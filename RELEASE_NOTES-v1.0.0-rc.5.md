@@ -18,6 +18,8 @@
   datasets offline flags.
 - Kept durable per-page checkpoints, cancellation, resume, Markdown, structured
   JSON, box inspection, and local run history.
+- Added an install-ready DMG window with a deliberately arranged **Okra** app
+  and **Applications** shortcut for the standard drag-to-install flow.
 
 ## Defaults and migration
 
@@ -57,7 +59,7 @@ lineage, checksums, setup-state behavior, PDF rendering, the bundled worker,
 official Dots JSON shape, malformed-output recovery, smart-resize box geometry,
 tables/formulas, page checkpoints, aggregate Markdown/JSON, and provider-neutral
 PDF overlays.
-The candidate passes the brand gate, 21 Python tests, 111 Swift tests across
+The candidate passes the brand gate, 26 Python tests, 111 Swift tests across
 21 suites, six projection safety tests, and a production Swift build. The two
 packaged-artifact launch checks remain reserved for the signed DMG workflow.
 
@@ -72,7 +74,8 @@ local workflows.
 Once the release workflow completes, download `Okra-1.0.0-rc.5.dmg` and its
 adjacent `.sha256` file from the
 [`desktop-v1.0.0-rc.5` GitHub prerelease](https://github.com/okra-project/desktop/releases/tag/desktop-v1.0.0-rc.5).
-Verify the checksum, open the DMG, and copy **Okra** to **Applications**. At
+Verify the checksum, open the DMG, and drag **Okra** onto the adjacent
+**Applications** shortcut. At
 publication, the app and DMG will be Developer ID signed, hardened, notarized,
 and stapled by the release workflow.
 

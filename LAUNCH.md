@@ -56,7 +56,7 @@ source-aligned output.
 - [x] Sparkle 2 in-app updates: signed `appcast.xml` feed, EdDSA keypair (secret-only private key), Install and Relaunch flow
 - [x] Quarantined DMG launch smoke gate through LaunchServices in release automation
 - [ ] Second-Mac clean-install verification
-- [ ] DMG Applications shortcut and window polish
+- [x] DMG Applications shortcut and intentional Finder window layout
 
 The app currently has an empty entitlement set. Do not add network, JIT,
 unsigned-executable-memory, or library-validation exceptions speculatively.

@@ -88,6 +88,7 @@ Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`
 - [x] Document-first default and independent Workspace/Extract toggles have unit coverage
 - [x] Packaged app starts with builder-only SwiftPM resources hidden
 - [x] Quarantined notarized beta.8 through beta.15 DMGs start through LaunchServices before publishing (2026-07-28)
+- [x] DMG packaging stages an Applications shortcut, persists the Finder icon layout, and verifies both from the mounted release image
 - [x] Remote-control, dispatch, registry, and model-catalog tests removed
 - [x] Docling provider, tests, and Docling-only bundled resources removed for beta.20
 - [x] `swift build` on an unrestricted macOS shell (2026-07-28)
@@ -95,7 +96,7 @@ Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`
 - [x] `swift test` on an unrestricted macOS shell (93 tests passed, 2026-07-29)
 - [x] Python output-parser, resume, appcast, and protected-release tests (12/12 passed, 2026-07-29)
 - [x] RC.4 brand gate, 12 Python tests, 101 Swift tests across 20 suites, and release build pass on the candidate tree (2026-08-05)
-- [x] RC.5 brand gate, 21 Python tests, 111 Swift tests across 21 suites, six projection safety tests, and release build pass on the candidate tree (2026-08-06)
+- [x] RC.5 brand gate, 26 Python tests, 111 Swift tests across 21 suites, six projection safety tests, and release build pass on the candidate tree (updated 2026-08-12)
 - [x] Local ad-hoc RC.4 package launches and passes empty, loaded-document, light, dark, and 960-point drawer interaction checks (2026-08-05)
 - [x] Packaged-app resource-isolation launch and quarantined local-DMG LaunchServices tests pass against the rebuilt RC.4 package (2/2, 2026-08-05)
 
