@@ -13,6 +13,8 @@ enum LocalParserOutputAdapterID: String, Codable, CaseIterable, Sendable {
     case plainTextV1 = "plain-text-v1"
     case markdownV1 = "markdown-v1"
     case hybridMarkdownV1 = "hybrid-markdown-v1"
+    case dotsLayoutJSONV1 = "dots-layout-json-v1"
+    case chandraHTMLV1 = "chandra-html-v1"
     case unlimitedOCRTokensV1 = "unlimited-ocr-tokens-v1"
 }
 
@@ -59,6 +61,9 @@ struct LocalModelPackageManifest: Codable, Equatable, Sendable {
     let quantization: LocalModelQuantization?
     let parameterCount: Int64?
     let licenseSPDXIdentifier: String
+    let licenseURL: URL?
+    let licenseRevision: String?
+    let licenseNotice: String?
     let artifacts: [LocalModelArtifact]
 
     var totalBytes: Int64 {
@@ -153,6 +158,40 @@ struct LocalParserHostProfile: Codable, Equatable, Sendable {
     let macOSMajorVersion: Int
     let unifiedMemoryGB: Int
     let availableDiskBytes: Int64?
+
+    static func current(fileManager: FileManager = .default) -> LocalParserHostProfile {
+        #if arch(arm64)
+        let architecture = LocalParserArchitecture.appleSilicon
+        #else
+        let architecture = LocalParserArchitecture.intel
+        #endif
+
+        let processInfo = ProcessInfo.processInfo
+        let availableDiskBytes: Int64?
+        if let attributes = try? fileManager.attributesOfFileSystem(
+            forPath: fileManager.homeDirectoryForCurrentUser.path
+        ), let freeSize = attributes[.systemFreeSize] as? NSNumber {
+            availableDiskBytes = freeSize.int64Value
+        } else {
+            availableDiskBytes = nil
+        }
+
+        return LocalParserHostProfile(
+            architecture: architecture,
+            macOSMajorVersion: processInfo.operatingSystemVersion.majorVersion,
+            unifiedMemoryGB: Int(processInfo.physicalMemory / 1_073_741_824),
+            availableDiskBytes: availableDiskBytes
+        )
+    }
+
+    func ignoringAvailableDisk() -> LocalParserHostProfile {
+        LocalParserHostProfile(
+            architecture: architecture,
+            macOSMajorVersion: macOSMajorVersion,
+            unifiedMemoryGB: unifiedMemoryGB,
+            availableDiskBytes: nil
+        )
+    }
 }
 
 enum LocalParserIncompatibility: Codable, Equatable, Sendable {
@@ -190,6 +229,30 @@ enum LocalParserCatalog {
         )
     )
 
+    static let dotsOCR = LocalParserDefinition(
+        runtime: .mlxVLM,
+        modelDelivery: .pinned(DotsOCRModelManifest.package),
+        outputAdapter: .dotsLayoutJSONV1,
+        capabilities: [
+            .ocr,
+            .readingOrder,
+            .layoutBlocks,
+            .boundingBoxes,
+            .tables,
+            .formulas,
+            .charts,
+            .multilingual,
+            .structuredOutput,
+        ],
+        requirements: LocalParserResourceRequirements(
+            supportedArchitectures: [.appleSilicon],
+            minimumMacOSMajorVersion: 14,
+            minimumUnifiedMemoryGB: 16,
+            recommendedUnifiedMemoryGB: 24,
+            minimumFreeDiskBytes: 5_000_000_000
+        )
+    )
+
     static let unlimitedOCR = LocalParserDefinition(
         runtime: .mlxVLM,
         modelDelivery: .pinned(UnlimitedOCRModelManifest.package),
@@ -211,6 +274,33 @@ enum LocalParserCatalog {
             minimumUnifiedMemoryGB: 16,
             recommendedUnifiedMemoryGB: 16,
             minimumFreeDiskBytes: 3_000_000_000
+        )
+    )
+
+    /// Datalab's Chandra OCR 2 document VLM, pinned to the mlx-community oQ8
+    /// conversion and run fully offline through the bundled MLX worker.
+    static let chandraOCR2 = LocalParserDefinition(
+        runtime: .mlxVLM,
+        modelDelivery: .pinned(ChandraOCRModelManifest.package),
+        outputAdapter: .chandraHTMLV1,
+        capabilities: [
+            .ocr,
+            .readingOrder,
+            .layoutBlocks,
+            .boundingBoxes,
+            .tables,
+            .formulas,
+            .charts,
+            .code,
+            .multilingual,
+            .structuredOutput,
+        ],
+        requirements: LocalParserResourceRequirements(
+            supportedArchitectures: [.appleSilicon],
+            minimumMacOSMajorVersion: 14,
+            minimumUnifiedMemoryGB: 16,
+            recommendedUnifiedMemoryGB: 24,
+            minimumFreeDiskBytes: 8_000_000_000
         )
     )
 
