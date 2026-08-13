@@ -22,6 +22,25 @@ enum LocalProviderPaths {
             .appendingPathComponent("providers", isDirectory: true)
     }
 
+    static var dotsOCRRoot: URL {
+        providersRoot.appendingPathComponent("dots-ocr", isDirectory: true)
+    }
+
+    static var dotsOCRPython: URL {
+        dotsOCRRoot
+            .appendingPathComponent("venv", isDirectory: true)
+            .appendingPathComponent("bin", isDirectory: true)
+            .appendingPathComponent("python")
+    }
+
+    static var dotsOCRModel: URL {
+        dotsOCRRoot.appendingPathComponent("model", isDirectory: true)
+    }
+
+    static var dotsOCRReadyMarker: URL {
+        dotsOCRRoot.appendingPathComponent(".ready")
+    }
+
     static var unlimitedOCRRoot: URL {
         providersRoot.appendingPathComponent("unlimited-ocr", isDirectory: true)
     }
@@ -39,6 +58,25 @@ enum LocalProviderPaths {
 
     static var unlimitedOCRReadyMarker: URL {
         unlimitedOCRRoot.appendingPathComponent(".ready")
+    }
+
+    static var chandraOCRRoot: URL {
+        providersRoot.appendingPathComponent("chandra-ocr-2", isDirectory: true)
+    }
+
+    static var chandraOCRPython: URL {
+        chandraOCRRoot
+            .appendingPathComponent("venv", isDirectory: true)
+            .appendingPathComponent("bin", isDirectory: true)
+            .appendingPathComponent("python")
+    }
+
+    static var chandraOCRModel: URL {
+        chandraOCRRoot.appendingPathComponent("model", isDirectory: true)
+    }
+
+    static var chandraOCRReadyMarker: URL {
+        chandraOCRRoot.appendingPathComponent(".ready")
     }
 
     static func runDirectory(runsRoot: URL = runsRoot, runID: String) -> URL {
