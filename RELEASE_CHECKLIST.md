@@ -88,7 +88,7 @@ Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`
 - [x] Document-first default and independent Workspace/Extract toggles have unit coverage
 - [x] Packaged app starts with builder-only SwiftPM resources hidden
 - [x] Quarantined notarized beta.8 through beta.15 DMGs start through LaunchServices before publishing (2026-07-28)
-- [x] DMG packaging stages an Applications shortcut, persists the Finder icon layout, and verifies both from the mounted release image
+- [x] DMG packaging stages an Applications shortcut, embeds a checksummed Finder icon layout without GUI automation, and verifies both from the mounted release image
 - [x] Remote-control, dispatch, registry, and model-catalog tests removed
 - [x] Docling provider, tests, and Docling-only bundled resources removed for beta.20
 - [x] `swift build` on an unrestricted macOS shell (2026-07-28)

@@ -62,11 +62,13 @@ PDF overlays.
 The candidate passes the brand gate, 26 Python tests, 111 Swift tests across
 21 suites, six projection safety tests, and a production Swift build. The two
 packaged-artifact launch checks remain reserved for the signed DMG workflow.
+The drag-to-install layout is embedded deterministically, so headless CI and
+release services do not need permission to automate Finder.
 
 The exact pinned Dots weights have not yet completed a clean current-app,
-multi-page memory/quality run because the signing Mac mini is offline. RC.5 is
-therefore a prerelease candidate, not a stable-quality promise. Apple Vision is
-the immediate zero-setup fallback, and Baidu remains available for established
+multi-page memory/quality run. That remains an explicit release gate, so RC.5
+is a prerelease candidate, not a stable-quality promise. Apple Vision is the
+immediate zero-setup fallback, and Baidu remains available for established
 local workflows.
 
 ## Install

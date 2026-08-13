@@ -3,14 +3,13 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LAYOUT_SCRIPT="${SCRIPT_DIR}/configure-dmg-layout.applescript"
+LAYOUT_TEMPLATE="${SCRIPT_DIR}/assets/dmg-layout.dsstore.b64"
+LAYOUT_SHA256="0eae0115c4a2e16f5ecdf57cff3acf326ef53fd413454581b0c8aa090a0f5222"
 VOLUME_NAME="Okra"
 APP_NAME="Okra.app"
 APPLICATIONS_LINK_NAME="Applications"
 
 WORK_ROOT=""
-MOUNT_DIR=""
-IS_MOUNTED=false
 
 stage_dmg_contents() {
   local app_path="$1"
@@ -31,9 +30,6 @@ stage_dmg_contents() {
 }
 
 cleanup() {
-  if [[ "${IS_MOUNTED}" == true && -n "${MOUNT_DIR}" ]]; then
-    /usr/bin/hdiutil detach -force "${MOUNT_DIR}" >/dev/null 2>&1 || true
-  fi
   if [[ -n "${WORK_ROOT}" && -d "${WORK_ROOT}" ]]; then
     /bin/rm -rf "${WORK_ROOT}"
   fi
@@ -44,9 +40,10 @@ package_dmg() {
   local output_path="$2"
   local staging_dir
   local read_write_dmg
+  local layout_sha256
 
-  if [[ ! -f "${LAYOUT_SCRIPT}" ]]; then
-    echo "Missing Finder layout script: ${LAYOUT_SCRIPT}" >&2
+  if [[ ! -f "${LAYOUT_TEMPLATE}" ]]; then
+    echo "Missing Finder layout template: ${LAYOUT_TEMPLATE}" >&2
     return 1
   fi
 
@@ -56,10 +53,20 @@ package_dmg() {
   WORK_ROOT="$(/usr/bin/mktemp -d "${TMPDIR:-/private/tmp}/okra-dmg.XXXXXX")"
   staging_dir="${WORK_ROOT}/staging"
   read_write_dmg="${WORK_ROOT}/Okra-read-write.dmg"
-  MOUNT_DIR="${WORK_ROOT}/mount"
   trap cleanup EXIT
 
   stage_dmg_contents "${app_path}" "${staging_dir}"
+  /usr/bin/base64 \
+    -D \
+    -i "${LAYOUT_TEMPLATE}" \
+    -o "${staging_dir}/.DS_Store"
+
+  layout_sha256="$(/usr/bin/shasum -a 256 "${staging_dir}/.DS_Store")"
+  layout_sha256="${layout_sha256%% *}"
+  if [[ "${layout_sha256}" != "${LAYOUT_SHA256}" ]]; then
+    echo "Finder layout template checksum mismatch" >&2
+    return 1
+  fi
 
   /usr/bin/hdiutil create \
     -volname "${VOLUME_NAME}" \
@@ -68,29 +75,6 @@ package_dmg() {
     -ov \
     -format UDRW \
     "${read_write_dmg}" >/dev/null
-
-  mkdir -p "${MOUNT_DIR}"
-  /usr/bin/hdiutil attach \
-    "${read_write_dmg}" \
-    -nobrowse \
-    -readwrite \
-    -mountpoint "${MOUNT_DIR}" >/dev/null
-  IS_MOUNTED=true
-
-  /usr/bin/osascript \
-    "${LAYOUT_SCRIPT}" \
-    "${MOUNT_DIR}" \
-    "${APP_NAME}" \
-    "${APPLICATIONS_LINK_NAME}" >/dev/null
-
-  if [[ ! -s "${MOUNT_DIR}/.DS_Store" ]]; then
-    echo "Finder did not persist the DMG window layout" >&2
-    return 1
-  fi
-
-  /bin/sync
-  /usr/bin/hdiutil detach "${MOUNT_DIR}" >/dev/null
-  IS_MOUNTED=false
 
   /usr/bin/hdiutil convert \
     "${read_write_dmg}" \
