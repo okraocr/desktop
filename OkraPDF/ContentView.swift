@@ -25,6 +25,13 @@ struct ContentView: View {
         } message: {
             Text(state.importError ?? "The PDF could not be opened.")
         }
+        .sheet(isPresented: setupGuideIsPresented) {
+            SetupGuideView(
+                coordinator: state.localProcessing,
+                close: state.dismissSetupGuide,
+                openPDF: state.openPDFPicker
+            )
+        }
     }
 
     private func workspace(availableWidth: Double) -> some View {
@@ -63,7 +70,8 @@ struct ContentView: View {
                 isDropTargeted: isDropTargeted,
                 coordinator: state.localProcessing,
                 canOpenPDF: state.canOpenPDF,
-                openPDF: state.openPDFPicker
+                openPDF: state.openPDFPicker,
+                openSetupGuide: state.presentSetupGuide
             )
             .frame(minWidth: WorkspaceTheme.readerMinimumWidth)
             .layoutPriority(1)
@@ -123,6 +131,17 @@ struct ContentView: View {
             set: { isPresented in
                 if isPresented == false {
                     state.dismissImportError()
+                }
+            }
+        )
+    }
+
+    private var setupGuideIsPresented: Binding<Bool> {
+        Binding(
+            get: { state.showsSetupGuide },
+            set: { isPresented in
+                if isPresented == false {
+                    state.dismissSetupGuide()
                 }
             }
         )

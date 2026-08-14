@@ -9,18 +9,35 @@ final class AppState: ObservableObject {
     @Published private(set) var selectedDocument: LocalPDFDocument?
     @Published var importError: String?
     @Published private(set) var canOpenPDF = true
+    @Published var showsSetupGuide = false
+
+    static let setupGuideCompletedDefaultsKey = "localProcessing.setupGuide.completed"
 
     let localProcessing: LocalProcessingCoordinator
+    private let userDefaults: UserDefaults
 
     init() {
+        let userDefaults = UserDefaults.standard
+        self.userDefaults = userDefaults
         localProcessing = LocalProcessingCoordinator()
         bindLocalProcessingState()
         openCommandLinePDFIfPresent()
+        showsSetupGuide = userDefaults.object(forKey: Self.setupGuideCompletedDefaultsKey) == nil
     }
 
     init(localProcessing: LocalProcessingCoordinator) {
         self.localProcessing = localProcessing
+        self.userDefaults = .standard
         bindLocalProcessingState()
+    }
+
+    func presentSetupGuide() {
+        showsSetupGuide = true
+    }
+
+    func dismissSetupGuide() {
+        showsSetupGuide = false
+        userDefaults.set(true, forKey: Self.setupGuideCompletedDefaultsKey)
     }
 
 
@@ -103,6 +120,10 @@ final class AppState: ObservableObject {
 
     func dismissImportError() {
         importError = nil
+    }
+
+    func copyLocalParserDiagnostics() {
+        localProcessing.copyDoctorReport()
     }
 
     func quit() {

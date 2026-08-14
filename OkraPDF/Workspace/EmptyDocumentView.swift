@@ -4,6 +4,7 @@ struct EmptyDocumentView: View {
     let isDropTargeted: Bool
     let canOpenPDF: Bool
     let openPDF: () -> Void
+    let openSetupGuide: () -> Void
 
     var body: some View {
         VStack(spacing: WorkspaceTheme.standardSpacing) {
@@ -21,6 +22,10 @@ struct EmptyDocumentView: View {
             Button("Open PDF…", action: openPDF)
                 .buttonStyle(.borderedProminent)
                 .disabled(canOpenPDF == false)
+            Button("Compare local parsers…", action: openSetupGuide)
+                .buttonStyle(.plain)
+                .font(.callout)
+                .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(WorkspaceTheme.panelPadding)

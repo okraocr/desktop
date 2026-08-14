@@ -158,6 +158,38 @@ struct LocalParserHostProfile: Codable, Equatable, Sendable {
     let macOSMajorVersion: Int
     let unifiedMemoryGB: Int
     let availableDiskBytes: Int64?
+    /// Marketing chip name, e.g. "Apple M2 Pro". Nil on Intel or unreadable sysctls.
+    let chipName: String?
+    /// Memory-bandwidth class derived from the chip; the strongest single
+    /// predictor of local VLM throughput since decode is bandwidth-bound.
+    let memoryBandwidthClass: LocalMemoryBandwidthClass?
+    /// `iogpu.wired_limit_mb` — the real MLX model memory budget, as opposed
+    /// to total unified memory. Nil when the sysctl is unavailable.
+    let gpuWiredLimitBytes: Int64?
+    let thermalState: LocalThermalState?
+    let isLowPowerModeEnabled: Bool
+
+    init(
+        architecture: LocalParserArchitecture,
+        macOSMajorVersion: Int,
+        unifiedMemoryGB: Int,
+        availableDiskBytes: Int64?,
+        chipName: String? = nil,
+        memoryBandwidthClass: LocalMemoryBandwidthClass? = nil,
+        gpuWiredLimitBytes: Int64? = nil,
+        thermalState: LocalThermalState? = nil,
+        isLowPowerModeEnabled: Bool = false
+    ) {
+        self.architecture = architecture
+        self.macOSMajorVersion = macOSMajorVersion
+        self.unifiedMemoryGB = unifiedMemoryGB
+        self.availableDiskBytes = availableDiskBytes
+        self.chipName = chipName
+        self.memoryBandwidthClass = memoryBandwidthClass
+        self.gpuWiredLimitBytes = gpuWiredLimitBytes
+        self.thermalState = thermalState
+        self.isLowPowerModeEnabled = isLowPowerModeEnabled
+    }
 
     static func current(fileManager: FileManager = .default) -> LocalParserHostProfile {
         #if arch(arm64)
@@ -176,11 +208,20 @@ struct LocalParserHostProfile: Codable, Equatable, Sendable {
             availableDiskBytes = nil
         }
 
+        let chipName = architecture == .appleSilicon ? LocalChipCatalog.chipName() : nil
+
         return LocalParserHostProfile(
             architecture: architecture,
             macOSMajorVersion: processInfo.operatingSystemVersion.majorVersion,
             unifiedMemoryGB: Int(processInfo.physicalMemory / 1_073_741_824),
-            availableDiskBytes: availableDiskBytes
+            availableDiskBytes: availableDiskBytes,
+            chipName: chipName,
+            memoryBandwidthClass: chipName.flatMap(LocalChipCatalog.bandwidthClass(forChipName:)),
+            gpuWiredLimitBytes: architecture == .appleSilicon
+                ? LocalChipCatalog.gpuWiredLimitBytes()
+                : nil,
+            thermalState: LocalThermalState(processInfo.thermalState),
+            isLowPowerModeEnabled: processInfo.isLowPowerModeEnabled
         )
     }
 
@@ -189,7 +230,12 @@ struct LocalParserHostProfile: Codable, Equatable, Sendable {
             architecture: architecture,
             macOSMajorVersion: macOSMajorVersion,
             unifiedMemoryGB: unifiedMemoryGB,
-            availableDiskBytes: nil
+            availableDiskBytes: nil,
+            chipName: chipName,
+            memoryBandwidthClass: memoryBandwidthClass,
+            gpuWiredLimitBytes: gpuWiredLimitBytes,
+            thermalState: thermalState,
+            isLowPowerModeEnabled: isLowPowerModeEnabled
         )
     }
 }

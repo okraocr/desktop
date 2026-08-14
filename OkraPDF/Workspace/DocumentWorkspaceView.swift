@@ -6,6 +6,7 @@ struct DocumentWorkspaceView: View {
     @ObservedObject var coordinator: LocalProcessingCoordinator
     let canOpenPDF: Bool
     let openPDF: () -> Void
+    let openSetupGuide: () -> Void
 
     var body: some View {
         if let document {
@@ -27,7 +28,8 @@ struct DocumentWorkspaceView: View {
             EmptyDocumentView(
                 isDropTargeted: isDropTargeted,
                 canOpenPDF: canOpenPDF,
-                openPDF: openPDF
+                openPDF: openPDF,
+                openSetupGuide: openSetupGuide
             )
         }
     }
