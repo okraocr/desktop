@@ -123,6 +123,15 @@ Use the following labels:
 # Chandra emits data-bbox coordinates normalized 0-1000 on both axes.
 BBOX_SCALE = 1000.0
 MAX_OUTPUT_TOKENS = 12_384
+TEMPERATURE = 0.0
+# Greedy decoding keeps page output deterministic, but on simple pages the
+# model can fall into emitting the same layout div forever instead of EOS.
+# Stop generation once the exact same token chunk repeats back to back; the
+# downstream duplicate suppression stays as the backstop and still reports
+# the tail in diagnostics. Window sizes stay large enough that real repeated
+# structure (table rows, form fields) never trips the cutoff.
+LOOP_STOP_WINDOW_SIZES = (32, 64, 128)
+LOOP_STOP_MAX_REPEATS = 3
 SPECIAL_TOKENS = (
     "<s>",
     "</s>",
@@ -187,6 +196,43 @@ VOID_ELEMENTS = {
     "track",
     "wbr",
 }
+
+
+class LoopStoppingCriteria:
+    """Callable per-token stop hook understood by mlx_vlm's generate.
+
+    Stops when the default EOS token arrives (delegated to the eos ids the
+    processor was loaded with) or when the generated tail is the same token
+    chunk repeated LOOP_STOP_MAX_REPEATS times in a row.
+    """
+
+    def __init__(
+        self,
+        eos_token_ids: list[int],
+        window_sizes: tuple[int, ...] = LOOP_STOP_WINDOW_SIZES,
+        max_repeats: int = LOOP_STOP_MAX_REPEATS,
+    ) -> None:
+        self.eos_token_ids = list(eos_token_ids)
+        self.window_sizes = window_sizes
+        self.max_repeats = max_repeats
+        self._tokens: list[int] = []
+
+    def __call__(self, token: Any) -> bool:
+        if token in self.eos_token_ids:
+            return True
+        self._tokens.append(int(token))
+        for window in self.window_sizes:
+            needed = window * self.max_repeats
+            if len(self._tokens) < needed:
+                continue
+            tail = self._tokens[-needed:]
+            unit = tail[:window]
+            if all(
+                tail[index * window : (index + 1) * window] == unit
+                for index in range(1, self.max_repeats)
+            ):
+                return True
+        return False
 
 
 def parse_args() -> argparse.Namespace:
@@ -777,6 +823,23 @@ def main() -> None:
             OCR_LAYOUT_PROMPT,
             num_images=1,
         )
+        tokenizer = getattr(processor, "tokenizer", processor)
+        default_eos = getattr(tokenizer, "eos_token_id", None)
+        tokenizer_eos = getattr(tokenizer, "eos_token_ids", None)
+        if isinstance(tokenizer_eos, int):
+            eos_token_ids = [tokenizer_eos]
+        elif tokenizer_eos:
+            eos_token_ids = list(tokenizer_eos)
+        elif default_eos is not None:
+            eos_token_ids = [default_eos]
+        else:
+            eos_token_ids = []
+        generation_config_eos = getattr(model.config, "eos_token_id", None)
+        if isinstance(generation_config_eos, int):
+            eos_token_ids.append(generation_config_eos)
+        elif isinstance(generation_config_eos, (list, tuple)):
+            eos_token_ids.extend(int(token) for token in generation_config_eos)
+        stopping_criteria = LoopStoppingCriteria(eos_token_ids)
 
     for page_number, image_name in enumerate(args.images, start=1):
         image_path = Path(image_name)
@@ -825,7 +888,8 @@ def main() -> None:
                 prompt=formatted_prompt,
                 image=image_name,
                 max_tokens=MAX_OUTPUT_TOKENS,
-                temperature=0.0,
+                temperature=TEMPERATURE,
+                stopping_criteria=stopping_criteria,
             )
             raw_text = result.text if hasattr(result, "text") else str(result)
 

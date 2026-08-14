@@ -1,8 +1,8 @@
 # okraPDF Desktop — Release Checklist
 
-Current train: `desktop-v1.0.0-rc.5`
+Current train: `desktop-v1.0.0-rc.6`
 
-Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.6.16`
+Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.6.16`, `D.6.17`
 
 ## Product contract
 
@@ -35,6 +35,7 @@ Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.
 - [x] Native byte-counted Chandra model download with cancel/resume state
 - [x] Chandra model OpenRAIL terms disclosed before setup
 - [x] Chandra layout-HTML parsing into labeled typed blocks with normalized source-PDF boxes
+- [x] Chandra per-token loop guard halts repeated generation tails; duplicate suppression remains as backstop
 - [x] Truthfully labeled Chandra OCR 2 simulation mode
 - [x] Dots model terms disclosed before setup
 - [x] Truthfully labeled Dots OCR 1.5 simulation mode
@@ -105,6 +106,8 @@ Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.
 - [x] Python output-parser, resume, appcast, and protected-release tests (12/12 passed, 2026-07-29)
 - [x] RC.4 brand gate, 12 Python tests, 101 Swift tests across 20 suites, and release build pass on the candidate tree (2026-08-05)
 - [x] RC.5 brand gate, 35 Python tests, 122 Swift tests across 22 suites, six projection safety tests, and release build pass on the candidate tree (updated 2026-08-13)
+- [x] RC.6 brand gate, 37 Python tests, 122 Swift tests across 22 suites, six projection safety tests, and release build pass on the candidate tree (updated 2026-08-13)
+- [x] Chandra real-weight dogfood on a 16 GB Apple-silicon MacBook Air: pinned oQ8 model loads, correct labeled layout HTML, loop guard bounds simple-page latency (2026-08-13)
 - [x] Local ad-hoc RC.4 package launches and passes empty, loaded-document, light, dark, and 960-point drawer interaction checks (2026-08-05)
 - [x] Packaged-app resource-isolation launch and quarantined local-DMG LaunchServices tests pass against the rebuilt RC.4 package (2/2, 2026-08-05)
 
@@ -223,8 +226,12 @@ the real-provider checks complete from Dots or Baidu simulation.
 - [x] Exact RC.4 is re-downloaded and passes checksum, disk-image integrity, Developer ID, hardened-runtime, notarization/stapling, Gatekeeper, embedded version/build, and quarantined LaunchServices checks (2026-08-05)
 - [x] Exact signed RC.4 empty, loaded-document, Workspace, and Extract layouts are inspected in light appearance; the identical candidate code passes light, dark, wide, and compact inspection before tag (2026-08-05)
 - [ ] Exact RC.4 is installed into Applications and dogfooded in dark appearance
-- [ ] Public `desktop-v1.0.0-rc.5` prerelease publishes a signed/notarized DMG and SHA-256 asset
-- [ ] RC.5 appcast branch passes `macos-checks` and merges to protected `main`
-- [ ] Exact RC.5 is re-downloaded and passes checksum, disk-image, signature, notarization/stapling, Gatekeeper, embedded-version, and quarantined-launch checks
+- [x] Public `desktop-v1.0.0-rc.5` prerelease publishes a signed/notarized DMG and SHA-256 asset (2026-08-13)
+- [x] RC.5 appcast branch passes `macos-checks` and merges to protected `main` (PR #73, 2026-08-13)
+- [x] Exact RC.5 is re-downloaded and passes checksum, disk-image integrity, Developer ID, notarization, embedded version/build checks (2026-08-13)
+- [x] Exact RC.5 is installed into Applications on this MacBook (2026-08-13)
 - [ ] Friend-equivalent clean-Mac install and Apple Vision extraction recorded on issue #47
+- [ ] Public `desktop-v1.0.0-rc.6` prerelease publishes a signed/notarized DMG and SHA-256 asset
+- [ ] RC.6 appcast branch passes `macos-checks` and merges to protected `main`
+- [ ] Exact RC.6 is re-downloaded and passes checksum, disk-image, signature, notarization/stapling, Gatekeeper, embedded-version, and quarantined-launch checks
 - [ ] Signed in-place **Install and Relaunch** update evidence recorded on issue #39
