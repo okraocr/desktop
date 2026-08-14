@@ -231,7 +231,7 @@ the real-provider checks complete from Dots or Baidu simulation.
 - [x] Exact RC.5 is re-downloaded and passes checksum, disk-image integrity, Developer ID, notarization, embedded version/build checks (2026-08-13)
 - [x] Exact RC.5 is installed into Applications on this MacBook (2026-08-13)
 - [ ] Friend-equivalent clean-Mac install and Apple Vision extraction recorded on issue #47
-- [ ] Public `desktop-v1.0.0-rc.6` prerelease publishes a signed/notarized DMG and SHA-256 asset
-- [ ] RC.6 appcast branch passes `macos-checks` and merges to protected `main`
-- [ ] Exact RC.6 is re-downloaded and passes checksum, disk-image, signature, notarization/stapling, Gatekeeper, embedded-version, and quarantined-launch checks
+- [x] Public `desktop-v1.0.0-rc.6` prerelease publishes a signed/notarized DMG and SHA-256 asset (2026-08-14)
+- [x] RC.6 appcast branch passes `macos-checks` and merges to protected `main` (PR #75, 2026-08-14)
+- [x] Exact RC.6 is re-downloaded and passes checksum, disk-image integrity, Developer ID, notarization, embedded version/build checks, and is installed into Applications on this MacBook (2026-08-14)
 - [ ] Signed in-place **Install and Relaunch** update evidence recorded on issue #39

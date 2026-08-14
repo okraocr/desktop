@@ -15,13 +15,14 @@
 > monorepo. [`okra-project/desktop`](https://github.com/okra-project/desktop)
 > is the generated public CI, release, signing, and Sparkle-update projection.
 
-RC.5 candidate source adds Dots OCR 1.5 as the managed default on eligible Macs
-inside the document-first workspace. The signed RC.4 download remains the
-current public artifact until RC.5 completes signing and notarization; RC.4
-does not include the Dots default.
+RC.6 candidate source adds a Chandra OCR 2 generation loop guard on top of the
+RC.5 train, which made Dots OCR 1.5 the managed default on eligible Macs and
+added the optional Chandra OCR 2 managed parser inside the document-first
+workspace. The signed RC.6 download is the current public artifact; RC.4 does
+not include the Dots default or Chandra.
 
 <p align="center">
-  <a href="https://github.com/okra-project/desktop/releases/tag/desktop-v1.0.0-rc.4">
+  <a href="https://github.com/okra-project/desktop/releases/tag/desktop-v1.0.0-rc.6">
     <img alt="Download for macOS" src="https://img.shields.io/badge/download-macOS%2013%2B-2f855a">
   </a>
   <a href="https://github.com/okra-project/desktop/releases">
@@ -33,7 +34,7 @@ does not include the Dots default.
 </p>
 
 <p align="center">
-  <a href="https://github.com/okra-project/desktop/releases/tag/desktop-v1.0.0-rc.4">Download</a> ·
+  <a href="https://github.com/okra-project/desktop/releases/tag/desktop-v1.0.0-rc.6">Download</a> ·
   <a href="docs/releases/README.md">Release notes</a> ·
   <a href="https://github.com/okra-project/desktop/issues/new">Report an issue</a>
 </p>
@@ -109,14 +110,14 @@ for installing and storing Ollama models.
 
 ## Download
 
-`desktop-v1.0.0-rc.4` is the current signed public release candidate for
-Apple-silicon Macs running macOS 13 or later. RC.5 is the active source train
-and will replace this download only after its release workflow succeeds.
+`desktop-v1.0.0-rc.6` is the current signed public release candidate for
+Apple-silicon Macs running macOS 13 or later. RC.6 shipped the Chandra OCR 2
+generation loop guard on top of the RC.5 parser lineup.
 
-1. Download `Okra-1.0.0-rc.4.dmg` from the
-   [v1.0.0-rc.4 release](https://github.com/okra-project/desktop/releases/tag/desktop-v1.0.0-rc.4).
+1. Download `Okra-1.0.0-rc.6.dmg` from the
+   [v1.0.0-rc.6 release](https://github.com/okra-project/desktop/releases/tag/desktop-v1.0.0-rc.6).
 2. Optionally download the adjacent checksum and run
-   `shasum -a 256 -c Okra-1.0.0-rc.4.dmg.sha256`.
+   `shasum -a 256 -c Okra-1.0.0-rc.6.dmg.sha256`.
 3. Open the DMG, drag **Okra** to **Applications**, and eject the DMG.
 4. Open **Okra** from Applications. The app and DMG are Developer ID signed,
    hardened, notarized by Apple, and stapled for normal Gatekeeper opening.
@@ -138,7 +139,7 @@ swift build
 To create a local `.app` and DMG:
 
 ```bash
-./scripts/build-dmg.sh 1.0.0-rc.4
+./scripts/build-dmg.sh 1.0.0-rc.6
 ```
 
 Local packages are ad-hoc signed. The release workflow supplies the Developer
