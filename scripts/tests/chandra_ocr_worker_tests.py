@@ -52,6 +52,26 @@ worker = load_worker_module()
 
 
 class ChandraOCROutputParserTests(unittest.TestCase):
+    def test_loop_stopping_criteria_stops_on_eos_and_repeated_tails(self):
+        criteria = worker.LoopStoppingCriteria([99, 100])
+        self.assertTrue(criteria(99))
+
+        criteria = worker.LoopStoppingCriteria([99, 100])
+        unit = list(range(32))
+        for token in unit * 2 + unit[:31]:
+            self.assertFalse(criteria(token))
+        self.assertTrue(criteria(unit[31]))
+
+    def test_loop_stopping_criteria_ignores_short_and_varied_repeats(self):
+        criteria = worker.LoopStoppingCriteria([99])
+        for token in [7, 8] * 3:
+            self.assertFalse(criteria(token))
+        varied = [(index % 31) + 1 for index in range(32 * 3)]
+        for index, token in enumerate(varied):
+            if index == len(varied) - 1:
+                break
+            self.assertFalse(criteria(token))
+
     def test_official_layout_prompt_and_mlx_generation_contract(self):
         calls = {}
         fake_model = SimpleNamespace(config=object())
@@ -67,6 +87,8 @@ class ChandraOCROutputParserTests(unittest.TestCase):
 
         def fake_generate(**kwargs):
             calls["generate"] = kwargs
+            criteria = kwargs.get("stopping_criteria")
+            self.assertIsInstance(criteria, worker.LoopStoppingCriteria)
             return SimpleNamespace(
                 text='<div data-bbox="0 0 1000 200" data-label="Text"><p>Parsed</p></div>'
             )
@@ -115,8 +137,11 @@ class ChandraOCROutputParserTests(unittest.TestCase):
         self.assertIn('"data-bbox","data-label"]', prompt)
         self.assertIn("- Blank-Page", prompt)
         self.assertEqual(template_kwargs, {"num_images": 1})
+        generate_kwargs = dict(calls["generate"])
+        criteria = generate_kwargs.pop("stopping_criteria")
+        self.assertIsInstance(criteria, worker.LoopStoppingCriteria)
         self.assertEqual(
-            calls["generate"],
+            generate_kwargs,
             {
                 "model": fake_model,
                 "processor": fake_processor,
