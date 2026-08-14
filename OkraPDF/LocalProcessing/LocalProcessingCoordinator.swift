@@ -56,6 +56,9 @@ final class LocalProcessingCoordinator: ObservableObject {
     @Published private(set) var ollamaModels: [OllamaModel] = []
     @Published private(set) var isRefreshingOllamaModels = false
     @Published private(set) var ollamaErrorMessage: String?
+    /// Host-adaptive parser diagnosis (D.6.16). Computed once at launch from
+    /// the probed host profile; advisory only, never triggers downloads.
+    let doctorDiagnosis: LocalParserDiagnosis
     @Published var selectedOllamaModelName: String? {
         didSet {
             if let selectedOllamaModelName {
@@ -137,19 +140,34 @@ final class LocalProcessingCoordinator: ObservableObject {
         self.stallThreshold = stallThreshold
         self.healthPollInterval = healthPollInterval
 
-        let dotsCanBeDefault = resolvedProviders.first(where: {
-            $0.descriptor.id == .dotsOCR
-        }).map { provider in
-            if case .unavailable = provider.availability() { return false }
-            return true
-        } ?? false
+        let doctorSubjects = resolvedProviders.compactMap {
+            provider -> LocalParserDoctor.Subject? in
+            guard let definition = provider.descriptor.parserDefinition else { return nil }
+            return LocalParserDoctor.Subject(
+                providerID: provider.descriptor.id,
+                providerName: provider.descriptor.name,
+                definition: definition
+            )
+        }
+        doctorDiagnosis = LocalParserDoctor.evaluate(
+            host: hostProfile,
+            memory: memorySampler(),
+            subjects: doctorSubjects
+        )
+
+        let doctorDefault = doctorDiagnosis.recommendedProviderID.flatMap { id in
+            resolvedProviders.first { $0.descriptor.id == id }
+        }.map { provider -> LocalProviderID? in
+            if case .unavailable = provider.availability() { return nil }
+            return provider.descriptor.id
+        } ?? nil
         let storedProvider = userDefaults.string(forKey: Self.providerDefaultsKey)
         if let stored = storedProvider,
            let providerID = LocalProviderID.persisted(rawValue: stored),
            self.providers.contains(where: { $0.descriptor.id == providerID }) {
             selectedProviderID = providerID
-        } else if dotsCanBeDefault {
-            selectedProviderID = .dotsOCR
+        } else if let doctorDefault {
+            selectedProviderID = doctorDefault
         } else if self.providers.contains(where: { $0.descriptor.id == .appleVision }) {
             selectedProviderID = .appleVision
         } else if let firstProvider = self.providers.first {
@@ -277,6 +295,27 @@ final class LocalProcessingCoordinator: ObservableObject {
         statusMessage = selectedAvailability.isReady
             ? "Ready to parse with \(selectedDescriptor.name)."
             : selectedAvailability.message
+    }
+
+    func doctorVerdict(for id: LocalProviderID) -> LocalParserVerdict? {
+        doctorDiagnosis.verdict(for: id)
+    }
+
+    /// Highest-priority badge for compact picker display.
+    func primaryDoctorBadge(for id: LocalProviderID) -> LocalParserBadge? {
+        doctorVerdict(for: id)?.badges.first
+    }
+
+    /// Privacy-safe diagnostic report (host specs and parser verdicts only)
+    /// suitable for friends-beta feedback.
+    func doctorReport() -> String {
+        doctorDiagnosis.reportText()
+    }
+
+    func copyDoctorReport() {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(doctorReport(), forType: .string)
+        statusMessage = "Copied local parser diagnostics."
     }
 
     func refreshAvailability() {

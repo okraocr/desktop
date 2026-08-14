@@ -11,10 +11,14 @@ struct ProviderPickerView: View {
                 } label: {
                     let availability = coordinator.availabilityByProvider[descriptor.id]?.message
                         ?? "Unavailable"
+                    let badge = coordinator.primaryDoctorBadge(for: descriptor.id)
+                    let title = [descriptor.name, badge?.rawValue, availability]
+                        .compactMap { $0 }
+                        .joined(separator: " · ")
                     if descriptor.id == coordinator.selectedProviderID {
-                        Label("\(descriptor.name) · \(availability)", systemImage: "checkmark")
+                        Label(title, systemImage: "checkmark")
                     } else {
-                        Text("\(descriptor.name) · \(availability)")
+                        Text(title)
                     }
                 }
             }

@@ -22,7 +22,8 @@ let package = Package(
         .testTarget(
             name: "okraPDFTests",
             dependencies: ["Okra"],
-            path: "Tests"
+            path: "Tests",
+            exclude: ["OkraDesktopTests"]
         )
     ]
 )

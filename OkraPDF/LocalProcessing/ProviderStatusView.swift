@@ -19,6 +19,14 @@ struct ProviderStatusView: View {
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
+            if let verdict = coordinator.doctorVerdict(for: coordinator.selectedProviderID),
+               let headline = verdict.reasons.first {
+                Text(headline)
+                    .font(.callout)
+                    .foregroundStyle(.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
             if let setupNote = coordinator.selectedDescriptor.setupNote {
                 Text(setupNote)
                     .font(.callout)

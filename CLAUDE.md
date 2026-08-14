@@ -30,6 +30,10 @@ open/drop PDF → read → choose local provider → explicit Parse → readable
 - `OkraPDF/Workspace/` — native toolbar, local Workspace/Extract panels, reader surface, and layout state
 - `OkraPDF/PDFReaderView.swift` — native PDFKit reader bridge
 - `OkraPDF/LocalProcessing/` — provider contracts, setup, coordinator, and output UI
+- `OkraPDF/SetupGuide/` — first-run parser setup guide: ParseBench-style pairing
+  combinations, five-dimension radar comparison, filter combo bar, and install
+  hand-off into the same coordinator (completed flag:
+  `localProcessing.setupGuide.completed`; reopen via Help → Parser Setup Guide…)
 - `OkraPDF/ProviderScripts/` — bundled managed-parser setup and worker scripts
 
 ## Build and test
