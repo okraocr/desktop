@@ -81,17 +81,13 @@ struct PresidioRedactionTests {
             .appendingPathComponent("okra-redacted-export-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: root) }
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        let fixture = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .appendingPathComponent("Packages/OkraConformance/Tests/OkraConformanceTests/Corpus/upstream/qpdf-11-pages.pdf")
         let source = root.appendingPathComponent("source.pdf")
         let destination = root.appendingPathComponent("redacted.pdf")
-        try FileManager.default.copyItem(at: fixture, to: source)
+        try makePDF(pageTexts: ["page one secret", "page two remains"]).write(to: source)
         let originalData = try Data(contentsOf: source)
         let originalDocument = try #require(PDFDocument(url: source))
-        #expect(originalDocument.pageCount > 1)
+        #expect(originalDocument.pageCount == 2)
+        #expect(originalDocument.page(at: 0)?.string?.contains("page one secret") == true)
 
         let box = RedactionBox(
             id: "redaction-1",
@@ -116,6 +112,7 @@ struct PresidioRedactionTests {
         let redacted = try #require(PDFDocument(url: destination))
         #expect(redacted.pageCount == originalDocument.pageCount)
         #expect(redacted.page(at: 0)?.string?.isEmpty != false)
+        #expect(redacted.page(at: 1)?.string?.contains("page two remains") == true)
     }
 
     private func structuredDocument(
@@ -162,5 +159,23 @@ struct PresidioRedactionTests {
                 ),
             ]
         )
+    }
+
+    private func makePDF(pageTexts: [String]) throws -> Data {
+        let document = PDFDocument()
+
+        for (index, text) in pageTexts.enumerated() {
+            let pageView = NSView(frame: NSRect(x: 0, y: 0, width: 612, height: 792))
+            let label = NSTextField(labelWithString: text)
+            label.font = .systemFont(ofSize: 30)
+            label.frame = NSRect(x: 72, y: 640, width: 468, height: 60)
+            pageView.addSubview(label)
+            let pageData = pageView.dataWithPDF(inside: pageView.bounds)
+            let pageDocument = try #require(PDFDocument(data: pageData))
+            let page = try #require(pageDocument.page(at: 0))
+            document.insert(page, at: index)
+        }
+
+        return try #require(document.dataRepresentation())
     }
 }

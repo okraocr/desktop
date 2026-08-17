@@ -225,7 +225,12 @@ struct LocalProcessingProviderTests {
         try Data("pdf".utf8).write(to: sourceURL)
         let pageCount = 3
         let coordinator = LocalProcessingCoordinator(
-            providers: [IncrementalFixtureProcessingProvider(pageCount: pageCount)],
+            providers: [
+                IncrementalFixtureProcessingProvider(
+                    pageCount: pageCount,
+                    pauseAfterFirstPage: .seconds(5)
+                ),
+            ],
             runsRoot: workspace.runsRoot,
             userDefaults: workspace.defaults
         )
@@ -293,7 +298,12 @@ struct LocalProcessingProviderTests {
             totalPages: 3
         )
         let coordinator = LocalProcessingCoordinator(
-            providers: [ResumableFixtureProcessingProvider(pageCount: 3)],
+            providers: [
+                ResumableFixtureProcessingProvider(
+                    pageCount: 3,
+                    pauseAfterPage: .seconds(5)
+                ),
+            ],
             runsRoot: workspace.runsRoot,
             userDefaults: workspace.defaults
         )
