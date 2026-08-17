@@ -135,7 +135,7 @@ must be parsed with a source-aligned provider before redaction is available.
 
 ## Download
 
-`desktop-v1.0.0-rc.8` is the current release-candidate train for
+`desktop-v1.0.0-rc.8` is the current signed public release candidate for
 Apple-silicon Macs running macOS 13 or later. RC.8 adds explicit local
 Presidio detection, human review, and irreversible redacted-PDF export on top
 of RC.7's parser setup guide and local parser doctor.
