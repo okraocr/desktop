@@ -64,6 +64,7 @@ struct LocalCommandRunnerTests {
 
         let childPID = try await waitForChildPID(at: childPIDURL)
         defer {
+            task.cancel()
             let processGroupID = Darwin.getpgid(childPID)
             if processGroupID > 0, processGroupID != Darwin.getpgrp() {
                 Darwin.kill(-processGroupID, SIGKILL)
@@ -72,6 +73,7 @@ struct LocalCommandRunnerTests {
             }
         }
         #expect(Darwin.kill(childPID, 0) == 0)
+        try await waitForHeartbeat(at: heartbeatURL)
 
         task.cancel()
         do {
@@ -99,6 +101,16 @@ struct LocalCommandRunnerTests {
         throw LocalCommandRunnerTestError.childDidNotStart
     }
 
+    private func waitForHeartbeat(at url: URL) async throws {
+        for _ in 0..<100 {
+            if let size = fileSize(at: url), size > 0 {
+                return
+            }
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        throw LocalCommandRunnerTestError.childDidNotProduceHeartbeat
+    }
+
     private func fileSize(at url: URL) -> Int64? {
         let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
         return (attributes?[.size] as? NSNumber)?.int64Value
@@ -107,4 +119,5 @@ struct LocalCommandRunnerTests {
 
 private enum LocalCommandRunnerTestError: Error {
     case childDidNotStart
+    case childDidNotProduceHeartbeat
 }
