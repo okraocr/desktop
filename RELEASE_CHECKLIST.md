@@ -246,7 +246,9 @@ the real-provider checks complete from Dots or Baidu simulation.
 - [x] Public `desktop-v1.0.0-rc.7` prerelease publishes a signed/notarized DMG and SHA-256 asset (2026-08-14)
 - [x] RC.7 appcast branch passes `macos-checks` and merges to protected `main` (PR #78, 2026-08-14)
 - [ ] Exact RC.7 is re-downloaded and passes checksum, disk-image integrity, Developer ID, notarization, embedded version/build checks, and parser setup-guide dogfood
-- [ ] Public `desktop-v1.0.0-rc.8` prerelease publishes a signed/notarized DMG and SHA-256 asset
-- [ ] RC.8 appcast branch passes `macos-checks` and merges to protected `main`
-- [ ] Exact RC.8 is re-downloaded and passes checksum, disk-image integrity, Developer ID, notarization, embedded version/build checks, and local Presidio redaction dogfood
+- [x] Public `desktop-v1.0.0-rc.8` prerelease publishes a signed/notarized DMG and SHA-256 asset (2026-08-17)
+- [x] RC.8 appcast branch passes `macos-checks` and merges to protected `main` (PR #80, 2026-08-17)
+- [x] Exact RC.8 DMG is re-downloaded and matches published SHA-256 `86559fbb63d6c7f151b603c56a3022095bdba836af76fa9e03fb227e55f60267` (2026-08-17)
+- [x] RC.8 release workflow passes disk-image integrity, Developer ID, notarization/stapling, Gatekeeper, embedded build, and quarantined LaunchServices checks (run `32057788576`, 2026-08-17)
+- [ ] Exact RC.8 is installed on a release Mac and dogfooded with managed Presidio redaction plus optional Ollama inference
 - [ ] Signed in-place **Install and Relaunch** update evidence recorded on issue #39
