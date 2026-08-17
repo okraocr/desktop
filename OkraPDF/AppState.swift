@@ -146,8 +146,16 @@ final class AppState: ObservableObject {
     private func bindLocalProcessingState() {
         localProcessing.$isRunning
             .combineLatest(localProcessing.$isInstalling)
-            .map { isRunning, isInstalling in
-                isRunning == false && isInstalling == false
+            .combineLatest(localProcessing.redaction.$isInstalling)
+            .combineLatest(localProcessing.redaction.$isDetecting)
+            .combineLatest(localProcessing.redaction.$isExporting)
+            .map { values, isExporting in
+                let (((isRunning, isInstalling), isRedactionInstalling), isDetecting) = values
+                return isRunning == false
+                    && isInstalling == false
+                    && isRedactionInstalling == false
+                    && isDetecting == false
+                    && isExporting == false
             }
             .removeDuplicates()
             .assign(to: &$canOpenPDF)

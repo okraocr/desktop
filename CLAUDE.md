@@ -35,6 +35,11 @@ open/drop PDF → read → choose local provider → explicit Parse → readable
   hand-off into the same coordinator (completed flag:
   `localProcessing.setupGuide.completed`; reopen via Help → Parser Setup Guide…)
 - `OkraPDF/ProviderScripts/` — bundled managed-parser setup and worker scripts
+- `windows/` — Windows port (Go loopback server + WebView2 + React/Vite/Tailwind,
+  mirroring the Ollama Windows desktop stack). Same read-before-parse contract,
+  run layout, and normalized output schema; `windows-ocr` (Windows.Media.Ocr)
+  is the Apple Vision equivalent. See `windows/README.md`. The macOS public
+  projection sync must not include this directory.
 
 ## Build and test
 
@@ -65,6 +70,11 @@ Do not start a dev server or watch process.
   top-left layout boxes. Valid boxes render as removable, screen-only PDFKit
   annotations over the source PDF and support two-way selection and hover with
   the block preview; do not expose raw tokenizer artifacts or mutate the source PDF.
+- Presidio PII detection is an explicit post-parse action over positioned
+  blocks, not a parser or open-time hook. Its managed Python worker and optional
+  Ollama recognizer stay on loopback. Human-approved export rasterizes affected
+  pages before burning black boxes into a new PDF; never add printable overlay
+  annotations that leave the underlying glyphs recoverable.
 - Do not add SQLite, cloud fields, policy/spend models, chat, or document agents
   without a new roadmap item and architecture decision.
 - Use system controls and accessible SF Symbols only for functional affordances.

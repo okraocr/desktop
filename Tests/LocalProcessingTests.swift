@@ -33,7 +33,15 @@ struct LocalProcessingProviderTests {
         let coordinator = LocalProcessingCoordinator(
             providers: [FixtureProcessingProvider(), simulatedProvider],
             runsRoot: workspace.runsRoot,
-            userDefaults: workspace.defaults
+            userDefaults: workspace.defaults,
+            hostProfile: LocalParserHostProfile(
+                architecture: .appleSilicon,
+                macOSMajorVersion: 14,
+                unifiedMemoryGB: 16,
+                availableDiskBytes: 100_000_000_000,
+                chipName: "Apple M1",
+                memoryBandwidthClass: .entry
+            )
         )
 
         #expect(coordinator.selectedProviderID == .dotsOCR)
@@ -217,7 +225,12 @@ struct LocalProcessingProviderTests {
         try Data("pdf".utf8).write(to: sourceURL)
         let pageCount = 3
         let coordinator = LocalProcessingCoordinator(
-            providers: [IncrementalFixtureProcessingProvider(pageCount: pageCount)],
+            providers: [
+                IncrementalFixtureProcessingProvider(
+                    pageCount: pageCount,
+                    pauseAfterFirstPage: .seconds(5)
+                ),
+            ],
             runsRoot: workspace.runsRoot,
             userDefaults: workspace.defaults
         )
@@ -285,7 +298,12 @@ struct LocalProcessingProviderTests {
             totalPages: 3
         )
         let coordinator = LocalProcessingCoordinator(
-            providers: [ResumableFixtureProcessingProvider(pageCount: 3)],
+            providers: [
+                ResumableFixtureProcessingProvider(
+                    pageCount: 3,
+                    pauseAfterPage: .seconds(5)
+                ),
+            ],
             runsRoot: workspace.runsRoot,
             userDefaults: workspace.defaults
         )

@@ -4,6 +4,7 @@ struct DocumentWorkspaceView: View {
     let document: LocalPDFDocument?
     let isDropTargeted: Bool
     @ObservedObject var coordinator: LocalProcessingCoordinator
+    @ObservedObject var redaction: PresidioRedactionCoordinator
     let canOpenPDF: Bool
     let openPDF: () -> Void
     let openSetupGuide: () -> Void
@@ -13,13 +14,13 @@ struct DocumentWorkspaceView: View {
             ZStack {
                 PDFDocumentView(
                     url: document.fileURL,
-                    overlays: coordinator.pdfBoundingBoxOverlays,
+                    overlays: activeOverlays,
                     showsOverlays: coordinator.showsPDFBoundingBoxes,
-                    selectedOverlayID: coordinator.selectedStructuredBlockID,
-                    hoveredOverlayID: coordinator.hoveredStructuredBlockID,
-                    transientOverlayID: coordinator.previewHoveredStructuredBlockID,
-                    onOverlaySelection: coordinator.selectStructuredBlock,
-                    onOverlayHover: coordinator.hoverPDFOverlay
+                    selectedOverlayID: activeSelectedOverlayID,
+                    hoveredOverlayID: activeHoveredOverlayID,
+                    transientOverlayID: activeTransientOverlayID,
+                    onOverlaySelection: selectOverlay,
+                    onOverlayHover: hoverOverlay
                 )
                 DropTargetOverlayView(isVisible: isDropTargeted)
             }
@@ -31,6 +32,42 @@ struct DocumentWorkspaceView: View {
                 openPDF: openPDF,
                 openSetupGuide: openSetupGuide
             )
+        }
+    }
+
+    private var reviewingRedactions: Bool {
+        redaction.detection != nil
+    }
+
+    private var activeOverlays: [PDFBoundingBoxOverlay] {
+        reviewingRedactions ? redaction.pdfOverlays : coordinator.pdfBoundingBoxOverlays
+    }
+
+    private var activeSelectedOverlayID: String? {
+        reviewingRedactions ? redaction.selectedBoxID : coordinator.selectedStructuredBlockID
+    }
+
+    private var activeHoveredOverlayID: String? {
+        reviewingRedactions ? redaction.hoveredBoxID : coordinator.hoveredStructuredBlockID
+    }
+
+    private var activeTransientOverlayID: String? {
+        reviewingRedactions ? redaction.hoveredBoxID : coordinator.previewHoveredStructuredBlockID
+    }
+
+    private func selectOverlay(_ id: String) {
+        if reviewingRedactions {
+            redaction.selectBox(id)
+        } else {
+            coordinator.selectStructuredBlock(id)
+        }
+    }
+
+    private func hoverOverlay(_ id: String?) {
+        if reviewingRedactions {
+            redaction.hoverPDFOverlay(id)
+        } else {
+            coordinator.hoverPDFOverlay(id)
         }
     }
 }
