@@ -15,14 +15,14 @@
 > monorepo. [`okra-project/desktop`](https://github.com/okra-project/desktop)
 > is the generated public CI, release, signing, and Sparkle-update projection.
 
-RC.6 candidate source adds a Chandra OCR 2 generation loop guard on top of the
-RC.5 train, which made Dots OCR 1.5 the managed default on eligible Macs and
-added the optional Chandra OCR 2 managed parser inside the document-first
-workspace. The signed RC.6 download is the current public artifact; RC.4 does
-not include the Dots default or Chandra.
+RC.8 adds explicit local PII detection and reviewed redacted-PDF export with
+Microsoft Presidio. It retains the RC.7 parser setup guide and host-adaptive
+parser doctor, the Dots OCR 1.5 managed default on eligible Macs, and optional
+Chandra OCR 2 inside the document-first workspace. Redaction never starts when
+a PDF opens or parses.
 
 <p align="center">
-  <a href="https://github.com/okra-project/desktop/releases/tag/desktop-v1.0.0-rc.6">
+  <a href="https://github.com/okra-project/desktop/releases/tag/desktop-v1.0.0-rc.8">
     <img alt="Download for macOS" src="https://img.shields.io/badge/download-macOS%2013%2B-2f855a">
   </a>
   <a href="https://github.com/okra-project/desktop/releases">
@@ -34,7 +34,7 @@ not include the Dots default or Chandra.
 </p>
 
 <p align="center">
-  <a href="https://github.com/okra-project/desktop/releases/tag/desktop-v1.0.0-rc.6">Download</a> ·
+  <a href="https://github.com/okra-project/desktop/releases/tag/desktop-v1.0.0-rc.8">Download</a> ·
   <a href="docs/releases/README.md">Release notes</a> ·
   <a href="https://github.com/okra-project/desktop/issues/new">Report an issue</a>
 </p>
@@ -51,7 +51,11 @@ per-page run history on this Mac.
 - Read text, charts, forms, and scanned pages in a native document-first workspace.
 - Parse with the managed Dots OCR 1.5 default, built-in Apple Vision, optional
   Chandra OCR 2 or Baidu Unlimited-OCR, or an installed Ollama vision model.
+- Compare parser/model pairings in the first-run setup guide and use the local
+  parser doctor's host-adaptive recommendation without triggering a download.
 - Inspect extracted blocks against their source boxes without modifying the PDF.
+- Detect PII locally with Presidio, approve source-aligned candidates, and
+  export a new raster-burned PDF without changing the source.
 - Preview, copy, save, or reveal Markdown and JSON output.
 - Cancel and resume long runs without throwing away completed pages.
 
@@ -83,7 +87,8 @@ per-page run history on this Mac.
 3. **Processing stays local.** Apple Vision, Dots OCR, Chandra OCR 2, and Baidu extraction run
    on the Mac. Ollama uses only its loopback service on this Mac.
 4. **Artifacts stay inspectable.** Run state, page checkpoints, Markdown, and
-   JSON live under `~/Library/Application Support/Okra/Runs/`.
+   JSON live under `~/Library/Application Support/Okra/Runs/`. The latest
+   Presidio candidates live beside a run as `redactions.json`.
 
 Dots OCR 1.5 is selected by default on an eligible clean install but never
 downloads or parses automatically. Hardware eligibility requires Apple silicon,
@@ -96,6 +101,26 @@ pinned setup. A stored Baidu selection stays on Baidu, and an interrupted Baidu
 run resumes only with Baidu. Managed extraction is forced offline after setup.
 Apple Vision remains available with no setup, and Ollama remains responsible
 for installing and storing Ollama models.
+
+## Local PII redaction
+
+After a positioned parse finishes, expand **Redact PII locally** in the Extract
+inspector. The first explicit setup installs pinned Microsoft Presidio 2.2.364
+and the English spaCy 3.8 model under `~/.okra/providers/presidio`. Detection
+runs through a session-scoped loopback worker and maps each finding to the
+complete normalized source block that contains it.
+
+Review and approve every candidate before export. The block-level mapping
+intentionally over-redacts rather than risking a partial glyph leak. Export
+rasterizes only affected pages at 2x before burning in black boxes, so covered
+text is no longer selectable; unaffected pages remain normal PDF pages and the
+opened source is never modified.
+
+Optionally enable Presidio's official experimental LangExtract recognizer and
+choose an installed Ollama text model. Okra restricts that connection to
+`127.0.0.1:11434`; the documented lightweight default is `qwen2.5:1.5b`.
+Presidio setup requires Python 3.10 or later. Runs without positioned blocks
+must be parsed with a source-aligned provider before redaction is available.
 
 ## Local parsers
 
@@ -110,14 +135,15 @@ for installing and storing Ollama models.
 
 ## Download
 
-`desktop-v1.0.0-rc.6` is the current signed public release candidate for
-Apple-silicon Macs running macOS 13 or later. RC.6 shipped the Chandra OCR 2
-generation loop guard on top of the RC.5 parser lineup.
+`desktop-v1.0.0-rc.8` is the current release-candidate train for
+Apple-silicon Macs running macOS 13 or later. RC.8 adds explicit local
+Presidio detection, human review, and irreversible redacted-PDF export on top
+of RC.7's parser setup guide and local parser doctor.
 
-1. Download `Okra-1.0.0-rc.6.dmg` from the
-   [v1.0.0-rc.6 release](https://github.com/okra-project/desktop/releases/tag/desktop-v1.0.0-rc.6).
+1. Download `Okra-1.0.0-rc.8.dmg` from the
+   [v1.0.0-rc.8 release](https://github.com/okra-project/desktop/releases/tag/desktop-v1.0.0-rc.8).
 2. Optionally download the adjacent checksum and run
-   `shasum -a 256 -c Okra-1.0.0-rc.6.dmg.sha256`.
+   `shasum -a 256 -c Okra-1.0.0-rc.8.dmg.sha256`.
 3. Open the DMG, drag **Okra** to **Applications**, and eject the DMG.
 4. Open **Okra** from Applications. The app and DMG are Developer ID signed,
    hardened, notarized by Apple, and stapled for normal Gatekeeper opening.
@@ -139,7 +165,7 @@ swift build
 To create a local `.app` and DMG:
 
 ```bash
-./scripts/build-dmg.sh 1.0.0-rc.6
+./scripts/build-dmg.sh 1.0.0-rc.8
 ```
 
 Local packages are ad-hoc signed. The release workflow supplies the Developer
@@ -155,7 +181,8 @@ swift test
 
 The test suite covers the read-before-parse contract, provider integration,
 page checkpoints, cancel/resume recovery, structured output, source-box
-geometry, packaging, and signed-update metadata.
+geometry, Presidio redaction, rasterized export, packaging, and signed-update
+metadata.
 
 ## Project map
 
@@ -164,6 +191,7 @@ OkraPDF/       SwiftUI app, PDFKit reader, and local parsing providers
 Tests/         Product, provider, persistence, and packaging tests
 scripts/       Verification, packaging, and release automation
 docs/releases/ Versioned user-facing release notes
+windows/       Windows port (Go + WebView2 + React; see windows/README.md)
 ```
 
 Maintainers should start with [CLAUDE.md](CLAUDE.md),

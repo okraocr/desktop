@@ -1,8 +1,8 @@
 # okraPDF Desktop — Release Checklist
 
-Current train: `desktop-v1.0.0-rc.6`
+Current train: `desktop-v1.0.0-rc.8`
 
-Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.6.16`, `D.6.17`
+Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.6.16`, `D.6.17`, `D.6.18`, `D.6.19`
 
 ## Product contract
 
@@ -20,6 +20,8 @@ Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.
 - [x] Dots OCR 1.5 selected by default on eligible clean installs; setup and Parse remain explicit
 - [x] Dots host gate requires Apple silicon, macOS 14+, 16 GB+ memory, and setup space; incompatible hosts fall back to Apple Vision, and setup separately requires Python 3.10+
 - [x] Apple Vision remains available without setup
+- [x] Local parser doctor recommends a compatible pairing without downloading or parsing
+- [x] First-run parser setup guide compares pairings and keeps setup/license consent explicit
 - [x] Auto (Hybrid) native-text reuse with page-local Ollama vision fallback
 - [x] Generic Ollama provider with HTTP model discovery and vision-capability filtering
 - [x] Ollama model selection persists without inspecting its model directory or invoking its CLI
@@ -60,6 +62,10 @@ Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.
 - [x] Two-way source-box and preview-card hover highlighting, including card scroll-into-view
 - [x] Accessible Show boxes toolbar toggle; overlays remain screen-only and never mutate the source PDF
 - [x] Copy, Save As, and Reveal actions for Markdown and JSON
+- [x] Explicit post-parse Presidio PII detection over positioned extraction blocks
+- [x] Human approval/exclusion of every candidate with PDFKit source-box review
+- [x] Affected-page rasterization and burned black boxes in a new PDF; source remains unchanged
+- [x] Optional official Presidio LangExtract recognizer through local Ollama only
 - [x] No cloud upload or remote-control surface
 
 ## Persistence and privacy
@@ -75,6 +81,8 @@ Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.
 - [x] Dots OCR 1.5 and Baidu Unlimited-OCR inference force Hugging Face/Transformers offline mode
 - [x] Provider setup is visibly distinct from offline extraction
 - [x] Ollama is represented as a loopback HTTP integration, separate from Okra-managed Dots and Baidu setup
+- [x] Presidio installs under its own pinned managed runtime and analyzes only after an explicit Detect action
+- [x] Presidio candidate boxes persist beside the run as `redactions.json`; analyzed text is not logged
 
 ## Automated verification
 
@@ -94,6 +102,7 @@ Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.
 - [x] Apple Vision native-text and scanned-observation structured-output coverage
 - [x] Default app state constructs every bundled provider without terminating
 - [x] Ollama `/api/tags`, `/api/show`, and `/api/chat` request contracts have hermetic unit coverage
+- [x] Presidio simulation, loopback-only URL policy, source-block mapping, box persistence, and rasterized export coverage
 - [x] Document-first default and independent Workspace/Extract toggles have unit coverage
 - [x] Packaged app starts with builder-only SwiftPM resources hidden
 - [x] Quarantined notarized beta.8 through beta.15 DMGs start through LaunchServices before publishing (2026-07-28)
@@ -234,4 +243,10 @@ the real-provider checks complete from Dots or Baidu simulation.
 - [x] Public `desktop-v1.0.0-rc.6` prerelease publishes a signed/notarized DMG and SHA-256 asset (2026-08-14)
 - [x] RC.6 appcast branch passes `macos-checks` and merges to protected `main` (PR #75, 2026-08-14)
 - [x] Exact RC.6 is re-downloaded and passes checksum, disk-image integrity, Developer ID, notarization, embedded version/build checks, and is installed into Applications on this MacBook (2026-08-14)
+- [x] Public `desktop-v1.0.0-rc.7` prerelease publishes a signed/notarized DMG and SHA-256 asset (2026-08-14)
+- [x] RC.7 appcast branch passes `macos-checks` and merges to protected `main` (PR #78, 2026-08-14)
+- [ ] Exact RC.7 is re-downloaded and passes checksum, disk-image integrity, Developer ID, notarization, embedded version/build checks, and parser setup-guide dogfood
+- [ ] Public `desktop-v1.0.0-rc.8` prerelease publishes a signed/notarized DMG and SHA-256 asset
+- [ ] RC.8 appcast branch passes `macos-checks` and merges to protected `main`
+- [ ] Exact RC.8 is re-downloaded and passes checksum, disk-image integrity, Developer ID, notarization, embedded version/build checks, and local Presidio redaction dogfood
 - [ ] Signed in-place **Install and Relaunch** update evidence recorded on issue #39

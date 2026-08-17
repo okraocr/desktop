@@ -9,6 +9,9 @@ language that accompanied their original release.
 
 ## v1.0 release candidates
 
+- [v1.0.0-rc.8](RELEASE_NOTES-v1.0.0-rc.8.md)
+- [v1.0.0-rc.7](RELEASE_NOTES-v1.0.0-rc.7.md)
+- [v1.0.0-rc.6](../../RELEASE_NOTES-v1.0.0-rc.6.md)
 - [v1.0.0-rc.5](RELEASE_NOTES-v1.0.0-rc.5.md)
 - [v1.0.0-rc.4](RELEASE_NOTES-v1.0.0-rc.4.md)
 - [v1.0.0-rc.3](RELEASE_NOTES-v1.0.0-rc.3.md)

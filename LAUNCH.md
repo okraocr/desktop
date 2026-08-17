@@ -8,8 +8,8 @@ source-aligned output.
 ## Versioning
 
 - Tag format: `desktop-v{SEMVER}`, including prerelease suffixes such as
-  `desktop-v1.0.0-rc.5`.
-- Current train: `desktop-v1.0.0-rc.5`.
+  `desktop-v1.0.0-rc.8`.
+- Current train: `desktop-v1.0.0-rc.8`.
 - `1.0.0` means the parser flow and direct-download distribution are stable.
 - Chat, agents, cloud upload, document libraries, channels, and remote control
   are separate products and do not belong in this release train.
@@ -32,12 +32,15 @@ source-aligned output.
 - [x] Stored Baidu selection remains selected, and interrupted Baidu runs resume only with Baidu
 - [x] Docling provider removed for beta.20
 - [x] Historical Baidu run provenance and checkpoints remain readable
+- [x] Host-adaptive parser doctor and explicit ParseBench-style first-run setup guide
 - [x] Accessible Show boxes toolbar toggle with Reduce Motion support
 - [x] Markdown copy, save, and reveal
 - [x] File-backed `run.json` and `result.md` artifacts
 - [x] Durable per-parser, per-page `idle` / `inProgress` / `done` / `attention` / `error` lifecycle
 - [x] Accessible lazy page-state UI with visible text and symbols in addition to color
-- [x] No account, network workflow, SQLite, policy, agents, or sidecars
+- [x] Explicit local Presidio PII detection, candidate review, and raster-burned export without source mutation
+- [x] Optional official Presidio Ollama recognizer restricted to loopback
+- [x] No account, cloud workflow, SQLite, policy, agents, or remote sidecars
 - [ ] Clean-profile Dots OCR 1.5 dogfood on a 16 GB Apple-silicon Mac
 - [ ] Clean-profile Baidu Unlimited-OCR regression on Apple silicon
 - [ ] Manual large/scanned/malformed PDF regression pass
@@ -67,10 +70,10 @@ is required by one of the supported local parsers.
 
 ```bash
 swift test
-./scripts/build-dmg.sh 1.0.0-rc.5
+./scripts/build-dmg.sh 1.0.0-rc.8
 ```
 
-RC.5 is the current release-candidate train, not the stable release. It is
+RC.8 is the current release-candidate train, not the stable release. It is
 appropriate for direct-download and in-app-update testing after passing the
 document-first layout and signed-artifact gates. Do not call it stable until the
 remaining friend-core, second-Mac install, and signed in-place update gates in

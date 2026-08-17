@@ -69,6 +69,7 @@ struct ContentView: View {
                 document: state.selectedDocument,
                 isDropTargeted: isDropTargeted,
                 coordinator: state.localProcessing,
+                redaction: state.localProcessing.redaction,
                 canOpenPDF: state.canOpenPDF,
                 openPDF: state.openPDFPicker,
                 openSetupGuide: state.presentSetupGuide
@@ -158,6 +159,7 @@ struct ContentView: View {
     private func handleDrop(providers: [NSItemProvider]) -> Bool {
         guard state.localProcessing.isRunning == false,
               state.localProcessing.isInstalling == false,
+              state.localProcessing.redaction.isBusy == false,
               let provider = providers.first(where: {
                   $0.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier)
               }) else {

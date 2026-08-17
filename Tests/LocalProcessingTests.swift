@@ -33,7 +33,15 @@ struct LocalProcessingProviderTests {
         let coordinator = LocalProcessingCoordinator(
             providers: [FixtureProcessingProvider(), simulatedProvider],
             runsRoot: workspace.runsRoot,
-            userDefaults: workspace.defaults
+            userDefaults: workspace.defaults,
+            hostProfile: LocalParserHostProfile(
+                architecture: .appleSilicon,
+                macOSMajorVersion: 14,
+                unifiedMemoryGB: 16,
+                availableDiskBytes: 100_000_000_000,
+                chipName: "Apple M1",
+                memoryBandwidthClass: .entry
+            )
         )
 
         #expect(coordinator.selectedProviderID == .dotsOCR)

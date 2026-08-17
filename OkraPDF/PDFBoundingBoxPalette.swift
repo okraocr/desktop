@@ -3,6 +3,8 @@ import AppKit
 enum PDFBoundingBoxPalette {
     static func color(for label: String) -> NSColor {
         switch label {
+        case "Redaction":
+            return .systemPink
         case "Table":
             return .systemBlue
         case "Picture":

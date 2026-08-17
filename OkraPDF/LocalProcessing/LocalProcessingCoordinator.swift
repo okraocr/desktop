@@ -76,6 +76,8 @@ final class LocalProcessingCoordinator: ObservableObject {
         }
     }
 
+    let redaction: PresidioRedactionCoordinator
+
     private static let providerDefaultsKey = "localProcessing.selectedProvider"
     private static let ollamaModelDefaultsKey = "localProcessing.ollama.selectedModel"
 
@@ -104,6 +106,7 @@ final class LocalProcessingCoordinator: ObservableObject {
         runsRoot: URL = LocalProviderPaths.runsRoot,
         userDefaults: UserDefaults = .standard,
         ollamaClient: OllamaClient = OllamaClient(),
+        redaction: PresidioRedactionCoordinator? = nil,
         memorySampler: @escaping @Sendable () -> SystemMemoryStatus = {
             SystemMemorySampler.sample()
         },
@@ -114,6 +117,7 @@ final class LocalProcessingCoordinator: ObservableObject {
         self.runsRoot = runsRoot
         self.userDefaults = userDefaults
         self.ollamaClient = ollamaClient
+        self.redaction = redaction ?? PresidioRedactionCoordinator(userDefaults: userDefaults)
         let storedOllamaModel = userDefaults.string(forKey: Self.ollamaModelDefaultsKey)
         selectedOllamaModelName = storedOllamaModel
         let ollamaIntegration = OllamaIntegrationState(selectedModelName: storedOllamaModel)
@@ -282,6 +286,7 @@ final class LocalProcessingCoordinator: ObservableObject {
         outputText = ""
         structuredOutputText = ""
         structuredOutput = nil
+        redaction.load(run: nil, structuredDocument: nil, sourceURL: document.fileURL)
         selectedStructuredBlockID = nil
         clearStructuredBlockHover()
         progress = 0
@@ -421,7 +426,7 @@ final class LocalProcessingCoordinator: ObservableObject {
     }
 
     func run(document: LocalPDFDocument) {
-        guard !isRunning else {
+        guard !isRunning, redaction.isBusy == false else {
             statusMessage = "Another extraction is already running."
             return
         }
@@ -471,6 +476,8 @@ final class LocalProcessingCoordinator: ObservableObject {
             statusMessage = "Could not start extraction: \(error.localizedDescription)"
             return
         }
+
+        redaction.load(run: run, structuredDocument: nil, sourceURL: document.fileURL)
 
         beginProcessing(run: run, document: document, provider: provider, in: runDirectory)
     }
@@ -662,6 +669,11 @@ final class LocalProcessingCoordinator: ObservableObject {
                     pageLifecycles = completedRun.pageLifecycles ?? []
                     statusMessage = completedRun.statusMessage ?? "Extraction complete."
                     loadOutputs()
+                    redaction.load(
+                        run: completedRun,
+                        structuredDocument: structuredOutput,
+                        sourceURL: document.fileURL
+                    )
                 }
             } catch is CancellationError {
                 if var canceledRun = activeRun, canceledRun.id == runID {
@@ -822,6 +834,11 @@ final class LocalProcessingCoordinator: ObservableObject {
             : (run.status == "succeeded" ? 1 : 0))
         statusMessage = displayMessage(for: run)
         loadOutputs()
+        redaction.load(
+            run: run,
+            structuredDocument: structuredOutput,
+            sourceURL: URL(fileURLWithPath: run.sourcePath)
+        )
     }
 
     func refreshRecentRuns() {

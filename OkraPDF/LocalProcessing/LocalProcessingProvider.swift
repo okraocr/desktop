@@ -35,7 +35,7 @@ struct LocalProviderDescriptor: Identifiable, Equatable {
     }
 }
 
-enum LocalProviderAvailability: Equatable {
+enum LocalProviderAvailability: Equatable, Sendable {
     case ready
     case simulated(String)
     case setupRequired(String)
