@@ -15,17 +15,21 @@ permissions:
   contents: read
 
 concurrency:
-  # Cancel superseded runs for the same PR/branch so the constrained
-  # self-hosted macOS lane is not wasted on stale commits.
+  # Cancel superseded runs for the same PR/branch so hosted capacity is not
+  # wasted on stale commits.
   group: pr-checks-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   macos-checks:
-    runs-on: [self-hosted, macOS, ARM64]
+    runs-on: macos-15
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
 
       - name: Run brand, unit, and build checks
         shell: bash

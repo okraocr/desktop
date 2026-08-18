@@ -2,29 +2,13 @@ import SwiftUI
 
 struct WorkspaceToolbarContent: ToolbarContent {
     let document: LocalPDFDocument?
-    let isSidebarPresented: Bool
-    let isInspectorPresented: Bool
     @ObservedObject var coordinator: LocalProcessingCoordinator
-    let toggleSidebar: () -> Void
-    let toggleInspector: () -> Void
     let openPDF: () -> Void
     let revealPDF: () -> Void
 
     var body: some ToolbarContent {
-        ToolbarItemGroup(placement: .navigation) {
+        ToolbarItem(placement: .navigation) {
             BrandMarkView(size: 24)
-
-            WorkspaceToolbarPanelButton(
-                title: "Workspace",
-                isSelected: isSidebarPresented,
-                action: toggleSidebar
-            )
-
-            WorkspaceToolbarPanelButton(
-                title: "Extract",
-                isSelected: isInspectorPresented,
-                action: toggleInspector
-            )
         }
 
         ToolbarItem(placement: .principal) {
