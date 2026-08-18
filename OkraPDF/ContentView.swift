@@ -109,11 +109,7 @@ struct ContentView: View {
         .toolbar {
             WorkspaceToolbarContent(
                 document: state.selectedDocument,
-                isSidebarPresented: presentation.isSidebarPresented,
-                isInspectorPresented: presentation.isInspectorPresented,
                 coordinator: state.localProcessing,
-                toggleSidebar: { toggle(.sidebar, availableWidth: availableWidth) },
-                toggleInspector: { toggle(.inspector, availableWidth: availableWidth) },
                 openPDF: state.openPDFPicker,
                 revealPDF: state.revealSelectedPDF
             )

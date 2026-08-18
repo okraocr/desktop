@@ -9,7 +9,7 @@ Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.
 - [x] Windowed app with native PDFKit preview
 - [x] Regular activation policy and Dock lifecycle
 - [x] Document-first workspace with a permanent center reader, compact edge rails, and independently collapsible Workspace and Extract panels
-- [x] Native toolbar with the canonical mark, document title, panel toggles, Open, source reveal, and extraction-box controls
+- [x] Native toolbar with the canonical mark, document title, Open, source reveal, and extraction-box controls; panel toggles live in their corresponding edge rails rather than title-bar tabs
 - [x] Workspace visible and Extract tucked away by default; hiding either panel preserves its local state
 - [x] Panel transitions honor Reduce Motion and expose accessible labels, help, and selected state
 - [x] Hidden drawer controls are disabled and removed from accessibility; closing a drawer returns keyboard focus to its persistent rail
@@ -163,12 +163,12 @@ job.
 
 ## Friend-core manual regression
 
-Run every line below against the exact downloadable RC.4 prerelease candidate.
-Record evidence on the RC.4 release tracking issue or pull request; do not use
+Run every line below against the exact downloadable prerelease candidate.
+Record evidence on its release tracking issue or pull request; do not use
 a local build.
 
 - [ ] Launch with Workspace visible and Extract hidden; confirm the center reader remains the largest surface
-- [ ] Toggle Workspace and Extract independently from both the toolbar and edge rails
+- [ ] Toggle Workspace and Extract independently from their corresponding edge rails, then close each from its panel
 - [ ] Hide and reopen Extract during a completed run; confirm the selected provider and output remain intact
 - [ ] Open a one-page text PDF and confirm no extraction starts until **Parse** is clicked
 - [ ] Replace it with a multi-page scanned PDF and again confirm no automatic extraction

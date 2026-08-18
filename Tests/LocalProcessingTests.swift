@@ -275,7 +275,7 @@ struct LocalProcessingProviderTests {
             ) == false
         )
 
-        try await waitUntil("incremental extraction to finish") {
+        try await waitUntil("incremental extraction to finish", timeout: .seconds(10)) {
             coordinator.isRunning == false
         }
         #expect(coordinator.completedPageCount == pageCount)
