@@ -23,7 +23,7 @@ Chandra OCR 2 inside the document-first workspace. Redaction never starts when
 a PDF opens or parses.
 
 <p align="center">
-  <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.9">
+  <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.8">
     <img alt="Download for macOS" src="https://img.shields.io/badge/download-macOS%2013%2B-2f855a">
   </a>
   <a href="https://github.com/okrapdf/desktop/releases">
@@ -35,7 +35,7 @@ a PDF opens or parses.
 </p>
 
 <p align="center">
-  <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.9">Download</a> ·
+  <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.8">Download</a> ·
   <a href="docs/releases/README.md">Release notes</a> ·
   <a href="https://github.com/okrapdf/desktop/issues/new">Report an issue</a>
 </p>
@@ -139,15 +139,15 @@ must be parsed with a source-aligned provider before redaction is available.
 
 ## Download
 
-`desktop-v1.0.0-rc.9` is the current signed public release candidate for
+`desktop-v1.0.0-rc.8` is the current signed public release candidate for
 Apple-silicon Macs running macOS 13 or later. RC.8 adds explicit local
 Presidio detection, human review, and irreversible redacted-PDF export on top
 of RC.7's parser setup guide and local parser doctor.
 
-1. Download `Okra-1.0.0-rc.9.dmg` from the
-   [v1.0.0-rc.9 release](https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.9).
+1. Download `Okra-1.0.0-rc.8.dmg` from the
+   [v1.0.0-rc.8 release](https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.8).
 2. Optionally download the adjacent checksum and run
-   `shasum -a 256 -c Okra-1.0.0-rc.9.dmg.sha256`.
+   `shasum -a 256 -c Okra-1.0.0-rc.8.dmg.sha256`.
 3. Open the DMG, drag **Okra** to **Applications**, and eject the DMG.
 4. Open **Okra** from Applications. The app and DMG are Developer ID signed,
    hardened, notarized by Apple, and stapled for normal Gatekeeper opening.
@@ -169,7 +169,7 @@ swift build
 To create a local `.app` and DMG:
 
 ```bash
-./scripts/build-dmg.sh 1.0.0-rc.9
+./scripts/build-dmg.sh 1.0.0-rc.8
 ```
 
 Local packages are ad-hoc signed. The release workflow supplies the Developer
