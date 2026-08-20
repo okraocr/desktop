@@ -30,6 +30,13 @@ struct WorkspaceLayoutState: Equatable {
         }
     }
 
+    /// Presents a panel regardless of its current state. Compact layouts show
+    /// one panel at a time, so this takes the slot from the other one.
+    mutating func present(_ panel: WorkspacePanel, availableWidth: Double) {
+        guard presentation(for: availableWidth).isPresented(panel) == false else { return }
+        toggle(panel, availableWidth: availableWidth)
+    }
+
     mutating func toggle(_ panel: WorkspacePanel, availableWidth: Double) {
         let currentPresentation = presentation(for: availableWidth)
 
@@ -77,4 +84,13 @@ struct WorkspaceLayoutState: Equatable {
 struct WorkspacePresentation: Equatable {
     let isSidebarPresented: Bool
     let isInspectorPresented: Bool
+
+    func isPresented(_ panel: WorkspacePanel) -> Bool {
+        switch panel {
+        case .sidebar:
+            return isSidebarPresented
+        case .inspector:
+            return isInspectorPresented
+        }
+    }
 }

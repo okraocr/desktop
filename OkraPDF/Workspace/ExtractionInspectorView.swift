@@ -6,6 +6,7 @@ struct ExtractionInspectorView: View {
     @ObservedObject var coordinator: LocalProcessingCoordinator
     let parse: () -> Void
     let revealPDF: () -> Void
+    let showPlugins: () -> Void
     let dismiss: () -> Void
 
     var body: some View {
@@ -16,7 +17,7 @@ struct ExtractionInspectorView: View {
                         Text("Extract")
                             .font(.title2)
                             .bold()
-                        Text("Choose a local parser. Nothing runs until you click Parse.")
+                        Text("Runs on this Mac. Nothing starts until you click Parse.")
                             .font(.callout)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -42,7 +43,8 @@ struct ExtractionInspectorView: View {
                     document: document,
                     coordinator: coordinator,
                     parse: parse,
-                    revealPDF: revealPDF
+                    revealPDF: revealPDF,
+                    showPlugins: showPlugins
                 )
             }
             .padding(WorkspaceTheme.panelPadding)

@@ -82,4 +82,32 @@ struct WorkspaceLayoutStateTests {
         #expect(atBreakpoint.isSidebarPresented)
         #expect(atBreakpoint.isInspectorPresented)
     }
+
+    @Test("Asking for Plugins opens the sidebar instead of toggling it shut")
+    func presentOpensRatherThanToggles() {
+        var layout = WorkspaceLayoutState()
+
+        // Already open: presenting again must be a no-op, not a hide.
+        layout.present(.sidebar, availableWidth: 1_320)
+        #expect(layout.presentation(for: 1_320).isSidebarPresented)
+
+        layout.toggle(.sidebar, availableWidth: 1_320)
+        #expect(layout.presentation(for: 1_320).isSidebarPresented == false)
+
+        layout.present(.sidebar, availableWidth: 1_320)
+        #expect(layout.presentation(for: 1_320).isSidebarPresented)
+    }
+
+    @Test("In compact widths, opening Plugins takes the slot from Extract")
+    func presentTakesTheCompactSlot() {
+        var layout = WorkspaceLayoutState()
+
+        layout.toggle(.inspector, availableWidth: 960)
+        #expect(layout.presentation(for: 960).isInspectorPresented)
+
+        layout.present(.sidebar, availableWidth: 960)
+        let presentation = layout.presentation(for: 960)
+        #expect(presentation.isSidebarPresented)
+        #expect(presentation.isInspectorPresented == false)
+    }
 }

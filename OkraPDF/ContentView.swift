@@ -99,6 +99,7 @@ struct ContentView: View {
                     coordinator: state.localProcessing,
                     parse: state.parseSelectedDocument,
                     revealPDF: state.revealSelectedPDF,
+                    showPlugins: { present(.sidebar, availableWidth: availableWidth) },
                     dismiss: { toggle(.inspector, availableWidth: availableWidth) }
                 )
                 .overlay(alignment: .leading) {
@@ -146,6 +147,15 @@ struct ContentView: View {
 
     private func toggle(_ panel: WorkspacePanel, availableWidth: Double) {
         layout.toggle(panel, availableWidth: availableWidth)
+        moveFocus(to: panel)
+    }
+
+    private func present(_ panel: WorkspacePanel, availableWidth: Double) {
+        layout.present(panel, availableWidth: availableWidth)
+        moveFocus(to: panel)
+    }
+
+    private func moveFocus(to panel: WorkspacePanel) {
         focusedPanelToggle = nil
         Task { @MainActor in
             focusedPanelToggle = panel

@@ -17,6 +17,8 @@ struct WorkspaceSidebarView: View {
                 }
             }
 
+            WorkspacePluginsSectionView(coordinator: coordinator)
+
             Section("Recent runs") {
                 if coordinator.recentRuns.isEmpty {
                     Text("Completed parses appear here.")
@@ -42,7 +44,7 @@ struct WorkspaceSidebarView: View {
                         Text("Workspace")
                             .font(.headline)
                             .foregroundStyle(.primary)
-                        Text("Local files and runs")
+                        Text("Plugins, files, and runs")
                             .font(.callout)
                             .foregroundStyle(.secondary)
                     }

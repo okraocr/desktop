@@ -1,8 +1,8 @@
 {
   "generatedBy": "scripts/sync-from-monorepo.mjs",
   "schemaVersion": 1,
-  "sourceCommit": "0882f78cd8948d67b533047c4b864244fbd05b44",
+  "sourceCommit": "86832837c335a875399542c6da1069900db826cc",
   "sourcePath": "apps/desktop",
   "sourceRepository": "steventsao/okra",
-  "sourceTree": "e789b38ece8a16be79e54bcf98126f1fc68dd901"
+  "sourceTree": "9a3284b540f6fe62170970412904e0c9d040ac6e"
 }

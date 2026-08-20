@@ -5,14 +5,12 @@ struct LocalExtractionView: View {
     @ObservedObject var coordinator: LocalProcessingCoordinator
     let parse: () -> Void
     let revealPDF: () -> Void
+    /// Opens the sidebar, where parsers are chosen and set up.
+    let showPlugins: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: WorkspaceTheme.sectionSpacing) {
-            ProviderPickerView(coordinator: coordinator)
-            ProviderStatusView(coordinator: coordinator)
-            if coordinator.selectedProviderUsesOllama {
-                OllamaIntegrationView(coordinator: coordinator)
-            }
+            selectedPluginSummary
 
             if document != nil {
                 ForEach(coordinator.pageLifecycleGroups) { group in
@@ -47,10 +45,45 @@ struct LocalExtractionView: View {
         }
     }
 
+    /// Which engine will run, and one click back to the Plugins list to change
+    /// it. Choosing and installing parsers lives in the sidebar now, so this
+    /// panel stays about the run.
+    private var selectedPluginSummary: some View {
+        HStack(alignment: .firstTextBaseline, spacing: WorkspaceTheme.standardSpacing) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Parser")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(coordinator.selectedDescriptor.name)
+                    .font(.headline)
+                Text(coordinator.selectedAvailability.message)
+                    .font(.caption)
+                    .foregroundStyle(
+                        coordinator.selectedAvailability.isReady ? WorkspaceTheme.brand : .secondary
+                    )
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer()
+
+            Button("Change", action: showPlugins)
+                .buttonStyle(.bordered)
+                .disabled(coordinator.isRunning || coordinator.isInstalling)
+                .accessibilityHint("Opens the Plugins list in the workspace sidebar")
+        }
+        .padding(WorkspaceTheme.standardSpacing)
+        .background(.quaternary.opacity(0.35), in: .rect(cornerRadius: WorkspaceTheme.cardRadius))
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(
+            "Selected parser \(coordinator.selectedDescriptor.name), \(coordinator.selectedAvailability.message)"
+        )
+    }
+
     @ViewBuilder
     private var extractionControls: some View {
         if coordinator.isInstalling {
-            ProviderSetupView(coordinator: coordinator)
+            pluginsHandoff(message: coordinator.setupProgress?.message
+                ?? "Setting this parser up. Progress is in Plugins.")
         } else if coordinator.isRunning {
             RunProgressView(coordinator: coordinator)
         } else if coordinator.canResumeLatestRun, let document {
@@ -87,14 +120,25 @@ struct LocalExtractionView: View {
                 .accessibilityHint("Extracts on this Mac without uploading the PDF")
             }
         } else {
-            if coordinator.selectedProviderUsesOllama {
-                Text(coordinator.statusMessage)
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            } else {
-                ProviderSetupView(coordinator: coordinator)
+            pluginsHandoff(message: coordinator.statusMessage)
+        }
+    }
+
+    /// The parser cannot run yet. Say why, then send the reader to the one place
+    /// that can fix it.
+    private func pluginsHandoff(message: String) -> some View {
+        VStack(alignment: .leading, spacing: WorkspaceTheme.standardSpacing) {
+            Text(message)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Button(action: showPlugins) {
+                Text("Open Plugins")
+                    .frame(maxWidth: .infinity)
             }
+            .buttonStyle(.borderedProminent)
+            .accessibilityHint("Set this parser up in the workspace sidebar")
         }
     }
 
