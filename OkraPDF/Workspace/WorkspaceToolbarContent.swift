@@ -2,7 +2,9 @@ import SwiftUI
 
 struct WorkspaceToolbarContent: ToolbarContent {
     let document: LocalPDFDocument?
+    let isAssistantPresented: Bool
     @ObservedObject var coordinator: LocalProcessingCoordinator
+    let toggleAssistant: () -> Void
     let openPDF: () -> Void
     let revealPDF: () -> Void
 
@@ -49,6 +51,18 @@ struct WorkspaceToolbarContent: ToolbarContent {
 
             Button("Open PDF…", systemImage: "folder", action: openPDF)
                 .disabled(coordinator.isRunning || coordinator.isInstalling)
+
+            Toggle(
+                isOn: Binding(
+                    get: { isAssistantPresented },
+                    set: { _ in toggleAssistant() }
+                )
+            ) {
+                Label("Assistant", systemImage: "sidebar.right")
+            }
+            .toggleStyle(.button)
+            .labelStyle(.iconOnly)
+            .help(isAssistantPresented ? "Hide assistant" : "Show assistant")
         }
     }
 }

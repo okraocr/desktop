@@ -3,11 +3,20 @@ import SwiftUI
 struct PresidioRedactionView: View {
     @ObservedObject var coordinator: LocalProcessingCoordinator
     @ObservedObject var redaction: PresidioRedactionCoordinator
-    @State private var isExpanded = false
+    @State private var isExpanded: Bool
+
+    init(
+        coordinator: LocalProcessingCoordinator,
+        redaction: PresidioRedactionCoordinator,
+        initiallyExpanded: Bool = false
+    ) {
+        _coordinator = ObservedObject(wrappedValue: coordinator)
+        _redaction = ObservedObject(wrappedValue: redaction)
+        _isExpanded = State(initialValue: initiallyExpanded)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: WorkspaceTheme.standardSpacing) {
-            Divider()
             DisclosureGroup(isExpanded: $isExpanded) {
                 VStack(alignment: .leading, spacing: WorkspaceTheme.standardSpacing) {
                     Text("Presidio checks positioned extraction blocks only after you ask it to. Review every candidate; the source PDF is never changed.")

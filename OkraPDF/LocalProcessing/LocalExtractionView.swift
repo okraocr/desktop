@@ -37,13 +37,6 @@ struct LocalExtractionView: View {
             if coordinator.outputText.isEmpty == false {
                 ExtractionOutputView(coordinator: coordinator)
             }
-
-            if coordinator.structuredOutput != nil {
-                PresidioRedactionView(
-                    coordinator: coordinator,
-                    redaction: coordinator.redaction
-                )
-            }
         }
     }
 

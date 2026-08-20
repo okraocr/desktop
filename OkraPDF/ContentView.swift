@@ -5,13 +5,43 @@ import UniformTypeIdentifiers
 struct ContentView: View {
     @EnvironmentObject private var state: AppState
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var layout = WorkspaceLayoutState()
-    @FocusState private var focusedPanelToggle: WorkspacePanel?
+    @State private var isAssistantPresented = true
     @State private var isDropTargeted = false
 
     var body: some View {
-        GeometryReader { proxy in
-            workspace(availableWidth: proxy.size.width)
+        HStack(spacing: 0) {
+            DocumentWorkspaceView(
+                document: state.selectedDocument,
+                isDropTargeted: isDropTargeted,
+                coordinator: state.localProcessing,
+                redaction: state.localProcessing.redaction,
+                canOpenPDF: state.canOpenPDF,
+                openPDF: state.openPDFPicker,
+                openSetupGuide: state.presentSetupGuide
+            )
+            .frame(minWidth: WorkspaceTheme.readerMinimumWidth)
+            .layoutPriority(1)
+
+            WorkspaceCollapsiblePanel(
+                isPresented: isAssistantPresented,
+                width: WorkspaceTheme.assistantPanelWidth,
+                alignment: .leading
+            ) {
+                AssistantPanelView(
+                    document: state.selectedDocument,
+                    importError: state.importError,
+                    coordinator: state.localProcessing,
+                    conversation: state.conversation,
+                    parse: state.parseSelectedDocument,
+                    revealPDF: state.revealSelectedPDF,
+                    openPDF: state.openPDFPicker,
+                    openRun: state.openRun,
+                    dismiss: toggleAssistant
+                )
+                .overlay(alignment: .leading) {
+                    Divider()
+                }
+            }
         }
         .background(.background)
         .tint(WorkspaceTheme.brand)
@@ -32,90 +62,21 @@ struct ContentView: View {
                 openPDF: state.openPDFPicker
             )
         }
-    }
-
-    private func workspace(availableWidth: Double) -> some View {
-        let presentation = layout.presentation(for: availableWidth)
-
-        return HStack(spacing: 0) {
-            WorkspaceCollapsiblePanel(
-                isPresented: presentation.isSidebarPresented,
-                width: WorkspaceTheme.sidebarWidth,
-                alignment: .trailing
-            ) {
-                WorkspaceSidebarView(
-                    document: state.selectedDocument,
-                    coordinator: state.localProcessing,
-                    openRun: state.openRun,
-                    dismiss: { toggle(.sidebar, availableWidth: availableWidth) }
-                )
-                .overlay(alignment: .trailing) {
-                    Divider()
-                }
-            }
-
-            WorkspaceLeadingRailView(
-                isSidebarPresented: presentation.isSidebarPresented,
-                coordinator: state.localProcessing,
-                focusedPanelToggle: $focusedPanelToggle,
-                toggleSidebar: { toggle(.sidebar, availableWidth: availableWidth) },
-                openPDF: state.openPDFPicker,
-                revealRuns: state.localProcessing.revealRunsFolder
-            )
-
-            Divider()
-
-            DocumentWorkspaceView(
-                document: state.selectedDocument,
-                isDropTargeted: isDropTargeted,
-                coordinator: state.localProcessing,
-                redaction: state.localProcessing.redaction,
-                canOpenPDF: state.canOpenPDF,
-                openPDF: state.openPDFPicker,
-                openSetupGuide: state.presentSetupGuide
-            )
-            .frame(minWidth: WorkspaceTheme.readerMinimumWidth)
-            .layoutPriority(1)
-
-            Divider()
-
-            WorkspaceTrailingRailView(
-                documentIsOpen: state.selectedDocument != nil,
-                isInspectorPresented: presentation.isInspectorPresented,
-                coordinator: state.localProcessing,
-                focusedPanelToggle: $focusedPanelToggle,
-                toggleInspector: { toggle(.inspector, availableWidth: availableWidth) },
-                revealPDF: state.revealSelectedPDF
-            )
-
-            WorkspaceCollapsiblePanel(
-                isPresented: presentation.isInspectorPresented,
-                width: WorkspaceTheme.inspectorWidth,
-                alignment: .leading
-            ) {
-                ExtractionInspectorView(
-                    document: state.selectedDocument,
-                    importError: state.importError,
-                    coordinator: state.localProcessing,
-                    parse: state.parseSelectedDocument,
-                    revealPDF: state.revealSelectedPDF,
-                    dismiss: { toggle(.inspector, availableWidth: availableWidth) }
-                )
-                .overlay(alignment: .leading) {
-                    Divider()
-                }
-            }
-        }
         .toolbar {
             WorkspaceToolbarContent(
                 document: state.selectedDocument,
+                isAssistantPresented: isAssistantPresented,
                 coordinator: state.localProcessing,
+                toggleAssistant: toggleAssistant,
                 openPDF: state.openPDFPicker,
                 revealPDF: state.revealSelectedPDF
             )
         }
-        .animation(panelAnimation, value: presentation.isSidebarPresented)
-        .animation(panelAnimation, value: presentation.isInspectorPresented)
+        .animation(panelAnimation, value: isAssistantPresented)
+    }
+
+    private func toggleAssistant() {
+        isAssistantPresented.toggle()
     }
 
     private var panelAnimation: Animation? {
@@ -142,14 +103,6 @@ struct ContentView: View {
                 }
             }
         )
-    }
-
-    private func toggle(_ panel: WorkspacePanel, availableWidth: Double) {
-        layout.toggle(panel, availableWidth: availableWidth)
-        focusedPanelToggle = nil
-        Task { @MainActor in
-            focusedPanelToggle = panel
-        }
     }
 
     private func handleDrop(providers: [NSItemProvider]) -> Bool {
