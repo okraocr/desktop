@@ -12,6 +12,8 @@ struct AssistantPanelView: View {
     let revealPDF: () -> Void
     let openPDF: () -> Void
     let openRun: (LocalProcessingRun) -> Void
+    /// Opens the leading Parsers panel, where engines are chosen and set up.
+    let showParsers: () -> Void
     let dismiss: () -> Void
 
     @State private var draft = ""
@@ -128,7 +130,8 @@ struct AssistantPanelView: View {
                     document: document,
                     coordinator: coordinator,
                     parse: parse,
-                    revealPDF: revealPDF
+                    revealPDF: revealPDF,
+                    showParsers: showParsers
                 )
             }
         case .redact:
