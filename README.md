@@ -11,9 +11,10 @@
   into structured local output. No account, document library, or cloud upload.
 </p>
 
-> **Source of truth:** desktop code is maintained at `apps/desktop` in the Okra
-> monorepo. [`okra-project/desktop`](https://github.com/okra-project/desktop)
-> is the generated public CI, release, signing, and Sparkle-update projection.
+> **Source of truth:** this repository is the canonical home of the desktop
+> app and owns its CI, releases, signing, and Sparkle updates. It was
+> formerly a generated projection of the Okra monorepo; development now
+> happens directly here.
 
 RC.8 adds explicit local PII detection and reviewed redacted-PDF export with
 Microsoft Presidio. It retains the RC.7 parser setup guide and host-adaptive
@@ -39,7 +40,7 @@ a PDF opens or parses.
   <a href="https://github.com/okra-project/desktop/issues/new">Report an issue</a>
 </p>
 
-![okraPDF reading a public SEC filing in the RC.4 document-first workspace](.github/assets/okra-reader-overview.png)
+![okraPDF reading a public SEC filing beside the local assistant panel](.github/assets/okra-reader-overview.png)
 
 ## Read first. Parse when you choose.
 
@@ -48,7 +49,10 @@ it is, renders it with native PDFKit, and waits until you choose **Parse**.
 The selected local parser then produces reviewable output beside a persistent
 per-page run history on this Mac.
 
-- Read text, charts, forms, and scanned pages in a native document-first workspace.
+- Read text, charts, forms, and scanned pages in a native document-first workspace:
+  the PDF stays the main window, and every feature mounts as a plugin — Extract,
+  Redact, Runs — in one collapsible assistant panel with a deterministic local
+  command router (no cloud model).
 - Parse with the managed Dots OCR 1.5 default, built-in Apple Vision, optional
   Chandra OCR 2 or Baidu Unlimited-OCR, or an installed Ollama vision model.
 - Compare parser/model pairings in the first-run setup guide and use the local
@@ -104,8 +108,8 @@ for installing and storing Ollama models.
 
 ## Local PII redaction
 
-After a positioned parse finishes, expand **Redact PII locally** in the Extract
-inspector. The first explicit setup installs pinned Microsoft Presidio 2.2.364
+After a positioned parse finishes, open the **Redact** plugin in the assistant
+panel. The first explicit setup installs pinned Microsoft Presidio 2.2.364
 and the English spaCy 3.8 model under `~/.okra/providers/presidio`. Detection
 runs through a session-scoped loopback worker and maps each finding to the
 complete normalized source block that contains it.
@@ -191,15 +195,12 @@ OkraPDF/       SwiftUI app, PDFKit reader, and local parsing providers
 Tests/         Product, provider, persistence, and packaging tests
 scripts/       Verification, packaging, and release automation
 docs/releases/ Versioned user-facing release notes
-windows/       Windows port (Go + WebView2 + React; see windows/README.md)
 ```
 
 Maintainers should start with [CLAUDE.md](CLAUDE.md),
 [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md), and
 [LAUNCH.md](LAUNCH.md). Historical changes are indexed in
-[docs/releases](docs/releases/README.md). Repository projection and source
-ownership are documented in the monorepo at
-`internal/specs/desktop-repository-canonicalization.md`.
+[docs/releases](docs/releases/README.md).
 
 ## License
 

@@ -2,18 +2,25 @@
 
 ## Source boundary
 
-The canonical source is the monorepo subtree `apps/desktop`. The public
-`okra-project/desktop` repository is generated from committed files in this
-directory and owns public CI, signing, Releases, and the Sparkle appcast. Do not
-reverse-sync public changes or place public-only release credentials here.
+This repository (`okrapdf/desktop`) is the canonical source of truth for the
+desktop app, and it owns public CI, signing, Releases, and the Sparkle
+appcast. It was formerly a generated projection of the `steventsao/okra`
+monorepo subtree `apps/desktop`; that subtree and its sync tooling were
+removed on 2026-08-20, so develop directly here. Product roadmap tracking
+(`D.6.x` item IDs) stays in the monorepo's `internal/roadmap.md`. The
+monorepo's git history (tag `windows/v0.1.0-alpha.1`) preserves the
+unprojected Windows alpha source that lived at `apps/desktop/windows`.
 
 ## Product boundary
 
 This app is currently a minimal macOS 13+ windowed PDF reader and local parser. Under
-`D.6.3`, keep one permanent center reader with compact edge rails and
-independently collapsible local Workspace and Extract panels. Do not add tabs,
-remote control, chat, cloud upload, registries, promotions, account gates, or
-backoffice UI.
+`D.6.20`, the shell is a permanent center reader plus one collapsible trailing
+assistant panel where local features mount as plugins (Extract, Redact, Runs)
+in a session timeline. The composer routes slash commands and plain words with
+a deterministic on-device router — the assistant is **not** a language model
+and its copy must never imply one. Do not add per-feature tabs, edge rails,
+remote control, model-backed chat, cloud upload, registries, promotions,
+account gates, or backoffice UI.
 
 The supported flow is:
 
@@ -26,8 +33,9 @@ open/drop PDF → read → choose local provider → explicit Parse → readable
 - `OkraPDF/App.swift` — normal windowed app lifecycle and File menu command
 - `OkraPDF/Support/SparkleUpdaterController.swift` — Sparkle in-app updates (signed appcast, Install and Relaunch)
 - `OkraPDF/AppState.swift` — open/drop state separated from explicit parsing
-- `OkraPDF/ContentView.swift` — document-first PDF reader shell, drop target, rails, and collapsible panels
-- `OkraPDF/Workspace/` — native toolbar, local Workspace/Extract panels, reader surface, and layout state
+- `OkraPDF/ContentView.swift` — document-first PDF reader shell, drop target, and the collapsible assistant panel
+- `OkraPDF/Assistant/` — assistant panel: plugin registry, deterministic command router, session timeline, and plugin cards
+- `OkraPDF/Workspace/` — native toolbar, reader surface, and shared panel/theme primitives
 - `OkraPDF/PDFReaderView.swift` — native PDFKit reader bridge
 - `OkraPDF/LocalProcessing/` — provider contracts, setup, coordinator, and output UI
 - `OkraPDF/SetupGuide/` — first-run parser setup guide: ParseBench-style pairing
@@ -35,11 +43,6 @@ open/drop PDF → read → choose local provider → explicit Parse → readable
   hand-off into the same coordinator (completed flag:
   `localProcessing.setupGuide.completed`; reopen via Help → Parser Setup Guide…)
 - `OkraPDF/ProviderScripts/` — bundled managed-parser setup and worker scripts
-- `windows/` — Windows port (Go loopback server + WebView2 + React/Vite/Tailwind,
-  mirroring the Ollama Windows desktop stack). Same read-before-parse contract,
-  run layout, and normalized output schema; `windows-ocr` (Windows.Media.Ocr)
-  is the Apple Vision equivalent. See `windows/README.md`. The macOS public
-  projection sync must not include this directory.
 
 ## Build and test
 

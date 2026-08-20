@@ -7,8 +7,16 @@ final class SparkleUpdaterController: ObservableObject {
     private let controller: SPUStandardUpdaterController
 
     init() {
+        // Debug capture runs launch the bare build product, where Sparkle's
+        // startup check fails with a modal alert that stalls the runloop.
+        var startsUpdater = true
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["OKRA_SHELL_CAPTURE_DIR"] != nil {
+            startsUpdater = false
+        }
+        #endif
         controller = SPUStandardUpdaterController(
-            startingUpdater: true,
+            startingUpdater: startsUpdater,
             updaterDelegate: nil,
             userDriverDelegate: nil
         )

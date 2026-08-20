@@ -14,6 +14,7 @@ final class AppState: ObservableObject {
     static let setupGuideCompletedDefaultsKey = "localProcessing.setupGuide.completed"
 
     let localProcessing: LocalProcessingCoordinator
+    let conversation = AssistantConversation()
     private let userDefaults: UserDefaults
 
     init() {
@@ -23,6 +24,7 @@ final class AppState: ObservableObject {
         bindLocalProcessingState()
         openCommandLinePDFIfPresent()
         showsSetupGuide = userDefaults.object(forKey: Self.setupGuideCompletedDefaultsKey) == nil
+        ShellCaptureHarness.startIfRequested(state: self)
     }
 
     init(localProcessing: LocalProcessingCoordinator) {
