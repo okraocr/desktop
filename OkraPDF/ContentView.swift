@@ -6,10 +6,25 @@ struct ContentView: View {
     @EnvironmentObject private var state: AppState
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isAssistantPresented = true
+    @State private var isParsersPresented = false
     @State private var isDropTargeted = false
 
     var body: some View {
         HStack(spacing: 0) {
+            WorkspaceCollapsiblePanel(
+                isPresented: isParsersPresented,
+                width: WorkspaceTheme.parsersPanelWidth,
+                alignment: .trailing
+            ) {
+                ParsersPanelView(
+                    coordinator: state.localProcessing,
+                    dismiss: { isParsersPresented = false }
+                )
+                .overlay(alignment: .trailing) {
+                    Divider()
+                }
+            }
+
             DocumentWorkspaceView(
                 document: state.selectedDocument,
                 isDropTargeted: isDropTargeted,
@@ -36,6 +51,7 @@ struct ContentView: View {
                     revealPDF: state.revealSelectedPDF,
                     openPDF: state.openPDFPicker,
                     openRun: state.openRun,
+                    showParsers: { isParsersPresented = true },
                     dismiss: toggleAssistant
                 )
                 .overlay(alignment: .leading) {
@@ -66,17 +82,24 @@ struct ContentView: View {
             WorkspaceToolbarContent(
                 document: state.selectedDocument,
                 isAssistantPresented: isAssistantPresented,
+                isParsersPresented: isParsersPresented,
                 coordinator: state.localProcessing,
                 toggleAssistant: toggleAssistant,
+                toggleParsers: toggleParsers,
                 openPDF: state.openPDFPicker,
                 revealPDF: state.revealSelectedPDF
             )
         }
         .animation(panelAnimation, value: isAssistantPresented)
+        .animation(panelAnimation, value: isParsersPresented)
     }
 
     private func toggleAssistant() {
         isAssistantPresented.toggle()
+    }
+
+    private func toggleParsers() {
+        isParsersPresented.toggle()
     }
 
     private var panelAnimation: Animation? {

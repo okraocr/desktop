@@ -3,14 +3,31 @@ import SwiftUI
 struct WorkspaceToolbarContent: ToolbarContent {
     let document: LocalPDFDocument?
     let isAssistantPresented: Bool
+    let isParsersPresented: Bool
     @ObservedObject var coordinator: LocalProcessingCoordinator
     let toggleAssistant: () -> Void
+    let toggleParsers: () -> Void
     let openPDF: () -> Void
     let revealPDF: () -> Void
 
     var body: some ToolbarContent {
         ToolbarItem(placement: .navigation) {
             BrandMarkView(size: 24)
+        }
+
+        ToolbarItem(placement: .navigation) {
+            Toggle(
+                isOn: Binding(
+                    get: { isParsersPresented },
+                    set: { _ in toggleParsers() }
+                )
+            ) {
+                Label("Parsers", systemImage: "sidebar.left")
+            }
+            .toggleStyle(.button)
+            .labelStyle(.iconOnly)
+            .help(isParsersPresented ? "Hide parsers" : "Show parsers")
+            .accessibilityValue(coordinator.selectedDescriptor.name)
         }
 
         ToolbarItem(placement: .principal) {
