@@ -3,6 +3,7 @@ import Foundation
 enum AssistantReply: Equatable {
     case text(String)
     case plugin(AssistantPlugin, note: String)
+    case activity(WorkspaceActivity, note: String)
     case openPDF(note: String)
 }
 
@@ -24,8 +25,8 @@ enum AssistantCommandRouter {
             return extractReply(documentIsOpen: documentIsOpen)
         case AssistantPlugin.redact.command:
             return redactReply(documentIsOpen: documentIsOpen)
-        case AssistantPlugin.runs.command:
-            return .plugin(.runs, note: "Runs completed on this Mac, newest first.")
+        case WorkspaceActivity.runs.command:
+            return .activity(.runs, note: "Runs completed on this Mac, newest first.")
         case "/open":
             return .openPDF(note: "Opening the file picker.")
         default:
@@ -45,7 +46,7 @@ enum AssistantCommandRouter {
             return redactReply(documentIsOpen: documentIsOpen)
         }
         if tokens.isDisjoint(with: runsKeywords) == false {
-            return .plugin(.runs, note: "Runs completed on this Mac, newest first.")
+            return .activity(.runs, note: "Runs completed on this Mac, newest first.")
         }
         if tokens.isDisjoint(with: openKeywords) == false {
             return .openPDF(note: "Opening the file picker.")
@@ -55,10 +56,10 @@ enum AssistantCommandRouter {
     }
 
     static let helpText = """
-        This panel routes requests to local plugins. There is no cloud model \
+        This panel routes requests to local tools and activity. There is no cloud model \
         behind it and nothing leaves this Mac.
 
-        Open Plugins in the toolbar to manage dependencies and installation progress.
+        Open the left navigation for Plugins and Runs. Plugin setup and installation progress stay under Plugins; run history stays under Activity.
 
         /extract — parse the open PDF with a local provider
         /redact — detect PII after a parse and export burned-in boxes
@@ -67,7 +68,7 @@ enum AssistantCommandRouter {
         """
 
     static let fallbackText = """
-        I match simple requests to local plugins — try “parse this”, \
+        I match simple requests to local tools — try “parse this”, \
         “redact PII”, or “show runs”. Type /help for every command.
         """
 

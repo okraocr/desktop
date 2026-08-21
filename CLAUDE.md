@@ -13,14 +13,15 @@ unprojected Windows alpha source that lived at `apps/desktop/windows`.
 
 ## Product boundary
 
-This app is currently a minimal macOS 13+ windowed PDF reader and local parser. Under
-`D.6.20`, the shell is a permanent center reader plus one collapsible trailing
-assistant panel where local features mount as plugins (Extract, Redact, Runs)
-in a session timeline. The composer routes slash commands and plain words with
-a deterministic on-device router — the assistant is **not** a language model
-and its copy must never imply one. A collapsible leading Plugins page owns
-in-shell dependency setup and progress; Assistant setup handoffs only navigate
-there.
+This app is currently a minimal macOS 13+ windowed PDF reader and local parser.
+Under `D.6.20` and `D.6.21`, the shell is a permanent center reader, grouped
+leading navigation, and a collapsible trailing Assistant. The navigation root
+separates installable **Plugins** (Extract, Redact) from **Activity** (Runs),
+then opens one focused destination with a clear back path. The composer routes
+slash commands and plain words with a deterministic on-device router — the
+assistant is **not** a language model and its copy must never imply one.
+Dependency setup and progress stay with the focused plugin destination;
+Assistant setup handoffs only navigate there.
 Do not add per-feature tabs, edge rails, remote control, model-backed chat,
 cloud upload, remote registries, promotions, account gates, or backoffice UI.
 
@@ -35,11 +36,11 @@ open/drop PDF → read → choose local provider → explicit Parse → readable
 - `OkraPDF/App.swift` — normal windowed app lifecycle and File menu command
 - `OkraPDF/Support/SparkleUpdaterController.swift` — Sparkle in-app updates (signed appcast, Install and Relaunch)
 - `OkraPDF/AppState.swift` — open/drop state separated from explicit parsing
-- `OkraPDF/ContentView.swift` — document-first PDF reader shell, drop target, and the collapsible assistant panel
-- `OkraPDF/Assistant/` — assistant panel: plugin registry, deterministic command router, session timeline, and plugin cards
-- `OkraPDF/Plugins/` — local plugin catalog, configuration, and coordinator-backed installation progress
+- `OkraPDF/ContentView.swift` — document-first PDF reader shell, drop target, grouped leading navigation, and collapsible Assistant
+- `OkraPDF/Assistant/` — deterministic command router, session timeline, plugin cards, and activity handoffs
+- `OkraPDF/Plugins/` — focused plugin setup views and coordinator-backed installation progress
 - `OkraPDF/Parsers/` — parser choices and setup details embedded in the Extract plugin
-- `OkraPDF/Workspace/` — native toolbar, reader surface, and shared panel/theme primitives
+- `OkraPDF/Workspace/` — grouped Plugins/Activity navigation, native toolbar, reader surface, and shared panel/theme primitives
 - `OkraPDF/PDFReaderView.swift` — native PDFKit reader bridge
 - `OkraPDF/LocalProcessing/` — provider contracts, setup, coordinator, and output UI
 - `OkraPDF/SetupGuide/` — first-run parser setup guide: ParseBench-style pairing

@@ -117,7 +117,7 @@ struct PresidioRedactionView: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
-                .accessibilityHint("Opens the Plugins page where Presidio setup is managed")
+                .accessibilityHint("Opens Redact under Plugins where Presidio setup is managed")
             }
         case .unavailable(let message):
             VStack(alignment: .leading, spacing: WorkspaceTheme.compactSpacing) {
@@ -128,7 +128,7 @@ struct PresidioRedactionView: View {
                 )
                 Button("Open Redact Plugin", action: showPlugin)
                     .buttonStyle(.bordered)
-                    .accessibilityHint("Opens the Plugins page for Presidio status and configuration")
+                    .accessibilityHint("Opens Redact under Plugins for Presidio status and configuration")
             }
         }
     }

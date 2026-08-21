@@ -3,19 +3,19 @@ import Testing
 
 @Suite("Assistant command router")
 struct AssistantCommandRouterTests {
-    @Test("Slash commands mount their plugin")
-    func slashCommandsMountPlugins() {
+    @Test("Slash commands route to their destination type")
+    func slashCommandsRouteToDestinations() {
         #expect(mountedPlugin("/extract") == .extract)
         #expect(mountedPlugin("/redact") == .redact)
-        #expect(mountedPlugin("/runs") == .runs)
+        #expect(mountedActivity("/runs") == .runs)
     }
 
-    @Test("Plain words route to the matching plugin")
-    func keywordsRouteToPlugins() {
+    @Test("Plain words keep plugins and activity separate")
+    func keywordsRouteToDestinations() {
         #expect(mountedPlugin("parse the tables in this filing") == .extract)
         #expect(mountedPlugin("can you OCR this?") == .extract)
         #expect(mountedPlugin("redact the PII before I share it") == .redact)
-        #expect(mountedPlugin("show my recent runs") == .runs)
+        #expect(mountedActivity("show my recent runs") == .runs)
     }
 
     @Test("Extract wins when a request mixes run and parse words")
@@ -69,6 +69,16 @@ struct AssistantCommandRouterTests {
         }
         return nil
     }
+
+    private func mountedActivity(_ input: String) -> WorkspaceActivity? {
+        if case .activity(let activity, _) = AssistantCommandRouter.reply(
+            to: input,
+            documentIsOpen: true
+        ) {
+            return activity
+        }
+        return nil
+    }
 }
 
 @Suite("Assistant conversation")
@@ -92,14 +102,14 @@ struct AssistantConversationTests {
         #expect(conversation.entries.count == 4)
     }
 
-    @Test("Mounting the same plugin twice reuses the existing card")
-    func mountIsIdempotent() {
+    @Test("Showing the same activity twice reuses the existing card")
+    func showActivityIsIdempotent() {
         let conversation = AssistantConversation()
-        let first = conversation.mount(.runs)
-        let second = conversation.mount(.runs)
+        let first = conversation.show(.runs)
+        let second = conversation.show(.runs)
 
         #expect(first == second)
-        #expect(conversation.entries.filter { $0.kind == .plugin(.runs) }.count == 1)
+        #expect(conversation.entries.filter { $0.kind == .activity(.runs) }.count == 1)
     }
 
     @Test("Blank input is ignored")

@@ -5,6 +5,7 @@ struct AssistantEntry: Identifiable, Equatable {
         case user(String)
         case assistant(String)
         case plugin(AssistantPlugin)
+        case activity(WorkspaceActivity)
     }
 
     let id: Int
@@ -13,9 +14,9 @@ struct AssistantEntry: Identifiable, Equatable {
 
 /// Session-scoped timeline for the assistant panel.
 ///
-/// Entries are user text, assistant text, or a mounted plugin card. A plugin
-/// mounts at most once — repeating a request scrolls back to the existing
-/// card instead of duplicating live coordinator UI.
+/// Entries are user text, assistant text, a mounted plugin card, or workspace
+/// activity. Each destination appears at most once so repeating a request
+/// scrolls back to the existing live coordinator UI.
 @MainActor
 final class AssistantConversation: ObservableObject {
     @Published private(set) var entries: [AssistantEntry] = []
@@ -43,6 +44,9 @@ final class AssistantConversation: ObservableObject {
         case .plugin(let plugin, let note):
             append(.assistant(note))
             return mount(plugin)
+        case .activity(let activity, let note):
+            append(.assistant(note))
+            return show(activity)
         case .openPDF(let note):
             let id = append(.assistant(note))
             openPDF()
@@ -59,6 +63,15 @@ final class AssistantConversation: ObservableObject {
         return append(.plugin(plugin))
     }
 
+    /// Shows an activity card, or returns the existing card's entry.
+    @discardableResult
+    func show(_ activity: WorkspaceActivity) -> Int {
+        if let existing = entries.last(where: { $0.kind == .activity(activity) }) {
+            return existing.id
+        }
+        return append(.activity(activity))
+    }
+
     @discardableResult
     private func append(_ kind: AssistantEntry.Kind) -> Int {
         let id = nextEntryID
@@ -68,8 +81,8 @@ final class AssistantConversation: ObservableObject {
     }
 
     static let welcomeText = """
-        Read the PDF in the main window; this panel runs local plugins — \
-        Extract, Redact, and Runs. Ask in plain words or type /help. \
+        Read the PDF in the main window; this panel routes to local tools. \
+        Extract and Redact are plugins; Runs is local activity. Ask in plain words or type /help. \
         Nothing leaves this Mac.
         """
 }

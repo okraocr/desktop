@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Extract plugin configuration embedded in the Plugins page.
+/// Extract plugin configuration embedded in its focused navigation destination.
 ///
 /// Choosing and preparing an engine lives here; running it remains in the
 /// assistant's Extract card. The selected parser expands in place to expose

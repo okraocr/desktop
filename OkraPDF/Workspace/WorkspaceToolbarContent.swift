@@ -3,10 +3,10 @@ import SwiftUI
 struct WorkspaceToolbarContent: ToolbarContent {
     let document: LocalPDFDocument?
     let isAssistantPresented: Bool
-    let isPluginsPresented: Bool
+    let isNavigationPresented: Bool
     @ObservedObject var coordinator: LocalProcessingCoordinator
     let toggleAssistant: () -> Void
-    let togglePlugins: () -> Void
+    let toggleNavigation: () -> Void
     let openPDF: () -> Void
     let revealPDF: () -> Void
 
@@ -18,16 +18,18 @@ struct WorkspaceToolbarContent: ToolbarContent {
         ToolbarItem(placement: .navigation) {
             Toggle(
                 isOn: Binding(
-                    get: { isPluginsPresented },
-                    set: { _ in togglePlugins() }
+                    get: { isNavigationPresented },
+                    set: { _ in toggleNavigation() }
                 )
             ) {
-                Label("Plugins", systemImage: "puzzlepiece.extension")
+                Label("Workspace navigation", systemImage: "sidebar.left")
             }
             .toggleStyle(.button)
             .labelStyle(.iconOnly)
-            .help(isPluginsPresented ? "Hide plugins" : "Show plugins")
-            .accessibilityValue("Selected parser: \(coordinator.selectedDescriptor.name)")
+            .help(isNavigationPresented ? "Hide navigation" : "Show navigation")
+            .accessibilityValue(
+                "Plugins and activity. Selected parser: \(coordinator.selectedDescriptor.name)"
+            )
         }
 
         ToolbarItem(placement: .principal) {

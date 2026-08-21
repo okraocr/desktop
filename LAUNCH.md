@@ -18,8 +18,9 @@ source-aligned output.
 
 - [x] Lightweight windowed SwiftUI PDF reader
 - [x] Permanent center PDF reader with compact edge rails
-- [x] Independently collapsible local Workspace and Extract panels
-- [x] Dedicated Plugins page for local setup, progress, cancellation, and retry
+- [x] Independently collapsible left navigation and trailing Assistant
+- [x] Grouped left navigation separates Plugins (Extract, Redact) from Activity (Runs)
+- [x] Focused plugin destinations own setup, progress, cancellation, and retry
 - [x] Assistant setup handoffs navigate to Plugins instead of installing in chat
 - [x] Native document toolbar with clean, functional controls and no promotional surfaces
 - [x] Open and Finder drag-and-drop

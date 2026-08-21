@@ -11,9 +11,10 @@ struct AssistantPanelView: View {
     let parse: () -> Void
     let revealPDF: () -> Void
     let openPDF: () -> Void
-    let openRun: (LocalProcessingRun) -> Void
-    /// Opens the selected plugin in the leading Plugins page.
+    /// Opens the selected plugin in the leading navigation.
     let showPlugin: (AssistantPlugin) -> Void
+    /// Opens workspace activity in the leading navigation.
+    let showActivity: (WorkspaceActivity) -> Void
     let dismiss: () -> Void
 
     @State private var draft = ""
@@ -34,7 +35,6 @@ struct AssistantPanelView: View {
                         )
                     }
 
-                    pluginStrip(proxy: proxy)
                     composer(proxy: proxy)
                 }
                 .padding(WorkspaceTheme.panelPadding)
@@ -55,7 +55,7 @@ struct AssistantPanelView: View {
                 VStack(alignment: .leading, spacing: WorkspaceTheme.compactSpacing) {
                     Text("Assistant")
                         .font(.headline)
-                    Text("Local plugins · on this Mac")
+                    Text("Local tools and activity · on this Mac")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }
@@ -118,6 +118,8 @@ struct AssistantPanelView: View {
                 .accessibilityLabel("Assistant: \(text)")
         case .plugin(let plugin):
             pluginCard(plugin)
+        case .activity(let activity):
+            activityCard(activity)
         }
     }
 
@@ -157,8 +159,14 @@ struct AssistantPanelView: View {
                     }
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private func activityCard(_ activity: WorkspaceActivity) -> some View {
+        switch activity {
         case .runs:
-            AssistantPluginCardView(plugin: .runs) {
+            AssistantActivityCardView(activity: .runs) {
                 runsContent
             }
         }
@@ -166,66 +174,34 @@ struct AssistantPanelView: View {
 
     private var runsContent: some View {
         VStack(alignment: .leading, spacing: WorkspaceTheme.standardSpacing) {
-            if let document {
-                CurrentDocumentRowView(document: document)
-                Divider()
-            }
-
             if coordinator.recentRuns.isEmpty {
                 Text("Completed parses appear here.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
             } else {
-                ForEach(coordinator.recentRuns) { run in
-                    Button {
-                        openRun(run)
-                    } label: {
-                        RunHistoryRowView(run: run)
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(coordinator.isRunning || coordinator.isInstalling)
-                }
+                let count = coordinator.recentRuns.count
+                Text(count == 1 ? "1 recent local run" : "\(count) recent local runs")
+                    .font(.callout)
+                Text("Open Activity to browse runs, reopen outputs, or reveal the Runs folder.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
-            Divider()
-
-            Button("Show Runs Folder", action: coordinator.revealRunsFolder)
-                .buttonStyle(.plain)
-                .font(.callout)
-                .foregroundStyle(WorkspaceTheme.brand)
-        }
-    }
-
-    private func pluginStrip(proxy: ScrollViewProxy) -> some View {
-        HStack(spacing: WorkspaceTheme.compactSpacing) {
-            ForEach(AssistantPlugin.allCases) { plugin in
-                Button {
-                    let id = conversation.mount(plugin)
-                    scroll(to: id, proxy: proxy)
-                } label: {
-                    Label(plugin.name, systemImage: plugin.systemImage)
-                        .font(.callout)
-                        .padding(.horizontal, WorkspaceTheme.standardSpacing)
-                        .padding(.vertical, WorkspaceTheme.compactSpacing)
-                        .background(
-                            Color.primary.opacity(0.05),
-                            in: .capsule
-                        )
-                        .overlay {
-                            Capsule().strokeBorder(Color.primary.opacity(0.08))
-                        }
-                }
-                .buttonStyle(.plain)
-                .help(plugin.summary)
+            Button {
+                showActivity(.runs)
+            } label: {
+                Text("Open Runs")
+                    .frame(maxWidth: .infinity)
             }
-
-            Spacer(minLength: 0)
+            .buttonStyle(.bordered)
+            .accessibilityHint("Opens Runs under Activity in the left navigation")
         }
     }
 
     private func composer(proxy: ScrollViewProxy) -> some View {
         HStack(alignment: .bottom, spacing: WorkspaceTheme.compactSpacing) {
-            TextField("Ask for a plugin, or /help", text: $draft, axis: .vertical)
+            TextField("Ask for a tool, or /help", text: $draft, axis: .vertical)
                 .textFieldStyle(.plain)
                 .lineLimit(1...4)
                 .onSubmit {

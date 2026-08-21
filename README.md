@@ -16,10 +16,11 @@
 > formerly a generated projection of the Okra monorepo; development now
 > happens directly here.
 
-RC.10 keeps the PDF reader permanent, mounts Extract, Redact, and Runs in the
-local Assistant, and moves dependency management into a dedicated Plugins
-page. Install progress, cancellation, and retry stay with the plugin instead of
-running inside Assistant. Redaction never starts when a PDF opens or parses.
+RC.10 keeps the PDF reader permanent and routes Extract, Redact, and Runs from
+the local Assistant. The current source refines that shell with grouped left
+navigation: **Plugins** contains Extract and Redact, while **Activity** contains
+Runs. Install progress, cancellation, and retry stay with each plugin instead
+of running inside Assistant. Redaction never starts when a PDF opens or parses.
 
 <p align="center">
   <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.10">
@@ -49,12 +50,12 @@ The selected local parser then produces reviewable output beside a persistent
 per-page run history on this Mac.
 
 - Read text, charts, forms, and scanned pages in a native document-first workspace:
-  the PDF stays the main window, and every feature mounts as a plugin — Extract,
-  Redact, Runs — in one collapsible assistant panel with a deterministic local
-  command router (no cloud model).
-- Manage every local dependency in the dedicated **Plugins** page. Assistant
-  setup handoffs only link there; installation, cancellation, retry, and live
-  progress remain attached to the plugin even when the page is closed.
+  the PDF stays the main window, with grouped left navigation and a collapsible
+  Assistant that uses a deterministic local command router (no cloud model).
+- Configure **Extract** and **Redact** under **Plugins**. Browse parse history
+  under **Activity → Runs**. Assistant handoffs open one focused destination;
+  installation, cancellation, retry, and live progress remain attached to the
+  plugin even when navigation is closed.
 - Parse with the managed Dots OCR 1.5 default, built-in Apple Vision, optional
   Chandra OCR 2 or Baidu Unlimited-OCR, or an installed Ollama vision model.
 - Compare parser/model pairings in the first-run setup guide and use the local
@@ -112,7 +113,7 @@ for installing and storing Ollama models.
 
 After a positioned parse finishes, open the **Redact** plugin in the assistant
 panel. If Presidio is not ready, its one setup button opens **Plugins →
-Redact**; installation never runs inside Assistant. The Plugins page installs
+Redact**; installation never runs inside Assistant. The Redact destination installs
 the pinned Microsoft Presidio 2.2.364 and English spaCy 3.8 model under
 `~/.okra/providers/presidio`, tracks progress, and supports cancel/retry.
 Detection runs through a session-scoped loopback worker and maps each finding
@@ -145,7 +146,7 @@ must be parsed with a source-aligned provider before redaction is available.
 
 `desktop-v1.0.0-rc.10` is the current signed public release candidate for
 Apple-silicon Macs running macOS 13 or later. RC.10 adds the local Assistant
-shell and dedicated Plugins page on top of RC.8's explicit Presidio detection,
+shell and plugin setup surface on top of RC.8's explicit Presidio detection,
 human review, and irreversible redacted-PDF export.
 
 1. Download `Okra-1.0.0-rc.10.dmg` from the

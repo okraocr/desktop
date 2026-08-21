@@ -2,16 +2,17 @@
 
 Current train: `desktop-v1.0.0-rc.10`
 
-Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.6.16`, `D.6.17`, `D.6.18`, `D.6.19`, `D.6.20`
+Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.6.16`, `D.6.17`, `D.6.18`, `D.6.19`, `D.6.20`, `D.6.21`
 
 ## Product contract
 
 - [x] Windowed app with native PDFKit preview
 - [x] Regular activation policy and Dock lifecycle
-- [x] Document-first workspace with a permanent center reader, compact edge rails, and independently collapsible Workspace and Extract panels
-- [x] Dedicated Plugins page owns local setup, progress, cancellation, and retry; Assistant setup handoffs only navigate there
+- [x] Document-first workspace with a permanent center reader, compact edge rails, and independently collapsible left navigation and trailing Assistant
+- [x] Grouped left navigation separates Plugins (Extract, Redact) from Activity (Runs)
+- [x] Focused plugin destinations own setup, progress, cancellation, and retry; Assistant setup handoffs only navigate there
 - [x] Native toolbar with the canonical mark, document title, Open, source reveal, and extraction-box controls; panel toggles live in their corresponding edge rails rather than title-bar tabs
-- [x] Workspace visible and Extract tucked away by default; hiding either panel preserves its local state
+- [x] Assistant visible and navigation tucked away by default; hiding either panel preserves its local state
 - [x] Panel transitions honor Reduce Motion and expose accessible labels, help, and selected state
 - [x] Hidden drawer controls are disabled and removed from accessibility; closing a drawer returns keyboard focus to its persistent rail
 - [x] Open and document replacement are disabled and centrally guarded during setup or parsing
@@ -78,7 +79,7 @@ Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.
 - [x] Parser/page lifecycle matrix persisted in `run.json` with legacy-manifest decoding
 - [x] Results stored beside each run manifest as `result.md`
 - [x] Apple Vision, Dots, and Baidu structured results stored beside each run manifest as `result.json`
-- [x] Recent local runs re-open from the workspace sidebar
+- [x] Recent local runs re-open from Activity in the left navigation
 - [x] Dots OCR 1.5 and Baidu Unlimited-OCR inference force Hugging Face/Transformers offline mode
 - [x] Provider setup is visibly distinct from offline extraction
 - [x] Ollama is represented as a loopback HTTP integration, separate from Okra-managed Dots and Baidu setup
@@ -168,8 +169,8 @@ Run every line below against the exact downloadable prerelease candidate.
 Record evidence on its release tracking issue or pull request; do not use
 a local build.
 
-- [ ] Launch with Workspace visible and Extract hidden; confirm the center reader remains the largest surface
-- [ ] Toggle Workspace and Extract independently from their corresponding edge rails, then close each from its panel
+- [ ] Launch with Assistant visible and navigation hidden; confirm the center reader remains the largest surface
+- [ ] Toggle navigation and Assistant independently from their toolbar controls, then close each from its panel
 - [ ] Hide and reopen Extract during a completed run; confirm the selected provider and output remain intact
 - [ ] Open a one-page text PDF and confirm no extraction starts until **Parse** is clicked
 - [ ] Replace it with a multi-page scanned PDF and again confirm no automatic extraction
