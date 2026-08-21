@@ -14,6 +14,7 @@ final class PresidioRedactionCoordinator: ObservableObject {
     @Published private(set) var statusMessage = "Detect PII only after reviewing a positioned extraction."
     @Published private(set) var errorMessage: String?
     @Published private(set) var isInstalling = false
+    @Published private(set) var setupProgress: LocalProviderSetupProgress?
     @Published private(set) var isDetecting = false
     @Published private(set) var isExporting = false
     @Published var usesOllama: Bool {
@@ -150,23 +151,49 @@ final class PresidioRedactionCoordinator: ObservableObject {
         guard isManaged, isBusy == false else { return }
         isInstalling = true
         errorMessage = nil
-        statusMessage = "Installing Microsoft Presidio and the English spaCy model locally…"
+        let initialProgress = LocalProviderSetupProgress(
+            phase: .preparing,
+            fraction: nil,
+            message: "Preparing the Presidio plugin…"
+        )
+        setupProgress = initialProgress
+        statusMessage = initialProgress.message
         installTask = Task { [weak self] in
             guard let self else { return }
             do {
-                try await service.install()
+                try await service.install { [weak self] update in
+                    Task { @MainActor [weak self] in
+                        guard let self, self.isInstalling else { return }
+                        self.setupProgress = update
+                        self.statusMessage = update.message
+                    }
+                }
                 availability = await service.availability()
                 statusMessage = "Microsoft Presidio is ready locally."
             } catch is CancellationError {
-                statusMessage = "Presidio setup canceled."
+                statusMessage = "Presidio setup canceled. You can restart it from Plugins."
             } catch {
                 errorMessage = error.localizedDescription
                 statusMessage = error.localizedDescription
                 availability = await service.availability()
             }
             isInstalling = false
+            setupProgress = nil
             installTask = nil
         }
+    }
+
+    func cancelInstallation() {
+        guard isInstalling else { return }
+        statusMessage = "Canceling Presidio setup…"
+        if let setupProgress {
+            self.setupProgress = LocalProviderSetupProgress(
+                phase: setupProgress.phase,
+                fraction: setupProgress.fraction,
+                message: statusMessage
+            )
+        }
+        installTask?.cancel()
     }
 
     func detect() {

@@ -1,17 +1,17 @@
 import SwiftUI
 
 struct PresidioRedactionView: View {
-    @ObservedObject var coordinator: LocalProcessingCoordinator
     @ObservedObject var redaction: PresidioRedactionCoordinator
+    let showPlugin: () -> Void
     @State private var isExpanded: Bool
 
     init(
-        coordinator: LocalProcessingCoordinator,
         redaction: PresidioRedactionCoordinator,
+        showPlugin: @escaping () -> Void,
         initiallyExpanded: Bool = false
     ) {
-        _coordinator = ObservedObject(wrappedValue: coordinator)
         _redaction = ObservedObject(wrappedValue: redaction)
+        self.showPlugin = showPlugin
         _isExpanded = State(initialValue: initiallyExpanded)
     }
 
@@ -25,10 +25,6 @@ struct PresidioRedactionView: View {
                         .fixedSize(horizontal: false, vertical: true)
 
                     availabilityView
-
-                    if redaction.ollamaSupported {
-                        ollamaOptions
-                    }
 
                     if redaction.hasPositionedBlocks == false {
                         WorkspaceNoticeView(
@@ -85,85 +81,56 @@ struct PresidioRedactionView: View {
     private var availabilityView: some View {
         switch redaction.availability {
         case .ready:
-            WorkspaceNoticeView(
-                message: redaction.isManaged
-                    ? "Microsoft Presidio is ready locally."
-                    : "Connected to Presidio on loopback.",
-                systemImage: "checkmark.shield.fill",
-                color: WorkspaceTheme.brand
-            )
+            VStack(alignment: .leading, spacing: WorkspaceTheme.compactSpacing) {
+                WorkspaceNoticeView(
+                    message: redaction.isManaged
+                        ? "Microsoft Presidio is ready locally."
+                        : "Connected to Presidio on loopback.",
+                    systemImage: "checkmark.shield.fill",
+                    color: WorkspaceTheme.brand
+                )
+                Button("Plugin Settings", action: showPlugin)
+                    .buttonStyle(.bordered)
+                    .accessibilityHint("Opens Presidio configuration in Plugins")
+            }
         case .simulated(let message):
-            WorkspaceNoticeView(
-                message: message,
-                systemImage: "testtube.2",
-                color: .orange
-            )
+            VStack(alignment: .leading, spacing: WorkspaceTheme.compactSpacing) {
+                WorkspaceNoticeView(
+                    message: message,
+                    systemImage: "testtube.2",
+                    color: .orange
+                )
+                Button("Plugin Settings", action: showPlugin)
+                    .buttonStyle(.bordered)
+            }
         case .setupRequired(let message):
             VStack(alignment: .leading, spacing: WorkspaceTheme.compactSpacing) {
                 WorkspaceNoticeView(
-                    message: "Setup required · \(message)",
+                    message: redaction.isInstalling
+                        ? "Presidio is being installed in Plugins."
+                        : "Setup required · \(message)",
                     systemImage: "arrow.down.circle",
                     color: .orange
                 )
-                Button(action: redaction.install) {
-                    HStack {
-                        if redaction.isInstalling {
-                            ProgressView().controlSize(.small)
-                        }
-                        Text(redaction.isInstalling ? "Setting Up Presidio…" : "Set Up Presidio Locally")
-                            .frame(maxWidth: .infinity)
-                    }
+                Button(action: showPlugin) {
+                    Text(redaction.isInstalling ? "View Installation" : "Open Redact Plugin")
+                        .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
-                .disabled(redaction.isInstalling)
+                .accessibilityHint("Opens the Plugins page where Presidio setup is managed")
             }
         case .unavailable(let message):
-            WorkspaceNoticeView(
-                message: message,
-                systemImage: "exclamationmark.triangle.fill",
-                color: .red
-            )
-        }
-    }
-
-    private var ollamaOptions: some View {
-        VStack(alignment: .leading, spacing: WorkspaceTheme.compactSpacing) {
-            Toggle("Add Presidio’s Ollama recognizer", isOn: ollamaBinding)
-                .font(.callout)
-            Text("Experimental and slower; it can improve names and contextual PII. Text stays on this Mac and Ollama is restricted to 127.0.0.1:11434.")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
-                .fixedSize(horizontal: false, vertical: true)
-
-            if redaction.usesOllama {
-                HStack {
-                    Picker("Text model", selection: ollamaModelBinding) {
-                        Text("Choose a local model…").tag("")
-                        ForEach(coordinator.ollamaModels) { model in
-                            Text(model.name).tag(model.name)
-                        }
-                    }
-                    .pickerStyle(.menu)
-
-                    Button("Refresh Ollama models", systemImage: "arrow.clockwise") {
-                        coordinator.refreshOllamaModels()
-                    }
-                    .labelStyle(.iconOnly)
-                    .disabled(coordinator.isRefreshingOllamaModels)
-                }
-                if let error = coordinator.ollamaErrorMessage {
-                    Text(error)
-                        .font(.caption)
-                        .foregroundStyle(.red)
-                } else if coordinator.ollamaModels.isEmpty {
-                    Text("No installed Ollama models found. The documented lightweight default is qwen2.5:1.5b.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+            VStack(alignment: .leading, spacing: WorkspaceTheme.compactSpacing) {
+                WorkspaceNoticeView(
+                    message: message,
+                    systemImage: "exclamationmark.triangle.fill",
+                    color: .red
+                )
+                Button("Open Redact Plugin", action: showPlugin)
+                    .buttonStyle(.bordered)
+                    .accessibilityHint("Opens the Plugins page for Presidio status and configuration")
             }
         }
-        .padding(WorkspaceTheme.standardSpacing)
-        .background(.quaternary.opacity(0.25), in: .rect(cornerRadius: WorkspaceTheme.cardRadius))
     }
 
     private func candidateReview(_ detection: RedactionDetection) -> some View {
@@ -255,29 +222,5 @@ struct PresidioRedactionView: View {
         )
         .opacity(approved ? 1 : 0.55)
         .onHover { redaction.hoverBox(box.id, isHovering: $0) }
-    }
-
-    private var ollamaBinding: Binding<Bool> {
-        Binding(
-            get: { redaction.usesOllama },
-            set: { enabled in
-                redaction.usesOllama = enabled
-                if enabled {
-                    if redaction.selectedOllamaModelName == nil {
-                        redaction.selectedOllamaModelName = coordinator.ollamaModels.first?.name
-                    }
-                    if coordinator.ollamaModels.isEmpty {
-                        coordinator.refreshOllamaModels()
-                    }
-                }
-            }
-        )
-    }
-
-    private var ollamaModelBinding: Binding<String> {
-        Binding(
-            get: { redaction.selectedOllamaModelName ?? "" },
-            set: { redaction.selectedOllamaModelName = $0.isEmpty ? nil : $0 }
-        )
     }
 }

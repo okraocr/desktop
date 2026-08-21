@@ -49,6 +49,7 @@ struct ProviderSetupView: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
+                .disabled(coordinator.redaction.isBusy)
                 .accessibilityHint(setupAccessibilityHint)
             }
         }

@@ -1,8 +1,8 @@
 /// A local feature that mounts into the assistant panel as a card.
 ///
-/// Plugins are the only way features surface in the shell: the reader stays
-/// permanent in the center and everything else arrives on demand in the
-/// trailing panel. Nothing here talks to the network.
+/// The reader stays permanent in the center. Features mount on demand in the
+/// trailing Assistant, while their status and dependency setup live in the
+/// leading Plugins page. Nothing here talks to the network.
 enum AssistantPlugin: String, CaseIterable, Identifiable {
     case extract
     case redact

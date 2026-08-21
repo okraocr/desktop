@@ -3,7 +3,9 @@ import Foundation
 
 protocol PresidioRedactionServicing: AnyObject {
     func availability() async -> LocalProviderAvailability
-    func install() async throws
+    func install(
+        progress: @escaping @Sendable (LocalProviderSetupProgress) -> Void
+    ) async throws
     func detect(
         runID: String,
         document: StructuredExtractionDocument,
@@ -67,11 +69,20 @@ actor PresidioRedactionService: PresidioRedactionServicing {
         return .ready
     }
 
-    func install() async throws {
+    func install(
+        progress: @escaping @Sendable (LocalProviderSetupProgress) -> Void
+    ) async throws {
         guard externalBaseURL == nil else {
             throw PresidioRedactionError.externalSetupDisabled
         }
         guard simulation == false else { return }
+        progress(
+            LocalProviderSetupProgress(
+                phase: .preparing,
+                fraction: nil,
+                message: "Preparing the Presidio plugin…"
+            )
+        )
         guard let scriptURL = ProviderResources.scriptURL(
             named: "install-presidio",
             extension: "sh"
@@ -81,13 +92,35 @@ actor PresidioRedactionService: PresidioRedactionServicing {
         worker?.stop()
         worker = nil
         try FileManager.default.createDirectory(at: rootURL, withIntermediateDirectories: true)
+        progress(
+            LocalProviderSetupProgress(
+                phase: .installingRuntime,
+                fraction: nil,
+                message: "Installing Microsoft Presidio 2.2.364 and the English spaCy model…"
+            )
+        )
         _ = try await LocalCommandRunner.runAsync(
             executableURL: URL(fileURLWithPath: "/bin/zsh"),
             arguments: [scriptURL.path, rootURL.path]
         )
+        try Task.checkCancellation()
+        progress(
+            LocalProviderSetupProgress(
+                phase: .verifying,
+                fraction: 0.95,
+                message: "Verifying the pinned Presidio runtime…"
+            )
+        )
         guard PresidioReadyMarker.read(from: readyMarkerURL)?.matchesCurrentRuntime == true else {
             throw PresidioRedactionError.setupVerificationFailed
         }
+        progress(
+            LocalProviderSetupProgress(
+                phase: .ready,
+                fraction: 1,
+                message: "Microsoft Presidio is ready locally."
+            )
+        )
     }
 
     func detect(

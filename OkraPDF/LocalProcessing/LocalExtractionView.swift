@@ -5,8 +5,8 @@ struct LocalExtractionView: View {
     @ObservedObject var coordinator: LocalProcessingCoordinator
     let parse: () -> Void
     let revealPDF: () -> Void
-    /// Opens the leading Parsers panel, where engines are chosen and set up.
-    let showParsers: () -> Void
+    /// Opens Extract in the Plugins page, where parsers are chosen and set up.
+    let showPlugin: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: WorkspaceTheme.sectionSpacing) {
@@ -38,7 +38,7 @@ struct LocalExtractionView: View {
         }
     }
 
-    /// Which engine will run, and one click back to the Parsers panel to change
+    /// Which engine will run, and one click back to the Extract plugin to change
     /// it. Choosing and installing engines lives there now, so this card stays
     /// about the run.
     private var selectedParserSummary: some View {
@@ -59,10 +59,10 @@ struct LocalExtractionView: View {
 
             Spacer()
 
-            Button("Change", action: showParsers)
+            Button("Change", action: showPlugin)
                 .buttonStyle(.bordered)
                 .disabled(coordinator.isRunning || coordinator.isInstalling)
-                .accessibilityHint("Opens the Parsers panel")
+                .accessibilityHint("Opens the Extract plugin")
         }
         .padding(WorkspaceTheme.standardSpacing)
         .background(.quaternary.opacity(0.35), in: .rect(cornerRadius: WorkspaceTheme.cardRadius))
@@ -75,8 +75,8 @@ struct LocalExtractionView: View {
     @ViewBuilder
     private var extractionControls: some View {
         if coordinator.isInstalling {
-            parsersHandoff(message: coordinator.setupProgress?.message
-                ?? "Setting this parser up. Progress is in Parsers.")
+            pluginHandoff(message: coordinator.setupProgress?.message
+                ?? "Setting this parser up. Progress is in Plugins.")
         } else if coordinator.isRunning {
             RunProgressView(coordinator: coordinator)
         } else if coordinator.canResumeLatestRun, let document {
@@ -113,25 +113,25 @@ struct LocalExtractionView: View {
                 .accessibilityHint("Extracts on this Mac without uploading the PDF")
             }
         } else {
-            parsersHandoff(message: coordinator.statusMessage)
+            pluginHandoff(message: coordinator.statusMessage)
         }
     }
 
     /// The parser cannot run yet. Say why, then send the reader to the one place
     /// that can fix it.
-    private func parsersHandoff(message: String) -> some View {
+    private func pluginHandoff(message: String) -> some View {
         VStack(alignment: .leading, spacing: WorkspaceTheme.standardSpacing) {
             Text(message)
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Button(action: showParsers) {
-                Text("Open Parsers")
+            Button(action: showPlugin) {
+                Text("Open Extract Plugin")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .accessibilityHint("Set this parser up in the Parsers panel")
+            .accessibilityHint("Choose or set up a parser in the Plugins page")
         }
     }
 

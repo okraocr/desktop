@@ -16,14 +16,13 @@
 > formerly a generated projection of the Okra monorepo; development now
 > happens directly here.
 
-RC.8 adds explicit local PII detection and reviewed redacted-PDF export with
-Microsoft Presidio. It retains the RC.7 parser setup guide and host-adaptive
-parser doctor, the Dots OCR 1.5 managed default on eligible Macs, and optional
-Chandra OCR 2 inside the document-first workspace. Redaction never starts when
-a PDF opens or parses.
+RC.10 keeps the PDF reader permanent, mounts Extract, Redact, and Runs in the
+local Assistant, and moves dependency management into a dedicated Plugins
+page. Install progress, cancellation, and retry stay with the plugin instead of
+running inside Assistant. Redaction never starts when a PDF opens or parses.
 
 <p align="center">
-  <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.8">
+  <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.10">
     <img alt="Download for macOS" src="https://img.shields.io/badge/download-macOS%2013%2B-2f855a">
   </a>
   <a href="https://github.com/okrapdf/desktop/releases">
@@ -35,7 +34,7 @@ a PDF opens or parses.
 </p>
 
 <p align="center">
-  <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.8">Download</a> ·
+  <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.10">Download</a> ·
   <a href="docs/releases/README.md">Release notes</a> ·
   <a href="https://github.com/okrapdf/desktop/issues/new">Report an issue</a>
 </p>
@@ -53,6 +52,9 @@ per-page run history on this Mac.
   the PDF stays the main window, and every feature mounts as a plugin — Extract,
   Redact, Runs — in one collapsible assistant panel with a deterministic local
   command router (no cloud model).
+- Manage every local dependency in the dedicated **Plugins** page. Assistant
+  setup handoffs only link there; installation, cancellation, retry, and live
+  progress remain attached to the plugin even when the page is closed.
 - Parse with the managed Dots OCR 1.5 default, built-in Apple Vision, optional
   Chandra OCR 2 or Baidu Unlimited-OCR, or an installed Ollama vision model.
 - Compare parser/model pairings in the first-run setup guide and use the local
@@ -109,10 +111,12 @@ for installing and storing Ollama models.
 ## Local PII redaction
 
 After a positioned parse finishes, open the **Redact** plugin in the assistant
-panel. The first explicit setup installs pinned Microsoft Presidio 2.2.364
-and the English spaCy 3.8 model under `~/.okra/providers/presidio`. Detection
-runs through a session-scoped loopback worker and maps each finding to the
-complete normalized source block that contains it.
+panel. If Presidio is not ready, its one setup button opens **Plugins →
+Redact**; installation never runs inside Assistant. The Plugins page installs
+the pinned Microsoft Presidio 2.2.364 and English spaCy 3.8 model under
+`~/.okra/providers/presidio`, tracks progress, and supports cancel/retry.
+Detection runs through a session-scoped loopback worker and maps each finding
+to the complete normalized source block that contains it.
 
 Review and approve every candidate before export. The block-level mapping
 intentionally over-redacts rather than risking a partial glyph leak. Export
@@ -139,15 +143,15 @@ must be parsed with a source-aligned provider before redaction is available.
 
 ## Download
 
-`desktop-v1.0.0-rc.8` is the current signed public release candidate for
-Apple-silicon Macs running macOS 13 or later. RC.8 adds explicit local
-Presidio detection, human review, and irreversible redacted-PDF export on top
-of RC.7's parser setup guide and local parser doctor.
+`desktop-v1.0.0-rc.10` is the current signed public release candidate for
+Apple-silicon Macs running macOS 13 or later. RC.10 adds the local Assistant
+shell and dedicated Plugins page on top of RC.8's explicit Presidio detection,
+human review, and irreversible redacted-PDF export.
 
-1. Download `Okra-1.0.0-rc.8.dmg` from the
-   [v1.0.0-rc.8 release](https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.8).
+1. Download `Okra-1.0.0-rc.10.dmg` from the
+   [v1.0.0-rc.10 release](https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.10).
 2. Optionally download the adjacent checksum and run
-   `shasum -a 256 -c Okra-1.0.0-rc.8.dmg.sha256`.
+   `shasum -a 256 -c Okra-1.0.0-rc.10.dmg.sha256`.
 3. Open the DMG, drag **Okra** to **Applications**, and eject the DMG.
 4. Open **Okra** from Applications. The app and DMG are Developer ID signed,
    hardened, notarized by Apple, and stapled for normal Gatekeeper opening.
@@ -169,7 +173,7 @@ swift build
 To create a local `.app` and DMG:
 
 ```bash
-./scripts/build-dmg.sh 1.0.0-rc.8
+./scripts/build-dmg.sh 1.0.0-rc.10
 ```
 
 Local packages are ad-hoc signed. The release workflow supplies the Developer

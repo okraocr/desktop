@@ -18,9 +18,11 @@ This app is currently a minimal macOS 13+ windowed PDF reader and local parser. 
 assistant panel where local features mount as plugins (Extract, Redact, Runs)
 in a session timeline. The composer routes slash commands and plain words with
 a deterministic on-device router — the assistant is **not** a language model
-and its copy must never imply one. Do not add per-feature tabs, edge rails,
-remote control, model-backed chat, cloud upload, registries, promotions,
-account gates, or backoffice UI.
+and its copy must never imply one. A collapsible leading Plugins page owns
+in-shell dependency setup and progress; Assistant setup handoffs only navigate
+there.
+Do not add per-feature tabs, edge rails, remote control, model-backed chat,
+cloud upload, remote registries, promotions, account gates, or backoffice UI.
 
 The supported flow is:
 
@@ -35,6 +37,8 @@ open/drop PDF → read → choose local provider → explicit Parse → readable
 - `OkraPDF/AppState.swift` — open/drop state separated from explicit parsing
 - `OkraPDF/ContentView.swift` — document-first PDF reader shell, drop target, and the collapsible assistant panel
 - `OkraPDF/Assistant/` — assistant panel: plugin registry, deterministic command router, session timeline, and plugin cards
+- `OkraPDF/Plugins/` — local plugin catalog, configuration, and coordinator-backed installation progress
+- `OkraPDF/Parsers/` — parser choices and setup details embedded in the Extract plugin
 - `OkraPDF/Workspace/` — native toolbar, reader surface, and shared panel/theme primitives
 - `OkraPDF/PDFReaderView.swift` — native PDFKit reader bridge
 - `OkraPDF/LocalProcessing/` — provider contracts, setup, coordinator, and output UI

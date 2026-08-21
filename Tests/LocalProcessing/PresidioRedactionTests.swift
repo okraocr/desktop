@@ -5,6 +5,59 @@ import Testing
 @testable import Okra
 
 struct PresidioRedactionTests {
+    @Test("Presidio installation publishes durable plugin progress")
+    @MainActor
+    func installationProgress() async throws {
+        let workspace = try TestWorkspace(prefix: "okra-presidio-plugin-progress")
+        let service = PresidioInstallationFixtureService()
+        let coordinator = PresidioRedactionCoordinator(
+            service: service,
+            userDefaults: workspace.defaults
+        )
+
+        coordinator.install()
+        try await waitUntil("Presidio installation phase to appear") {
+            coordinator.setupProgress?.phase == .installingRuntime
+        }
+
+        #expect(coordinator.isInstalling)
+        #expect(coordinator.setupProgress?.message.contains("Microsoft Presidio") == true)
+
+        try await waitUntil("Presidio setup to finish") {
+            coordinator.isInstalling == false
+        }
+
+        #expect(coordinator.availability == .ready)
+        #expect(coordinator.setupProgress == nil)
+        #expect(coordinator.errorMessage == nil)
+        #expect(coordinator.statusMessage == "Microsoft Presidio is ready locally.")
+    }
+
+    @Test("Presidio installation can be canceled from Plugins")
+    @MainActor
+    func cancelInstallation() async throws {
+        let workspace = try TestWorkspace(prefix: "okra-presidio-plugin-cancel")
+        let service = PresidioInstallationFixtureService(suspendsUntilCanceled: true)
+        let coordinator = PresidioRedactionCoordinator(
+            service: service,
+            userDefaults: workspace.defaults
+        )
+
+        coordinator.install()
+        try await waitUntil("Presidio installation phase to appear") {
+            coordinator.setupProgress?.phase == .installingRuntime
+        }
+        coordinator.cancelInstallation()
+        try await waitUntil("Presidio installation cancellation to finish") {
+            coordinator.isInstalling == false
+        }
+
+        #expect(coordinator.availability.isReady == false)
+        #expect(coordinator.setupProgress == nil)
+        #expect(coordinator.errorMessage == nil)
+        #expect(coordinator.statusMessage.contains("canceled"))
+    }
+
     @Test("Presidio ready marker rejects stale runtime versions")
     func readyMarkerValidation() throws {
         let root = FileManager.default.temporaryDirectory
@@ -178,4 +231,76 @@ struct PresidioRedactionTests {
 
         return try #require(document.dataRepresentation())
     }
+}
+
+private final class PresidioInstallationFixtureService: PresidioRedactionServicing {
+    private(set) var isReady = false
+    let suspendsUntilCanceled: Bool
+
+    init(suspendsUntilCanceled: Bool = false) {
+        self.suspendsUntilCanceled = suspendsUntilCanceled
+    }
+
+    func availability() async -> LocalProviderAvailability {
+        isReady
+            ? .ready
+            : .setupRequired("Microsoft Presidio 2.2.364 + English spaCy model")
+    }
+
+    func install(
+        progress: @escaping @Sendable (LocalProviderSetupProgress) -> Void
+    ) async throws {
+        progress(
+            LocalProviderSetupProgress(
+                phase: .preparing,
+                fraction: nil,
+                message: "Preparing the Presidio plugin…"
+            )
+        )
+        progress(
+            LocalProviderSetupProgress(
+                phase: .installingRuntime,
+                fraction: nil,
+                message: "Installing Microsoft Presidio…"
+            )
+        )
+
+        if suspendsUntilCanceled {
+            try await Task.sleep(for: .seconds(60))
+        } else {
+            try await Task.sleep(for: .milliseconds(100))
+        }
+
+        try Task.checkCancellation()
+        progress(
+            LocalProviderSetupProgress(
+                phase: .verifying,
+                fraction: 0.95,
+                message: "Verifying Presidio…"
+            )
+        )
+        isReady = true
+        progress(
+            LocalProviderSetupProgress(
+                phase: .ready,
+                fraction: 1,
+                message: "Microsoft Presidio is ready locally."
+            )
+        )
+    }
+
+    func detect(
+        runID: String,
+        document: StructuredExtractionDocument,
+        ollamaModel: String?,
+        redactionsURL: URL
+    ) async throws -> RedactionDetection {
+        throw PresidioInstallationFixtureError.unexpectedDetection
+    }
+
+    func shutdown() async {}
+}
+
+private enum PresidioInstallationFixtureError: Error {
+    case unexpectedDetection
 }

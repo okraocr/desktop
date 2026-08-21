@@ -58,6 +58,8 @@ enum AssistantCommandRouter {
         This panel routes requests to local plugins. There is no cloud model \
         behind it and nothing leaves this Mac.
 
+        Open Plugins in the toolbar to manage dependencies and installation progress.
+
         /extract — parse the open PDF with a local provider
         /redact — detect PII after a parse and export burned-in boxes
         /runs — recent local runs and outputs

@@ -1,6 +1,6 @@
 import Foundation
 
-/// One row in the Parsers panel: a local parser, whether it can run on this Mac
+/// One row in the Extract plugin: a local parser, whether it can run on this Mac
 /// right now, and the doctor badge that explains why you would pick it.
 ///
 /// The assistant shell already calls Extract, Redact, and Runs "plugins", so

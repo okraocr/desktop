@@ -12,8 +12,8 @@ struct AssistantPanelView: View {
     let revealPDF: () -> Void
     let openPDF: () -> Void
     let openRun: (LocalProcessingRun) -> Void
-    /// Opens the leading Parsers panel, where engines are chosen and set up.
-    let showParsers: () -> Void
+    /// Opens the selected plugin in the leading Plugins page.
+    let showPlugin: (AssistantPlugin) -> Void
     let dismiss: () -> Void
 
     @State private var draft = ""
@@ -131,23 +131,30 @@ struct AssistantPanelView: View {
                     coordinator: coordinator,
                     parse: parse,
                     revealPDF: revealPDF,
-                    showParsers: showParsers
+                    showPlugin: { showPlugin(.extract) }
                 )
             }
         case .redact:
             AssistantPluginCardView(plugin: .redact) {
                 if coordinator.structuredOutput != nil {
                     PresidioRedactionView(
-                        coordinator: coordinator,
                         redaction: coordinator.redaction,
+                        showPlugin: { showPlugin(.redact) },
                         initiallyExpanded: true
                     )
                 } else {
-                    WorkspaceNoticeView(
-                        message: "Parse first with a positioned provider — redaction reviews source-aligned blocks.",
-                        systemImage: "viewfinder.circle",
-                        color: .secondary
-                    )
+                    VStack(alignment: .leading, spacing: WorkspaceTheme.standardSpacing) {
+                        WorkspaceNoticeView(
+                            message: "Parse first with a positioned provider — redaction reviews source-aligned blocks.",
+                            systemImage: "viewfinder.circle",
+                            color: .secondary
+                        )
+                        Button("Open Redact Plugin") {
+                            showPlugin(.redact)
+                        }
+                        .buttonStyle(.bordered)
+                        .accessibilityHint("Opens Presidio installation and configuration in Plugins")
+                    }
                 }
             }
         case .runs:
