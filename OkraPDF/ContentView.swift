@@ -6,22 +6,23 @@ struct ContentView: View {
     @EnvironmentObject private var state: AppState
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isAssistantPresented = true
-    @State private var isPluginsPresented = false
-    @State private var selectedPlugin = AssistantPlugin.extract
+    @State private var isNavigationPresented = false
+    @State private var navigationDestination: WorkspaceNavigationDestination?
     @State private var isDropTargeted = false
 
     var body: some View {
         HStack(spacing: 0) {
             WorkspaceCollapsiblePanel(
-                isPresented: isPluginsPresented,
-                width: WorkspaceTheme.pluginsPanelWidth,
+                isPresented: isNavigationPresented,
+                width: WorkspaceTheme.navigationPanelWidth,
                 alignment: .trailing
             ) {
-                PluginsPanelView(
+                WorkspaceNavigationView(
                     coordinator: state.localProcessing,
                     redaction: state.localProcessing.redaction,
-                    selection: $selectedPlugin,
-                    dismiss: { isPluginsPresented = false }
+                    destination: $navigationDestination,
+                    openRun: state.openRun,
+                    dismiss: { isNavigationPresented = false }
                 )
                 .overlay(alignment: .trailing) {
                     Divider()
@@ -53,8 +54,8 @@ struct ContentView: View {
                     parse: state.parseSelectedDocument,
                     revealPDF: state.revealSelectedPDF,
                     openPDF: state.openPDFPicker,
-                    openRun: state.openRun,
                     showPlugin: presentPlugin,
+                    showActivity: presentActivity,
                     dismiss: toggleAssistant
                 )
                 .overlay(alignment: .leading) {
@@ -85,29 +86,35 @@ struct ContentView: View {
             WorkspaceToolbarContent(
                 document: state.selectedDocument,
                 isAssistantPresented: isAssistantPresented,
-                isPluginsPresented: isPluginsPresented,
+                isNavigationPresented: isNavigationPresented,
                 coordinator: state.localProcessing,
                 toggleAssistant: toggleAssistant,
-                togglePlugins: togglePlugins,
+                toggleNavigation: toggleNavigation,
                 openPDF: state.openPDFPicker,
                 revealPDF: state.revealSelectedPDF
             )
         }
         .animation(panelAnimation, value: isAssistantPresented)
-        .animation(panelAnimation, value: isPluginsPresented)
+        .animation(panelAnimation, value: isNavigationPresented)
     }
 
     private func toggleAssistant() {
         isAssistantPresented.toggle()
     }
 
-    private func togglePlugins() {
-        isPluginsPresented.toggle()
+    private func toggleNavigation() {
+        isNavigationPresented.toggle()
     }
 
     private func presentPlugin(_ plugin: AssistantPlugin) {
-        selectedPlugin = plugin
-        isPluginsPresented = true
+        navigationDestination = .plugin(plugin)
+        isNavigationPresented = true
+        isAssistantPresented = false
+    }
+
+    private func presentActivity(_ activity: WorkspaceActivity) {
+        navigationDestination = .activity(activity)
+        isNavigationPresented = true
         isAssistantPresented = false
     }
 

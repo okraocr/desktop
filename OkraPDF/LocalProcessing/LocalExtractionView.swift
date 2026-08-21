@@ -5,7 +5,7 @@ struct LocalExtractionView: View {
     @ObservedObject var coordinator: LocalProcessingCoordinator
     let parse: () -> Void
     let revealPDF: () -> Void
-    /// Opens Extract in the Plugins page, where parsers are chosen and set up.
+    /// Opens Extract under Plugins, where parsers are chosen and set up.
     let showPlugin: () -> Void
 
     var body: some View {
@@ -131,7 +131,7 @@ struct LocalExtractionView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .accessibilityHint("Choose or set up a parser in the Plugins page")
+            .accessibilityHint("Choose or set up a parser under Plugins")
         }
     }
 

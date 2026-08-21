@@ -3,8 +3,8 @@ import Foundation
 /// One row in the Extract plugin: a local parser, whether it can run on this Mac
 /// right now, and the doctor badge that explains why you would pick it.
 ///
-/// The assistant shell already calls Extract, Redact, and Runs "plugins", so
-/// parsers keep their own name in code even though they mount the same way.
+/// Parsers are options within the Extract plugin. Run history is workspace
+/// activity and deliberately does not share this plugin model.
 ///
 /// Built from plain values rather than from the coordinator so the mapping can
 /// be tested without standing up a provider stack or a view.
