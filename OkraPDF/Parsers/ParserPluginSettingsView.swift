@@ -1,14 +1,12 @@
 import SwiftUI
 
-/// The leading Parsers panel.
+/// Extract plugin configuration embedded in the Plugins page.
 ///
-/// Choosing an engine and preparing it lives here; running it lives in the
-/// assistant's Extract card on the trailing side. The selected parser expands
-/// in place to show whatever it still needs — a download, an Ollama model — so
-/// setup happens next to the thing being set up.
-struct ParsersPanelView: View {
+/// Choosing and preparing an engine lives here; running it remains in the
+/// assistant's Extract card. The selected parser expands in place to expose
+/// its status and installation progress.
+struct ParserPluginSettingsView: View {
     @ObservedObject var coordinator: LocalProcessingCoordinator
-    let dismiss: () -> Void
 
     private var items: [ParserPluginItem] {
         ParserPluginItem.items(
@@ -28,62 +26,33 @@ struct ParsersPanelView: View {
     }
 
     private var isBusy: Bool {
-        coordinator.isRunning || coordinator.isInstalling
+        coordinator.isRunning || coordinator.isInstalling || coordinator.redaction.isBusy
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: WorkspaceTheme.standardSpacing) {
-                ForEach(items) { item in
-                    VStack(alignment: .leading, spacing: WorkspaceTheme.compactSpacing) {
-                        Button {
-                            coordinator.selectedProviderID = item.id
-                        } label: {
-                            ParserPluginRowView(item: item)
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(isBusy && item.isSelected == false)
-                        .accessibilityLabel(item.accessibilityDescription)
-                        .accessibilityAddTraits(item.isSelected ? [.isSelected] : [])
+        VStack(alignment: .leading, spacing: WorkspaceTheme.standardSpacing) {
+            Text("Parser engines")
+                .font(.caption)
+                .foregroundStyle(.secondary)
 
-                        if item.isSelected {
-                            selectedParserDetail(for: item)
-                        }
-                    }
-                    .padding(.horizontal, WorkspaceTheme.standardSpacing)
-                }
-            }
-            .padding(.vertical, WorkspaceTheme.standardSpacing)
-        }
-        .safeAreaInset(edge: .top, spacing: 0) {
-            header
-        }
-        .background(.bar)
-    }
-
-    private var header: some View {
-        VStack(spacing: 0) {
-            HStack(alignment: .top, spacing: WorkspaceTheme.standardSpacing) {
+            ForEach(items) { item in
                 VStack(alignment: .leading, spacing: WorkspaceTheme.compactSpacing) {
-                    Text("Parsers")
-                        .font(.headline)
-                    Text("Local engines · on this Mac")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-
-                Button("Hide parsers", systemImage: "xmark", action: dismiss)
-                    .labelStyle(.iconOnly)
+                    Button {
+                        coordinator.selectedProviderID = item.id
+                    } label: {
+                        ParserPluginRowView(item: item)
+                    }
                     .buttonStyle(.plain)
-                    .help("Hide parsers")
-            }
-            .padding(WorkspaceTheme.panelPadding)
+                    .disabled(isBusy && item.isSelected == false)
+                    .accessibilityLabel(item.accessibilityDescription)
+                    .accessibilityAddTraits(item.isSelected ? [.isSelected] : [])
 
-            Divider()
+                    if item.isSelected {
+                        selectedParserDetail(for: item)
+                    }
+                }
+            }
         }
-        .background(Color(nsColor: .windowBackgroundColor))
     }
 
     @ViewBuilder
