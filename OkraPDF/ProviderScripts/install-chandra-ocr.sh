@@ -3,6 +3,7 @@ set -euo pipefail
 
 provider_root="$1"
 python_bin=""
+requirements_file="${0:A:h}/requirements-mlx.lock"
 path_python="$(command -v python3 2>/dev/null || true)"
 python_candidates=(
   /opt/homebrew/bin/python3.13
@@ -41,11 +42,17 @@ if [[ -z "$python_bin" ]]; then
   exit 1
 fi
 
+if [[ ! -r "$requirements_file" ]]; then
+  print -u2 "Chandra OCR 2 is missing its hash-locked Python requirements. Reinstall okraPDF, then retry setup."
+  exit 1
+fi
+
 mkdir -p "$provider_root/huggingface"
 "$python_bin" -m venv --clear "$provider_root/venv"
 "$provider_root/venv/bin/python" -m pip install \
   --disable-pip-version-check \
   --require-virtualenv \
-  "mlx-vlm==0.6.6" \
-  "huggingface-hub==1.24.0"
+  --require-hashes \
+  --only-binary=:all: \
+  --requirement "$requirements_file"
 "$provider_root/venv/bin/python" -m pip freeze > "$provider_root/installed-packages.txt"
