@@ -258,10 +258,10 @@ the real-provider checks complete from Dots or Baidu simulation.
 - [x] RC.11 appcast branch passes `macos-checks` and merges to protected `main` (PR #94, 2026-08-21)
 - [x] Exact RC.11 DMG is re-downloaded, matches published SHA-256 `459d957ec384ac485d96c22713d87d24626221f571311abca9ee5e668374f303`, passes disk-image integrity verification, and is accepted as `Notarized Developer ID` (2026-08-21)
 - [x] RC.11 release workflow passes signing, notarization/stapling, Gatekeeper, packaged launch, DMG integrity, publication, and signed-appcast generation (run `32519554924`, 2026-08-21)
-- [ ] Public `desktop-v1.0.0-rc.12` prerelease publishes a signed/notarized DMG and SHA-256 asset
-- [ ] RC.12 appcast branch passes `macos-checks` and merges to protected `main`
-- [ ] Exact RC.12 DMG is re-downloaded, matches the published SHA-256, passes disk-image integrity verification, and is accepted as `Notarized Developer ID`
-- [ ] RC.12 release workflow passes signing, notarization/stapling, Gatekeeper, packaged launch, DMG integrity, publication, and signed-appcast generation
+- [x] Public `desktop-v1.0.0-rc.12` prerelease publishes a signed/notarized DMG and SHA-256 asset (2026-08-22)
+- [x] RC.12 appcast branch passes `macos-checks` and merges to protected `main` (PR #105, 2026-08-22)
+- [x] Exact RC.12 DMG is re-downloaded, matches published SHA-256 `8c174a3bff9760c9f94e06290bceb293f2c0528d6bceb256b27ecc9bbfee60b8`, passes disk-image integrity and staple validation, and is accepted as `Notarized Developer ID` (2026-08-22)
+- [x] RC.12 release workflow passes signing, notarization/stapling, Gatekeeper, packaged launch, DMG integrity, publication, and signed-appcast generation (run `32605739729`, 2026-08-22)
 - [x] RC.8 appcast branch passes `macos-checks` and merges to protected `main` (PR #80, 2026-08-17)
 - [x] Exact RC.8 DMG is re-downloaded and matches published SHA-256 `86559fbb63d6c7f151b603c56a3022095bdba836af76fa9e03fb227e55f60267` (2026-08-17)
 - [x] RC.8 release workflow passes disk-image integrity, Developer ID, notarization/stapling, Gatekeeper, embedded build, and quarantined LaunchServices checks (run `32057788576`, 2026-08-17)
