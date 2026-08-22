@@ -169,6 +169,16 @@ struct PackagedAppLaunchTests {
                 atPath: providerScriptsURL.appendingPathComponent("install-dots-ocr.sh").path
             )
         )
+        try #require(
+            fileManager.fileExists(
+                atPath: providerScriptsURL.appendingPathComponent("requirements-mlx.lock").path
+            )
+        )
+        try #require(
+            fileManager.fileExists(
+                atPath: providerScriptsURL.appendingPathComponent("requirements-presidio.lock").path
+            )
+        )
         try #require(fileManager.fileExists(atPath: brandMarkURL.path))
         #expect(bundle.bundleIdentifier == "com.okrapdf.desktop")
         #expect(bundle.object(forInfoDictionaryKey: "LSUIElement") == nil)
