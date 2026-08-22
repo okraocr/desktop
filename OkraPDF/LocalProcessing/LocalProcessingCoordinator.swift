@@ -438,6 +438,12 @@ final class LocalProcessingCoordinator: ObservableObject {
             statusMessage = provider.availability().message
             return
         }
+        do {
+            try PDFPageRenderLimits.standard.validate(pageCount: document.totalPages)
+        } catch {
+            statusMessage = error.localizedDescription
+            return
+        }
 
         let runID = UUID().uuidString
         let runDirectory = LocalProviderPaths.runDirectory(runsRoot: runsRoot, runID: runID)
@@ -511,6 +517,13 @@ final class LocalProcessingCoordinator: ObservableObject {
               run.sourcePath == document.filePath,
               let providerID = LocalProviderID.persisted(rawValue: run.providerId),
               let provider = provider(for: providerID) else {
+            return
+        }
+
+        do {
+            try PDFPageRenderLimits.standard.validate(pageCount: document.totalPages)
+        } catch {
+            statusMessage = error.localizedDescription
             return
         }
 
