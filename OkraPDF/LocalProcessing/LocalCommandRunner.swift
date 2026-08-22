@@ -20,7 +20,7 @@ enum LocalCommandRunner {
         process.arguments = arguments
         process.standardOutput = logHandle
         process.standardError = logHandle
-        process.environment = ProcessInfo.processInfo.environment.merging(additions) { _, new in new }
+        process.environment = try LocalProcessEnvironment.make(additions: additions)
 
         try process.run()
         process.waitUntilExit()
@@ -58,9 +58,7 @@ enum LocalCommandRunner {
                         processGroupID = try spawnProcessGroup(
                             executableURL: executableURL,
                             arguments: arguments,
-                            environment: ProcessInfo.processInfo.environment.merging(additions) {
-                                _, new in new
-                            },
+                            environment: try LocalProcessEnvironment.make(additions: additions),
                             outputFileDescriptor: logHandle.fileDescriptor
                         )
                         try logHandle.close()

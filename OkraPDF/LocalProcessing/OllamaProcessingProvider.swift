@@ -7,7 +7,7 @@ final class OllamaProcessingProvider: LocalProcessingProvider, OllamaPageParsing
         id: .ollama,
         name: "Ollama",
         summary: "Uses a vision model already installed in your local Ollama service.",
-        setupNote: "Okra connects only to Ollama at localhost. Choose any installed model that reports vision capability.",
+        setupNote: "Okra connects only to Ollama on IPv4 loopback. Choose any installed model that reports vision capability.",
         parserDefinition: LocalParserCatalog.ollama
     )
 

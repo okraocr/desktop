@@ -2,18 +2,41 @@
 set -euo pipefail
 
 provider_root="$1"
-python_bin=""
+python_bin="${2:-}"
 requirements_file="${0:A:h}/requirements-mlx.lock"
+trusted_python_candidates=(
+  /opt/homebrew/bin/python3.13
+  /opt/homebrew/bin/python3.12
+  /opt/homebrew/bin/python3.11
+  /opt/homebrew/bin/python3.10
+  /opt/homebrew/bin/python3
+  /usr/local/bin/python3.13
+  /usr/local/bin/python3.12
+  /usr/local/bin/python3.11
+  /usr/local/bin/python3.10
+  /usr/local/bin/python3
+  /usr/bin/python3
+)
 
-for candidate in /opt/homebrew/bin/python3.13 /opt/homebrew/bin/python3.12 /opt/homebrew/bin/python3 /usr/local/bin/python3 /usr/bin/python3; do
-  if [[ -x "$candidate" ]]; then
-    python_bin="$candidate"
+python_is_trusted=false
+for candidate in "${trusted_python_candidates[@]}"; do
+  if [[ "$python_bin" == "$candidate" ]]; then
+    python_is_trusted=true
     break
   fi
 done
-
-if [[ -z "$python_bin" ]]; then
-  print -u2 "Python 3 is required to set up Baidu Unlimited-OCR."
+python_version_supported=false
+if [[ "$python_is_trusted" == true && -x "$python_bin" ]]; then
+  python_version="$("$python_bin" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null || true)"
+  python_major="${python_version%%.*}"
+  python_minor="${python_version#*.}"
+  if [[ "$python_major" == <-> && "$python_minor" == <-> ]] \
+    && (( python_major > 3 || (python_major == 3 && python_minor >= 10) )); then
+    python_version_supported=true
+  fi
+fi
+if [[ "$python_version_supported" != true ]]; then
+  print -u2 "Baidu Unlimited-OCR requires a trusted Python 3.10 or newer interpreter."
   exit 1
 fi
 

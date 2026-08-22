@@ -71,6 +71,63 @@ struct AppStateLaunchTests {
         #expect(coordinator.selectedAvailability == .ready)
     }
 
+    @Test(
+        "Run history rejects manifest identifiers that do not match their directory",
+        .bug("https://github.com/okrapdf/desktop/issues/99")
+    )
+    func mismatchedRunIdentifierIsSkipped() throws {
+        let workspace = try TestWorkspace(prefix: "okra-mismatched-run")
+        let runDirectory = workspace.runsRoot
+            .appendingPathComponent("safe-run", isDirectory: true)
+        try FileManager.default.createDirectory(at: runDirectory, withIntermediateDirectories: true)
+        let run = makeSavedRun(id: "../outside", sourcePath: "/tmp/source.pdf")
+        try encode(run).write(to: runDirectory.appendingPathComponent("run.json"))
+
+        let coordinator = LocalProcessingCoordinator(
+            providers: [FixtureProcessingProvider()],
+            runsRoot: workspace.runsRoot,
+            userDefaults: workspace.defaults
+        )
+
+        #expect(coordinator.recentRuns.isEmpty)
+        #expect(
+            FileManager.default.fileExists(
+                atPath: workspace.root.appendingPathComponent("events.jsonl").path
+            ) == false
+        )
+    }
+
+    @Test(
+        "Run history rejects a directory symlink that escapes run storage",
+        .bug("https://github.com/okrapdf/desktop/issues/99")
+    )
+    func symlinkedRunDirectoryIsSkipped() throws {
+        let workspace = try TestWorkspace(prefix: "okra-symlinked-history")
+        let outsideDirectory = workspace.root.appendingPathComponent("outside", isDirectory: true)
+        let runID = "run-symlink"
+        try FileManager.default.createDirectory(at: outsideDirectory, withIntermediateDirectories: true)
+        try encode(makeSavedRun(id: runID, sourcePath: "/tmp/source.pdf"))
+            .write(to: outsideDirectory.appendingPathComponent("run.json"))
+        try FileManager.default.createDirectory(at: workspace.runsRoot, withIntermediateDirectories: true)
+        try FileManager.default.createSymbolicLink(
+            at: workspace.runsRoot.appendingPathComponent(runID, isDirectory: true),
+            withDestinationURL: outsideDirectory
+        )
+
+        let coordinator = LocalProcessingCoordinator(
+            providers: [FixtureProcessingProvider()],
+            runsRoot: workspace.runsRoot,
+            userDefaults: workspace.defaults
+        )
+
+        #expect(coordinator.recentRuns.isEmpty)
+        #expect(
+            FileManager.default.fileExists(
+                atPath: outsideDirectory.appendingPathComponent("events.jsonl").path
+            ) == false
+        )
+    }
+
     @Test("Startup marks orphaned work interrupted and reopening restores progress")
     func startupRecoversOrphanedRun() throws {
         let workspace = try TestWorkspace(prefix: "okra-orphaned-run")
@@ -131,5 +188,32 @@ struct AppStateLaunchTests {
         #expect(coordinator.pageLifecycles.prefix(4).allSatisfy { $0.state == .done })
         #expect(coordinator.pageLifecycles[4].state == .attention)
         #expect(coordinator.canResumeLatestRun)
+    }
+
+    private func makeSavedRun(id: String, sourcePath: String) -> LocalProcessingRun {
+        LocalProcessingRun(
+            id: id,
+            sourcePath: sourcePath,
+            fileName: "source.pdf",
+            providerId: "apple-vision",
+            providerName: "Apple Vision",
+            executionMode: "local",
+            status: "running",
+            outputPath: nil,
+            errorMessage: nil,
+            pageCount: 0,
+            completedPageCount: 0,
+            totalPageCount: 1,
+            startedAt: Date(),
+            completedAt: nil,
+            progress: 0,
+            statusMessage: "Running"
+        )
+    }
+
+    private func encode(_ run: LocalProcessingRun) throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        return try encoder.encode(run)
     }
 }

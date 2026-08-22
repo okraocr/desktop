@@ -2,10 +2,9 @@
 set -euo pipefail
 
 provider_root="$1"
-python_bin=""
+python_bin="${2:-}"
 requirements_file="${0:A:h}/requirements-mlx.lock"
-path_python="$(command -v python3 2>/dev/null || true)"
-python_candidates=(
+trusted_python_candidates=(
   /opt/homebrew/bin/python3.13
   /opt/homebrew/bin/python3.12
   /opt/homebrew/bin/python3.11
@@ -19,25 +18,24 @@ python_candidates=(
   /usr/bin/python3
 )
 
-if [[ -n "$path_python" ]]; then
-  python_candidates+=("$path_python")
-fi
-
-for candidate in "${python_candidates[@]}"; do
-  if [[ ! -x "$candidate" ]]; then
-    continue
+python_is_trusted=false
+for candidate in "${trusted_python_candidates[@]}"; do
+  if [[ "$python_bin" == "$candidate" ]]; then
+    python_is_trusted=true
+    break
   fi
-  python_version="$("$candidate" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null || true)"
+done
+python_version_supported=false
+if [[ "$python_is_trusted" == true && -x "$python_bin" ]]; then
+  python_version="$("$python_bin" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null || true)"
   python_major="${python_version%%.*}"
   python_minor="${python_version#*.}"
   if [[ "$python_major" == <-> && "$python_minor" == <-> ]] \
     && (( python_major > 3 || (python_major == 3 && python_minor >= 10) )); then
-    python_bin="$candidate"
-    break
+    python_version_supported=true
   fi
-done
-
-if [[ -z "$python_bin" ]]; then
+fi
+if [[ "$python_version_supported" != true ]]; then
   print -u2 "Dots OCR 1.5 requires Python 3.10 or newer. Install it with 'brew install python@3.13', then retry setup."
   exit 1
 fi

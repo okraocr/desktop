@@ -113,6 +113,11 @@ run resumes only with Baidu. Managed extraction is forced offline after setup.
 Apple Vision remains available with no setup, and Ollama remains responsible
 for installing and storing Ollama models.
 
+Managed provider setup never discovers Python through `PATH`. It accepts only
+Python 3.10+ at the declared `/opt/homebrew/bin`, `/usr/local/bin`, or
+Apple `/usr/bin` locations, rejects executable symlinks that leave those roots,
+and treats Homebrew installations as user-managed local dependencies.
+
 ## Local PII redaction
 
 After a positioned parse finishes, open the **Redact** plugin in the assistant

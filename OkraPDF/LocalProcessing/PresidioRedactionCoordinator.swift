@@ -173,8 +173,9 @@ final class PresidioRedactionCoordinator: ObservableObject {
             } catch is CancellationError {
                 statusMessage = "Presidio setup canceled. You can restart it from Plugins."
             } catch {
-                errorMessage = error.localizedDescription
-                statusMessage = error.localizedDescription
+                let diagnostic = LocalErrorPresentation.diagnosticDescription(for: error)
+                errorMessage = diagnostic
+                statusMessage = diagnostic
                 availability = await service.availability()
             }
             isInstalling = false

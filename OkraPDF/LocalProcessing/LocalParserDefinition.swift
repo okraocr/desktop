@@ -91,7 +91,7 @@ enum ApiVlmRuntimeType: String, Codable, CaseIterable, Sendable {
 /// A document-VLM served over a local HTTP endpoint. A nil model means the
 /// runtime-selected model is stored separately from this static parser shape.
 struct ApiVlmEndpoint: Codable, Equatable, Sendable {
-    /// Runtime API base URL, e.g. `http://localhost:11434`.
+    /// Runtime API base URL, e.g. `http://127.0.0.1:11434`.
     let baseURL: String
     let model: String?
     let runtimeType: ApiVlmRuntimeType
@@ -355,7 +355,7 @@ enum LocalParserCatalog {
     static let ollama = LocalParserDefinition(
         runtime: .apiVLM,
         modelDelivery: .apiVlm(ApiVlmEndpoint(
-            baseURL: "http://localhost:11434",
+            baseURL: "http://127.0.0.1:11434",
             model: nil,
             runtimeType: .ollama,
             responseFormat: "markdown",

@@ -24,6 +24,9 @@ class ProviderDependencyLockTests(unittest.TestCase):
                 self.assertIn("--require-hashes", script)
                 self.assertIn("--only-binary=:all:", script)
                 self.assertNotRegex(script, r"pip install[^\n]*==")
+                self.assertNotIn("command -v python", script)
+                self.assertIn('python_bin="${2:-}"', script)
+                self.assertIn("trusted_python_candidates", script)
 
     def test_every_locked_requirement_has_at_least_one_sha256_hash(self):
         for lock_name in ["requirements-mlx.lock", "requirements-presidio.lock"]:

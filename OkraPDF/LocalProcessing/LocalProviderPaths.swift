@@ -92,4 +92,73 @@ enum LocalProviderPaths {
     static func runDirectory(runsRoot: URL = runsRoot, runID: String) -> URL {
         runsRoot.appendingPathComponent(runID, isDirectory: true)
     }
+
+    static func validatedRunDirectory(
+        runsRoot: URL = runsRoot,
+        runID: String,
+        fileManager: FileManager = .default
+    ) throws -> URL {
+        let allowedCharacters = CharacterSet.alphanumerics.union(
+            CharacterSet(charactersIn: "._-")
+        )
+        guard runID.isEmpty == false,
+              runID.count <= 128,
+              runID != ".",
+              runID != "..",
+              runID.rangeOfCharacter(from: allowedCharacters.inverted) == nil else {
+            throw LocalProviderPathError.invalidRunIdentifier
+        }
+
+        let standardizedRoot = runsRoot.standardizedFileURL
+        let candidate = runDirectory(runsRoot: standardizedRoot, runID: runID)
+            .standardizedFileURL
+        guard candidate.deletingLastPathComponent().path == standardizedRoot.path else {
+            throw LocalProviderPathError.runDirectoryEscapesRoot
+        }
+
+        if let attributes = try? fileManager.attributesOfItem(atPath: candidate.path),
+           attributes[.type] as? FileAttributeType == .typeSymbolicLink {
+            throw LocalProviderPathError.symbolicRunDirectory
+        }
+
+        let resolvedRoot = standardizedRoot.resolvingSymlinksInPath()
+        let resolvedCandidate = candidate.resolvingSymlinksInPath()
+        guard resolvedCandidate.deletingLastPathComponent().path == resolvedRoot.path else {
+            throw LocalProviderPathError.runDirectoryEscapesRoot
+        }
+        return candidate
+    }
+
+    static func validateRunDirectory(
+        _ runDirectory: URL,
+        runsRoot: URL = runsRoot,
+        runID: String,
+        fileManager: FileManager = .default
+    ) throws {
+        let expected = try validatedRunDirectory(
+            runsRoot: runsRoot,
+            runID: runID,
+            fileManager: fileManager
+        )
+        guard runDirectory.standardizedFileURL.path == expected.path else {
+            throw LocalProviderPathError.runDirectoryEscapesRoot
+        }
+    }
+}
+
+enum LocalProviderPathError: LocalizedError {
+    case invalidRunIdentifier
+    case runDirectoryEscapesRoot
+    case symbolicRunDirectory
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidRunIdentifier:
+            return "The saved run identifier is invalid."
+        case .runDirectoryEscapesRoot:
+            return "The saved run directory is outside Okra's run storage."
+        case .symbolicRunDirectory:
+            return "Symbolic links cannot be used as Okra run directories."
+        }
+    }
 }

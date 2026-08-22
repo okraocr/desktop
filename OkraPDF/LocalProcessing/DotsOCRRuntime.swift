@@ -78,14 +78,8 @@ struct DotsOCRRuntime: Sendable {
     }
 
     static func simulated(workerURL: URL?) -> DotsOCRRuntime {
-        let pythonCandidates = [
-            URL(fileURLWithPath: "/opt/homebrew/bin/python3"),
-            URL(fileURLWithPath: "/usr/local/bin/python3"),
-            URL(fileURLWithPath: "/usr/bin/python3"),
-        ]
-        let pythonURL = pythonCandidates.first {
-            FileManager.default.isExecutableFile(atPath: $0.path)
-        } ?? URL(fileURLWithPath: "/usr/bin/python3")
+        let pythonURL = TrustedPythonInterpreter.firstAvailable()
+            ?? URL(fileURLWithPath: "/usr/bin/python3")
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("okra-dots-ocr-simulation", isDirectory: true)
         return DotsOCRRuntime(

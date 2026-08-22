@@ -80,6 +80,51 @@ struct ParserLifecycleCoordinatorTests {
         #expect(try loadRun(run.id, from: workspace).pageLifecycles?.first?.state == .error)
     }
 
+    @Test(
+        "Command diagnostics stay visible without entering durable run state",
+        .bug("https://github.com/okrapdf/desktop/issues/99"),
+        .timeLimit(.minutes(1))
+    )
+    func commandDiagnosticsAreNotPersisted() async throws {
+        let workspace = try TestWorkspace(prefix: "okra-transient-command-diagnostics")
+        let document = try makeDocument(in: workspace)
+        let secret = "provider-stderr-secret"
+        let failure = LocalProcessingError.commandFailed(
+            command: "python",
+            status: 7,
+            output: secret
+        )
+        let coordinator = LocalProcessingCoordinator(
+            providers: [
+                LifecycleFixtureProcessingProvider(
+                    pauseDuringPage: .milliseconds(10),
+                    failure: failure
+                )
+            ],
+            runsRoot: workspace.runsRoot,
+            userDefaults: workspace.defaults
+        )
+        coordinator.load(document: document)
+        coordinator.run(document: document)
+        try await waitUntil("command failure") { coordinator.isRunning == false }
+
+        let run = try #require(coordinator.latestRun)
+        let runDirectory = workspace.runsRoot.appendingPathComponent(run.id, isDirectory: true)
+        let snapshot = try String(
+            contentsOf: runDirectory.appendingPathComponent("run.json"),
+            encoding: .utf8
+        )
+        let events = try String(
+            contentsOf: runDirectory.appendingPathComponent("events.jsonl"),
+            encoding: .utf8
+        )
+
+        #expect(coordinator.statusMessage.contains(secret))
+        #expect(run.errorMessage?.contains(secret) == false)
+        #expect(snapshot.contains(secret) == false)
+        #expect(events.contains(secret) == false)
+    }
+
     @Test("A second parser keeps its page state when its local count is lower", .timeLimit(.minutes(1)))
     func preservesSecondParserProgress() async throws {
         let workspace = try TestWorkspace(prefix: "okra-multi-parser-lifecycle")
