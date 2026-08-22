@@ -10,13 +10,13 @@ extension LocalProviderDescriptor {
         case .appleVision:
             nil
         case .chandraOCR2:
-            "~/.okra/providers/chandra-ocr-2"
+            LocalProviderPaths.chandraOCRRoot.path(percentEncoded: false)
         case .dotsOCR:
-            "~/.okra/providers/dots-ocr"
+            LocalProviderPaths.dotsOCRRoot.path(percentEncoded: false)
         case .hybridAuto:
             nil
         case .unlimitedOCR:
-            "~/.okra/providers/unlimited-ocr"
+            LocalProviderPaths.unlimitedOCRRoot.path(percentEncoded: false)
         case .ollama:
             nil
         }

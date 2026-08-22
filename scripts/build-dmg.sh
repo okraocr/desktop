@@ -91,6 +91,8 @@ cat > "$APP_DIR/Info.plist" << PLIST
     <string>${SPARKLE_PUBLIC_ED_KEY}</string>
     <key>SUEnableAutomaticChecks</key>
     <true/>
+    <key>SUEnableInstallerLauncherService</key>
+    <true/>
     <key>LSMinimumSystemVersion</key>
     <string>13.0</string>
     <key>CFBundleDocumentTypes</key>
@@ -125,9 +127,14 @@ sign_sparkle_component() {
   fi
 }
 if [[ -n "${SIGNING_IDENTITY}" ]]; then
+  sign_sparkle_component \
+    "${SPARKLE_FW}/Versions/Current/XPCServices/Downloader.xpc" \
+    --options runtime \
+    --timestamp \
+    --preserve-metadata=entitlements \
+    --sign "${SIGNING_IDENTITY}"
   for component in \
     "${SPARKLE_FW}/Versions/Current/XPCServices/Installer.xpc" \
-    "${SPARKLE_FW}/Versions/Current/XPCServices/Downloader.xpc" \
     "${SPARKLE_FW}/Versions/Current/Autoupdate" \
     "${SPARKLE_FW}/Versions/Current/Updater.app" \
     "${SPARKLE_FW}"; do
@@ -144,9 +151,12 @@ if [[ -n "${SIGNING_IDENTITY}" ]]; then
     --entitlements okraPDF.entitlements \
     "build/${APP_NAME}.app"
 else
+  sign_sparkle_component \
+    "${SPARKLE_FW}/Versions/Current/XPCServices/Downloader.xpc" \
+    --preserve-metadata=entitlements \
+    --sign -
   for component in \
     "${SPARKLE_FW}/Versions/Current/XPCServices/Installer.xpc" \
-    "${SPARKLE_FW}/Versions/Current/XPCServices/Downloader.xpc" \
     "${SPARKLE_FW}/Versions/Current/Autoupdate" \
     "${SPARKLE_FW}/Versions/Current/Updater.app" \
     "${SPARKLE_FW}"; do

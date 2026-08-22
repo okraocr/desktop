@@ -1,8 +1,8 @@
 import Foundation
 
 enum LocalProviderPaths {
-    static var runsRoot: URL {
-        runsRoot(
+    static var applicationSupportRoot: URL {
+        applicationSupportRoot(
             applicationSupportDirectory: FileManager.default.urls(
                 for: .applicationSupportDirectory,
                 in: .userDomainMask
@@ -10,16 +10,26 @@ enum LocalProviderPaths {
         )
     }
 
+    static func applicationSupportRoot(applicationSupportDirectory: URL) -> URL {
+        applicationSupportDirectory.appendingPathComponent("Okra", isDirectory: true)
+    }
+
+    static var runsRoot: URL {
+        applicationSupportRoot.appendingPathComponent("Runs", isDirectory: true)
+    }
+
     static func runsRoot(applicationSupportDirectory: URL) -> URL {
-        applicationSupportDirectory
-            .appendingPathComponent("Okra", isDirectory: true)
+        applicationSupportRoot(applicationSupportDirectory: applicationSupportDirectory)
             .appendingPathComponent("Runs", isDirectory: true)
     }
 
     static var providersRoot: URL {
-        FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".okra", isDirectory: true)
-            .appendingPathComponent("providers", isDirectory: true)
+        applicationSupportRoot.appendingPathComponent("Providers", isDirectory: true)
+    }
+
+    static func providersRoot(applicationSupportDirectory: URL) -> URL {
+        applicationSupportRoot(applicationSupportDirectory: applicationSupportDirectory)
+            .appendingPathComponent("Providers", isDirectory: true)
     }
 
     static var dotsOCRRoot: URL {
