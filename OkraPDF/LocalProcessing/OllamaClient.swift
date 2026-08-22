@@ -27,7 +27,7 @@ struct OllamaHTTPTransport: Sendable {
 /// talks to the documented localhost API and never shells out to the Ollama CLI
 /// or inspects `~/.ollama`.
 struct OllamaClient: Sendable {
-    static let defaultBaseURL = URL(string: "http://localhost:11434")!
+    static let defaultBaseURL = URL(string: "http://127.0.0.1:11434")!
 
     let baseURL: URL
     private let transport: OllamaHTTPTransport
@@ -250,7 +250,7 @@ enum OllamaClientError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .unreachable:
-            return "Ollama is not responding at http://localhost:11434. Start Ollama, then refresh models."
+            return "Ollama is not responding at http://127.0.0.1:11434. Start Ollama, then refresh models."
         case .invalidResponse:
             return "Ollama returned an invalid HTTP response."
         case .invalidPayload:

@@ -28,9 +28,12 @@ struct UnlimitedOCRModelInstaller: UnlimitedOCRModelInstalling {
                 message: "Installing the pinned MLX runtime…"
             )
         )
+        guard let pythonURL = TrustedPythonInterpreter.firstAvailable() else {
+            throw LocalProcessingError.trustedPythonUnavailable
+        }
         _ = try await LocalCommandRunner.runAsync(
             executableURL: URL(fileURLWithPath: "/bin/zsh"),
-            arguments: [scriptURL.path, runtime.rootURL.path]
+            arguments: [scriptURL.path, runtime.rootURL.path, pythonURL.path]
         )
         try Task.checkCancellation()
 

@@ -410,9 +410,10 @@ final class LocalProcessingCoordinator: ObservableObject {
                 self.setupProgress = nil
                 self.statusMessage = "Setup canceled. You can resume when you are ready."
             } catch {
-                self.setupErrorMessage = error.localizedDescription
+                let diagnostic = LocalErrorPresentation.diagnosticDescription(for: error)
+                self.setupErrorMessage = diagnostic
                 self.setupProgress = nil
-                self.statusMessage = error.localizedDescription
+                self.statusMessage = diagnostic
             }
             self.isInstalling = false
             self.installationTask = nil
@@ -446,7 +447,16 @@ final class LocalProcessingCoordinator: ObservableObject {
         }
 
         let runID = UUID().uuidString
-        let runDirectory = LocalProviderPaths.runDirectory(runsRoot: runsRoot, runID: runID)
+        let runDirectory: URL
+        do {
+            runDirectory = try LocalProviderPaths.validatedRunDirectory(
+                runsRoot: runsRoot,
+                runID: runID
+            )
+        } catch {
+            statusMessage = error.localizedDescription
+            return
+        }
         var run = LocalProcessingRun(
             id: runID,
             sourcePath: document.filePath,
@@ -490,7 +500,13 @@ final class LocalProcessingCoordinator: ObservableObject {
 
     func cancelRun() {
         guard isRunning, var run = activeRun, run.status == "running" else { return }
-        let runDirectory = LocalProviderPaths.runDirectory(runsRoot: runsRoot, runID: run.id)
+        guard let runDirectory = try? LocalProviderPaths.validatedRunDirectory(
+            runsRoot: runsRoot,
+            runID: run.id
+        ) else {
+            statusMessage = "Could not validate the active run directory."
+            return
+        }
         run.status = "canceling"
         run.cancelRequestedAt = Date()
         run.statusMessage = "Canceling after the current operation…"
@@ -528,7 +544,13 @@ final class LocalProcessingCoordinator: ObservableObject {
         }
 
         selectedProviderID = providerID
-        let runDirectory = LocalProviderPaths.runDirectory(runsRoot: runsRoot, runID: run.id)
+        guard let runDirectory = try? LocalProviderPaths.validatedRunDirectory(
+            runsRoot: runsRoot,
+            runID: run.id
+        ) else {
+            statusMessage = "Could not validate the saved run directory."
+            return
+        }
         let completed = run.completedPageCount ?? 0
         let total = run.totalPageCount ?? document.totalPages
         run.status = "running"
@@ -716,14 +738,16 @@ final class LocalProcessingCoordinator: ObservableObject {
                 }
             } catch {
                 if var failedRun = activeRun, failedRun.id == runID {
+                    let persistedMessage = error.localizedDescription
+                    let diagnostic = LocalErrorPresentation.diagnosticDescription(for: error)
                     failedRun.status = "failed"
-                    failedRun.errorMessage = error.localizedDescription
+                    failedRun.errorMessage = persistedMessage
                     failedRun.completedAt = Date()
-                    failedRun.statusMessage = error.localizedDescription
+                    failedRun.statusMessage = persistedMessage
                     failedRun.pageLifecycles = transitioningActivePages(
                         in: failedRun,
                         to: .error,
-                        detail: error.localizedDescription,
+                        detail: persistedMessage,
                         markFirstUnfinishedWhenNoActivePage: true
                     )
                     try? recordTransition(&failedRun, type: "run.failed", in: runDirectory)
@@ -732,7 +756,7 @@ final class LocalProcessingCoordinator: ObservableObject {
                     if currentSourcePath == document.filePath {
                         latestRun = failedRun
                         pageLifecycles = failedRun.pageLifecycles ?? []
-                        statusMessage = error.localizedDescription
+                        statusMessage = diagnostic
                     }
                 }
             }
@@ -776,10 +800,10 @@ final class LocalProcessingCoordinator: ObservableObject {
                     detail: healthMessage,
                     markFirstUnfinishedWhenNoActivePage: true
                 )
-                let runDirectory = LocalProviderPaths.runDirectory(
+                guard let runDirectory = try? LocalProviderPaths.validatedRunDirectory(
                     runsRoot: self.runsRoot,
                     runID: run.id
-                )
+                ) else { continue }
                 try? self.recordTransition(
                     &run,
                     type: "run.page_attention",
@@ -867,9 +891,16 @@ final class LocalProcessingCoordinator: ObservableObject {
         }
 
         recentRuns = runDirectories.compactMap { runDirectory in
-            let manifestURL = runDirectory.appendingPathComponent("run.json")
+            let runID = runDirectory.lastPathComponent
+            guard let validatedDirectory = try? LocalProviderPaths.validatedRunDirectory(
+                runsRoot: runsRoot,
+                runID: runID
+            ) else { return nil }
+            let manifestURL = validatedDirectory.appendingPathComponent("run.json")
             guard let data = try? Data(contentsOf: manifestURL) else { return nil }
-            return try? decoder.decode(LocalProcessingRun.self, from: data)
+            guard let run = try? decoder.decode(LocalProcessingRun.self, from: data),
+                  run.id == runID else { return nil }
+            return run
         }
         .sorted { $0.startedAt > $1.startedAt }
         .prefix(12)
@@ -958,7 +989,10 @@ final class LocalProcessingCoordinator: ObservableObject {
                 to: .attention,
                 detail: "The app closed during this page. Resume to continue."
             )
-            let runDirectory = LocalProviderPaths.runDirectory(runsRoot: runsRoot, runID: run.id)
+            guard let runDirectory = try? LocalProviderPaths.validatedRunDirectory(
+                runsRoot: runsRoot,
+                runID: run.id
+            ) else { continue }
             try? recordTransition(&run, type: "run.interrupted", in: runDirectory)
             recentRuns[index] = run
         }
@@ -1125,6 +1159,11 @@ final class LocalProcessingCoordinator: ObservableObject {
         type: String,
         in runDirectory: URL
     ) throws {
+        try LocalProviderPaths.validateRunDirectory(
+            runDirectory,
+            runsRoot: runsRoot,
+            runID: run.id
+        )
         let timestamp = Date()
         run.updatedAt = timestamp
         run.progress = min(max(run.progress ?? 0, 0), 1)

@@ -157,6 +157,41 @@ struct LocalProcessingProviderTests {
     }
 
     @Test(
+        "Validated run directories reject traversal identifiers",
+        .bug("https://github.com/okrapdf/desktop/issues/99"),
+        arguments: ["", ".", "..", "../escape", "nested/escape", "run id"]
+    )
+    func validatedRunDirectoryRejectsTraversal(runID: String) {
+        #expect(throws: LocalProviderPathError.self) {
+            try LocalProviderPaths.validatedRunDirectory(
+                runsRoot: URL(fileURLWithPath: "/tmp/okra-runs", isDirectory: true),
+                runID: runID
+            )
+        }
+    }
+
+    @Test(
+        "Validated run directories reject symlink escapes",
+        .bug("https://github.com/okrapdf/desktop/issues/99")
+    )
+    func validatedRunDirectoryRejectsSymlinkEscape() throws {
+        let workspace = try TestWorkspace(prefix: "okra-run-symlink")
+        let outside = workspace.root.appendingPathComponent("outside", isDirectory: true)
+        let runID = "run-symlink"
+        let symlink = workspace.runsRoot.appendingPathComponent(runID, isDirectory: true)
+        try FileManager.default.createDirectory(at: workspace.runsRoot, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: outside, withIntermediateDirectories: true)
+        try FileManager.default.createSymbolicLink(at: symlink, withDestinationURL: outside)
+
+        #expect(throws: LocalProviderPathError.self) {
+            try LocalProviderPaths.validatedRunDirectory(
+                runsRoot: workspace.runsRoot,
+                runID: runID
+            )
+        }
+    }
+
+    @Test(
         "Default runs root uses the Okra application support namespace",
         .bug("https://github.com/okrapdf/desktop/issues/98")
     )

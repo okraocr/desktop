@@ -4,6 +4,52 @@ import Testing
 @testable import Okra
 
 struct LocalCommandRunnerTests {
+    @Test(
+        "Provider children receive only the minimal approved environment",
+        .bug("https://github.com/okrapdf/desktop/issues/99")
+    )
+    func childEnvironmentIsAllowlisted() throws {
+        let environment = try LocalProcessEnvironment.make(
+            parent: [
+                "API_TOKEN": "must-not-leak",
+                "DYLD_INSERT_LIBRARIES": "/tmp/injected.dylib",
+                "LANG": "en_US.UTF-8",
+                "PATH": "/tmp/attacker-bin",
+                "PYTHONPATH": "/tmp/attacker-python",
+            ],
+            additions: [
+                "HF_HUB_OFFLINE": "1",
+                "OLLAMA_HOST": "http://127.0.0.1:11434",
+            ]
+        )
+
+        #expect(environment["PATH"] == LocalProcessEnvironment.fixedPath)
+        #expect(environment["LANG"] == "en_US.UTF-8")
+        #expect(environment["HF_HUB_OFFLINE"] == "1")
+        #expect(environment["OLLAMA_HOST"] == "http://127.0.0.1:11434")
+        #expect(environment["API_TOKEN"] == nil)
+        #expect(environment["DYLD_INSERT_LIBRARIES"] == nil)
+        #expect(environment["PYTHONPATH"] == nil)
+    }
+
+    @Test(
+        "Command output is transient diagnostic detail",
+        .bug("https://github.com/okrapdf/desktop/issues/99")
+    )
+    func commandOutputIsTransientDiagnosticDetail() throws {
+        let secret = "provider-stderr-secret"
+        do {
+            _ = try LocalCommandRunner.run(
+                executableURL: URL(fileURLWithPath: "/bin/zsh"),
+                arguments: ["-c", "print -u2 -- \(secret); exit 23"]
+            )
+            Issue.record("A failing provider command unexpectedly succeeded")
+        } catch let error as LocalProcessingError {
+            #expect(error.localizedDescription.contains(secret) == false)
+            #expect(error.diagnosticDescription.contains(secret))
+        }
+    }
+
     @Test("Canceling an async provider command terminates its process", .timeLimit(.minutes(1)))
     func cancellationTerminatesProcess() async throws {
         let clock = ContinuousClock()

@@ -3,12 +3,15 @@ import Testing
 @testable import Okra
 
 struct OllamaParserDefinitionTests {
-    @Test("Ollama is a runtime-selected API VLM with the Markdown adapter")
+    @Test(
+        "Ollama is a runtime-selected API VLM with the Markdown adapter",
+        .bug("https://github.com/okrapdf/desktop/issues/99")
+    )
     func runtimeAndAdapter() throws {
         #expect(LocalParserCatalog.ollama.runtime == .apiVLM)
         #expect(LocalParserCatalog.ollama.outputAdapter == .markdownV1)
         let endpoint = try #require(LocalParserCatalog.ollama.modelDelivery.apiVlmEndpoint)
-        #expect(endpoint.baseURL == "http://localhost:11434")
+        #expect(endpoint.baseURL == "http://127.0.0.1:11434")
         #expect(endpoint.model == nil)
         #expect(endpoint.runtimeType == .ollama)
         #expect(endpoint.responseFormat == "markdown")

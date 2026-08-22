@@ -187,6 +187,7 @@ enum LocalProcessingError: LocalizedError {
     case insufficientDiskSpace(minimumFreeBytes: Int64)
     case diskCapacityUnavailable
     case providerUnavailable(String)
+    case trustedPythonUnavailable
     case commandFailed(command: String, status: Int32, output: String)
     case missingOutput(String)
     case invalidModelDownloadURL(String)
@@ -214,12 +215,10 @@ enum LocalProcessingError: LocalizedError {
             return "Okra could not verify available disk space before preparing PDF pages."
         case .providerUnavailable(let reason):
             return reason
-        case .commandFailed(let command, let status, let output):
-            let detail = output.trimmingCharacters(in: .whitespacesAndNewlines)
-            let clippedDetail = detail.count > 2_000 ? String(detail.suffix(2_000)) : detail
-            return clippedDetail.isEmpty
-                ? "\(command) exited with status \(status)."
-                : "\(command) failed: \(clippedDetail)"
+        case .trustedPythonUnavailable:
+            return "Python 3.10 or later is required from /opt/homebrew, /usr/local, or /usr/bin."
+        case .commandFailed(let command, let status, _):
+            return "\(command) exited with status \(status)."
         case .missingOutput(let provider):
             return "\(provider) finished without producing Markdown."
         case .invalidModelDownloadURL(let artifact):
@@ -227,5 +226,24 @@ enum LocalProcessingError: LocalizedError {
         case .modelIntegrityFailed(let provider, let artifact):
             return "\(artifact) did not match the pinned \(provider) model. Retry setup to download it again."
         }
+    }
+
+    var diagnosticDescription: String {
+        switch self {
+        case .commandFailed(let command, let status, let output):
+            let detail = output.trimmingCharacters(in: .whitespacesAndNewlines)
+            let clippedDetail = detail.count > 2_000 ? String(detail.suffix(2_000)) : detail
+            return clippedDetail.isEmpty
+                ? "\(command) exited with status \(status)."
+                : "\(command) failed: \(clippedDetail)"
+        default:
+            return localizedDescription
+        }
+    }
+}
+
+enum LocalErrorPresentation {
+    static func diagnosticDescription(for error: Error) -> String {
+        (error as? LocalProcessingError)?.diagnosticDescription ?? error.localizedDescription
     }
 }

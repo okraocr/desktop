@@ -9,7 +9,7 @@ struct OllamaIntegrationView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Ollama integration")
                         .font(.headline)
-                    Text("http://localhost:11434")
+                    Text("http://127.0.0.1:11434")
                         .font(.caption.monospaced())
                         .foregroundStyle(.secondary)
                 }

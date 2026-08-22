@@ -99,9 +99,12 @@ actor PresidioRedactionService: PresidioRedactionServicing {
                 message: "Installing Microsoft Presidio 2.2.364 and the English spaCy model…"
             )
         )
+        guard let pythonURL = TrustedPythonInterpreter.firstAvailable() else {
+            throw LocalProcessingError.trustedPythonUnavailable
+        }
         _ = try await LocalCommandRunner.runAsync(
             executableURL: URL(fileURLWithPath: "/bin/zsh"),
-            arguments: [scriptURL.path, rootURL.path]
+            arguments: [scriptURL.path, rootURL.path, pythonURL.path]
         )
         try Task.checkCancellation()
         progress(
@@ -304,13 +307,7 @@ actor PresidioRedactionService: PresidioRedactionServicing {
     }
 
     private static func systemPythonURL() -> URL? {
-        [
-            "/opt/homebrew/bin/python3",
-            "/usr/local/bin/python3",
-            "/usr/bin/python3",
-        ]
-        .map(URL.init(fileURLWithPath:))
-        .first { FileManager.default.isExecutableFile(atPath: $0.path) }
+        TrustedPythonInterpreter.firstAvailable()
     }
 
     private static func loopbackURL(from value: String?) throws -> URL? {
@@ -353,10 +350,10 @@ private final class PresidioWorkerProcess {
             + (simulation ? ["--simulate"] : [])
         process.standardOutput = outputPipe
         process.standardError = FileHandle.nullDevice
-        var environment = ProcessInfo.processInfo.environment
-        environment["PYTHONDONTWRITEBYTECODE"] = "1"
-        environment["OLLAMA_HOST"] = "http://127.0.0.1:11434"
-        process.environment = environment
+        process.environment = try LocalProcessEnvironment.make(additions: [
+            "OLLAMA_HOST": "http://127.0.0.1:11434",
+            "PYTHONDONTWRITEBYTECODE": "1",
+        ])
         try process.run()
 
         do {
