@@ -21,8 +21,8 @@ final class OllamaProcessingProvider: LocalProcessingProvider, OllamaPageParsing
     ) {
         self.client = client
         self.integration = integration
-        lockRoot = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".okra/providers/ollama", isDirectory: true)
+        lockRoot = LocalProviderPaths.providersRoot
+            .appendingPathComponent("ollama", isDirectory: true)
     }
 
     func availability() -> LocalProviderAvailability {

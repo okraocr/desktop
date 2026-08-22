@@ -94,8 +94,8 @@ per-page run history on this Mac.
 3. **Processing stays local.** Apple Vision, Dots OCR, Chandra OCR 2, and Baidu extraction run
    on the Mac. Ollama uses only its loopback service on this Mac.
 4. **Artifacts stay inspectable.** Run state, page checkpoints, Markdown, and
-   JSON live under `~/Library/Application Support/Okra/Runs/`. The latest
-   Presidio candidates live beside a run as `redactions.json`.
+   JSON live in Okra's sandboxed Application Support `Okra/Runs/` directory.
+   The latest Presidio candidates live beside a run as `redactions.json`.
 
 Local parser runs accept up to 2,000 PDF pages, cap prepared page images at
 4 GB per run, and preserve at least 1 GB of free disk space. Split larger PDFs
@@ -118,8 +118,9 @@ for installing and storing Ollama models.
 After a positioned parse finishes, open the **Redact** plugin in the assistant
 panel. If Presidio is not ready, its one setup button opens **Plugins →
 Redact**; installation never runs inside Assistant. The Redact destination installs
-the pinned Microsoft Presidio 2.2.364 and English spaCy 3.8 model under
-`~/.okra/providers/presidio`, tracks progress, and supports cancel/retry.
+the pinned Microsoft Presidio 2.2.364 and English spaCy 3.8 model under Okra's
+sandboxed Application Support `Okra/Providers/presidio` directory, tracks
+progress, and supports cancel/retry.
 Detection runs through a session-scoped loopback worker and maps each finding
 to the complete normalized source block that contains it.
 

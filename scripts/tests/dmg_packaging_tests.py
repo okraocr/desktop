@@ -1,6 +1,7 @@
 import base64
 import hashlib
 import os
+import plistlib
 import subprocess
 import tempfile
 import unittest
@@ -12,6 +13,8 @@ class DMGPackagingTests(unittest.TestCase):
     def setUpClass(cls):
         cls.desktop_root = Path(__file__).resolve().parents[2]
         cls.packager = cls.desktop_root / "scripts" / "package-dmg.sh"
+        cls.build_script = cls.desktop_root / "scripts" / "build-dmg.sh"
+        cls.entitlements = cls.desktop_root / "okraPDF.entitlements"
         cls.layout_template = (
             cls.desktop_root / "scripts" / "assets" / "dmg-layout.dsstore.b64"
         )
@@ -118,9 +121,7 @@ class DMGPackagingTests(unittest.TestCase):
                 )
 
     def test_local_and_release_builds_use_shared_packager(self):
-        build_script = (self.desktop_root / "scripts" / "build-dmg.sh").read_text(
-            encoding="utf-8"
-        )
+        build_script = self.build_script.read_text(encoding="utf-8")
         release_workflow = (
             self.desktop_root / ".github" / "workflows" / "notarized-release.yml"
         ).read_text(encoding="utf-8")
@@ -131,6 +132,36 @@ class DMGPackagingTests(unittest.TestCase):
         self.assertIn("--app-only", release_workflow)
         self.assertNotIn('-srcfolder "build/Okra.app"', release_workflow)
         self.assertNotIn("/usr/bin/osascript", self.packager.read_text(encoding="utf-8"))
+
+    def test_packaged_app_is_sandboxed_with_required_access(self):
+        with self.entitlements.open("rb") as entitlements_file:
+            entitlements = plistlib.load(entitlements_file)
+
+        self.assertIs(entitlements["com.apple.security.app-sandbox"], True)
+        self.assertIs(
+            entitlements["com.apple.security.files.user-selected.read-write"],
+            True,
+        )
+        self.assertIs(entitlements["com.apple.security.network.client"], True)
+        self.assertEqual(
+            entitlements[
+                "com.apple.security.temporary-exception.files.absolute-path.read-only"
+            ],
+            ["/opt/homebrew/", "/usr/local/"],
+        )
+        self.assertEqual(
+            entitlements[
+                "com.apple.security.temporary-exception.mach-lookup.global-name"
+            ],
+            ["com.okrapdf.desktop-spks", "com.okrapdf.desktop-spki"],
+        )
+
+        build_script = self.build_script.read_text(encoding="utf-8")
+        self.assertRegex(
+            build_script,
+            r"<key>SUEnableInstallerLauncherService</key>\s*<true/>",
+        )
+        self.assertIn("--preserve-metadata=entitlements", build_script)
 
 
 if __name__ == "__main__":

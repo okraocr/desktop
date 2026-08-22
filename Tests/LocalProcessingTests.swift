@@ -156,7 +156,10 @@ struct LocalProcessingProviderTests {
         )
     }
 
-    @Test("Default runs root uses the Okra application support namespace")
+    @Test(
+        "Default runs root uses the Okra application support namespace",
+        .bug("https://github.com/okrapdf/desktop/issues/98")
+    )
     func defaultRunsRootUsesOkraApplicationSupportNamespace() {
         let applicationSupport = URL(
             fileURLWithPath: "/tmp/Application Support",
@@ -166,6 +169,23 @@ struct LocalProcessingProviderTests {
         #expect(
             LocalProviderPaths.runsRoot(applicationSupportDirectory: applicationSupport).path
                 == "/tmp/Application Support/Okra/Runs"
+        )
+    }
+
+    @Test(
+        "Provider root uses the Okra application support namespace",
+        .bug("https://github.com/okrapdf/desktop/issues/98")
+    )
+    func providerRootUsesOkraApplicationSupportNamespace() {
+        let applicationSupport = URL(
+            fileURLWithPath: "/tmp/Application Support",
+            isDirectory: true
+        )
+
+        #expect(
+            LocalProviderPaths.providersRoot(
+                applicationSupportDirectory: applicationSupport
+            ).path == "/tmp/Application Support/Okra/Providers"
         )
     }
 

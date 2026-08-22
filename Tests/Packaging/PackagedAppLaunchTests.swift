@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import Security
 import Testing
 
 private let packagedAppPath = ProcessInfo.processInfo.environment[
@@ -14,6 +15,7 @@ struct PackagedAppLaunchTests {
     @Test(
         "Packaged app remains alive without builder-only resources",
         .disabled(if: packagedAppPath == nil, "Runs after build-dmg.sh"),
+        .bug("https://github.com/okrapdf/desktop/issues/98"),
         .tags(.packaging, .smoke),
         .timeLimit(.minutes(1))
     )
@@ -65,6 +67,7 @@ struct PackagedAppLaunchTests {
     @Test(
         "Quarantined DMG launches through LaunchServices",
         .disabled(if: packagedDMGPath == nil, "Runs after the final DMG is packaged"),
+        .bug("https://github.com/okrapdf/desktop/issues/98"),
         .tags(.packaging, .smoke),
         .timeLimit(.minutes(1))
     )
@@ -156,6 +159,7 @@ struct PackagedAppLaunchTests {
             .appendingPathComponent("okraPDF_Okra.bundle", isDirectory: true)
             .appendingPathComponent("AppIcon.png")
         let bundle = try #require(Bundle(url: appURL))
+        let entitlements = try signedEntitlements(at: appURL)
 
         try #require(fileManager.isExecutableFile(atPath: executableURL.path))
         try #require(fileManager.fileExists(atPath: providerScriptsURL.path))
@@ -182,6 +186,49 @@ struct PackagedAppLaunchTests {
         try #require(fileManager.fileExists(atPath: brandMarkURL.path))
         #expect(bundle.bundleIdentifier == "com.okrapdf.desktop")
         #expect(bundle.object(forInfoDictionaryKey: "LSUIElement") == nil)
+        #expect(
+            bundle.object(forInfoDictionaryKey: "SUEnableInstallerLauncherService") as? Bool
+                == true
+        )
+        #expect(entitlements["com.apple.security.app-sandbox"] as? Bool == true)
+        #expect(
+            entitlements["com.apple.security.files.user-selected.read-write"] as? Bool
+                == true
+        )
+        #expect(entitlements["com.apple.security.network.client"] as? Bool == true)
+        #expect(
+            entitlements[
+                "com.apple.security.temporary-exception.files.absolute-path.read-only"
+            ] as? [String] == ["/opt/homebrew/", "/usr/local/"]
+        )
+        #expect(
+            entitlements[
+                "com.apple.security.temporary-exception.mach-lookup.global-name"
+            ] as? [String] == ["com.okrapdf.desktop-spks", "com.okrapdf.desktop-spki"]
+        )
+    }
+
+    private func signedEntitlements(at appURL: URL) throws -> [String: Any] {
+        var staticCode: SecStaticCode?
+        let createStatus = SecStaticCodeCreateWithPath(appURL as CFURL, [], &staticCode)
+        guard createStatus == errSecSuccess, let staticCode else {
+            throw PackagedAppTestError.signingInformationUnavailable(createStatus)
+        }
+
+        var signingInformation: CFDictionary?
+        let copyStatus = SecCodeCopySigningInformation(
+            staticCode,
+            SecCSFlags(rawValue: kSecCSSigningInformation),
+            &signingInformation
+        )
+        guard copyStatus == errSecSuccess,
+              let signingInformation,
+              let entitlements = (signingInformation as NSDictionary)[
+                kSecCodeInfoEntitlementsDict as String
+              ] as? [String: Any] else {
+            throw PackagedAppTestError.signingInformationUnavailable(copyStatus)
+        }
+        return entitlements
     }
 
     private func verifyDMGPresentation(at mountURL: URL) throws {
@@ -294,6 +341,7 @@ private enum PackagedAppTestError: Error {
     case commandFailed(String, Int32, String)
     case commandTimedOut(String, TimeInterval)
     case missingResourceFallback(String)
+    case signingInformationUnavailable(OSStatus)
 }
 
 private final class ResourceFallbackIsolation {
