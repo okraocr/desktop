@@ -182,6 +182,10 @@ enum LocalProcessingError: LocalizedError {
     case missingResource(String)
     case invalidPDF
     case noPages
+    case pageLimitExceeded(pageCount: Int, maximum: Int)
+    case renderedPageBudgetExceeded(maximumBytes: Int64)
+    case insufficientDiskSpace(minimumFreeBytes: Int64)
+    case diskCapacityUnavailable
     case providerUnavailable(String)
     case commandFailed(command: String, status: Int32, output: String)
     case missingOutput(String)
@@ -198,6 +202,16 @@ enum LocalProcessingError: LocalizedError {
             return "The PDF could not be opened."
         case .noPages:
             return "The PDF does not contain any pages."
+        case .pageLimitExceeded(let pageCount, let maximum):
+            return "This PDF has \(pageCount) pages. Local parsing supports up to \(maximum) pages per run. Split the PDF, then retry."
+        case .renderedPageBudgetExceeded(let maximumBytes):
+            let limit = ByteCountFormatter.string(fromByteCount: maximumBytes, countStyle: .file)
+            return "Prepared page images exceeded the \(limit) run limit. Split the PDF, then retry."
+        case .insufficientDiskSpace(let minimumFreeBytes):
+            let reserve = ByteCountFormatter.string(fromByteCount: minimumFreeBytes, countStyle: .file)
+            return "Local parsing keeps at least \(reserve) of disk space free. Free space or choose a smaller PDF, then retry."
+        case .diskCapacityUnavailable:
+            return "Okra could not verify available disk space before preparing PDF pages."
         case .providerUnavailable(let reason):
             return reason
         case .commandFailed(let command, let status, let output):

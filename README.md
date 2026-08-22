@@ -97,6 +97,10 @@ per-page run history on this Mac.
    JSON live under `~/Library/Application Support/Okra/Runs/`. The latest
    Presidio candidates live beside a run as `redactions.json`.
 
+Local parser runs accept up to 2,000 PDF pages, cap prepared page images at
+4 GB per run, and preserve at least 1 GB of free disk space. Split larger PDFs
+before parsing; opening and reading them does not create rendered-page artifacts.
+
 Dots OCR 1.5 is selected by default on an eligible clean install but never
 downloads or parses automatically. Hardware eligibility requires Apple silicon,
 macOS 14+, at least 16 GB unified memory, and at least 5 GB free disk; an
