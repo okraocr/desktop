@@ -22,6 +22,41 @@ worker = load_worker_module()
 
 
 class UnlimitedOCROutputParserTests(unittest.TestCase):
+    def test_preserves_bbox_less_markers_as_separate_ungrounded_blocks(self):
+        raw = (
+            "<|det|>header [438, 30, 897, 66]<|/det|>Manage Checked Bags\n"
+            "<|det|>text<|/det|>View reservation\n"
+            "<|det|>heading [60, 520, 200, 560]<|/det|>Note\n"
+            "<|det|>list-item<|/det|>Guests must be checked in to add bags.\n"
+            "<|det|>text<|/det|>Read more about checked bags\n"
+        )
+
+        page = worker.parse_model_output(raw, page_number=1, image_file="page-0001.png")
+
+        self.assertEqual(
+            [block["text"] for block in page["blocks"]],
+            [
+                "Manage Checked Bags",
+                "View reservation",
+                "Note",
+                "Guests must be checked in to add bags.",
+                "Read more about checked bags",
+            ],
+        )
+        self.assertEqual(
+            [block["type"] for block in page["blocks"]],
+            ["header", "text", "heading", "list-item", "text"],
+        )
+        self.assertIsNotNone(page["blocks"][0]["bbox"])
+        self.assertIsNone(page["blocks"][1]["bbox"])
+        self.assertIsNotNone(page["blocks"][2]["bbox"])
+        self.assertIsNone(page["blocks"][3]["bbox"])
+        self.assertIsNone(page["blocks"][4]["bbox"])
+        self.assertEqual(page["diagnostics"]["detectionCount"], 5)
+        self.assertEqual(page["diagnostics"]["malformedDetectionCount"], 0)
+        self.assertEqual(page["diagnostics"]["groundedBlockCount"], 2)
+        self.assertEqual(page["diagnostics"]["ungroundedBlockCount"], 3)
+
     def test_decodes_layout_tokens_and_truncates_repeated_tail(self):
         repeated_tail = "".join(
             "<|det|>text [87, 632, 220, 660]<|/det|>Example BankĊ"

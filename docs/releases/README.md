@@ -1,7 +1,7 @@
 # Release notes
 
 User-facing changes for each published okraPDF Desktop build live here. The
-[GitHub Releases page](https://github.com/okra-project/desktop/releases) remains
+[GitHub Releases page](https://github.com/okrapdf/desktop/releases) remains
 the source for signed DMGs, checksums, and publication dates.
 
 The current source is licensed under MIT. Historical notes retain the license
@@ -9,6 +9,7 @@ language that accompanied their original release.
 
 ## v1.0 release candidates
 
+- [v1.0.0-rc.12](RELEASE_NOTES-v1.0.0-rc.12.md)
 - [v1.0.0-rc.11](RELEASE_NOTES-v1.0.0-rc.11.md)
 - [v1.0.0-rc.10](RELEASE_NOTES-v1.0.0-rc.10.md)
 - [v1.0.0-rc.8](RELEASE_NOTES-v1.0.0-rc.8.md)
