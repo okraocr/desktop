@@ -20,6 +20,13 @@ struct StructuredExtractionPreview: View {
                                 .font(.caption)
                                 .foregroundStyle(.orange)
                         }
+                        if let ungrounded = page.diagnostics.ungroundedBlockCount,
+                           ungrounded > 0 {
+                            Text("\(ungrounded) without source boxes")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                                .help("The parser returned these blocks without coordinates, so okraPDF cannot draw overlays for them.")
+                        }
                     }
 
                     ForEach(page.blocks) { block in

@@ -8,8 +8,8 @@ source-aligned output.
 ## Versioning
 
 - Tag format: `desktop-v{SEMVER}`, including prerelease suffixes such as
-  `desktop-v1.0.0-rc.11`.
-- Current train: `desktop-v1.0.0-rc.11`.
+  `desktop-v1.0.0-rc.12`.
+- Current train: `desktop-v1.0.0-rc.12`.
 - `1.0.0` means the parser flow and direct-download distribution are stable.
 - Chat, agents, cloud upload, document libraries, channels, and remote control
   are separate products and do not belong in this release train.
@@ -73,10 +73,10 @@ is required by one of the supported local parsers.
 
 ```bash
 swift test
-./scripts/build-dmg.sh 1.0.0-rc.11
+./scripts/build-dmg.sh 1.0.0-rc.12
 ```
 
-RC.11 is the current release-candidate train, not the stable release. It is
+RC.12 is the current release-candidate train, not the stable release. It is
 appropriate for direct-download and in-app-update testing after passing the
 document-first layout and signed-artifact gates. Do not call it stable until the
 remaining friend-core, second-Mac install, and signed in-place update gates in

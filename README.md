@@ -16,14 +16,14 @@
 > formerly a generated projection of the Okra monorepo; development now
 > happens directly here.
 
-RC.11 keeps the PDF reader permanent and gives local tools a clear hierarchy:
-**Plugins** contains Extract and Redact, while **Activity** contains Runs.
-Selecting an item opens one focused destination instead of expanding a crowded
-accordion. Install progress, cancellation, and retry stay with each plugin.
-Redaction never starts when a PDF opens or parses.
+RC.12 keeps every marked Unlimited-OCR entity as its own structured block,
+even when the model omits source coordinates. Grounded blocks still drive PDF
+overlays; the inspector reports how many blocks have no source boxes instead of
+silently folding their text into a neighboring region. Parsing remains explicit,
+local, and source-preserving.
 
 <p align="center">
-  <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.11">
+  <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.12">
     <img alt="Download for macOS" src="https://img.shields.io/badge/download-macOS%2013%2B-2f855a">
   </a>
   <a href="https://github.com/okrapdf/desktop/releases">
@@ -35,7 +35,7 @@ Redaction never starts when a PDF opens or parses.
 </p>
 
 <p align="center">
-  <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.11">Download</a> ·
+  <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.12">Download</a> ·
   <a href="docs/releases/README.md">Release notes</a> ·
   <a href="https://github.com/okrapdf/desktop/issues/new">Report an issue</a>
 </p>
@@ -154,15 +154,15 @@ must be parsed with a source-aligned provider before redaction is available.
 
 ## Download
 
-`desktop-v1.0.0-rc.11` is the current signed public release candidate for
-Apple-silicon Macs running macOS 13 or later. RC.11 separates Plugins from
-Activity and adds focused left-navigation destinations on top of RC.10's local
-Assistant and setup surface.
+`desktop-v1.0.0-rc.12` is the current signed public release candidate for
+Apple-silicon Macs running macOS 13 or later. RC.12 preserves bbox-less
+Unlimited-OCR blocks and reports grounded and ungrounded output counts on top
+of RC.11's focused Plugins and Activity navigation.
 
-1. Download `Okra-1.0.0-rc.11.dmg` from the
-   [v1.0.0-rc.11 release](https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.11).
+1. Download `Okra-1.0.0-rc.12.dmg` from the
+   [v1.0.0-rc.12 release](https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.12).
 2. Optionally download the adjacent checksum and run
-   `shasum -a 256 -c Okra-1.0.0-rc.11.dmg.sha256`.
+   `shasum -a 256 -c Okra-1.0.0-rc.12.dmg.sha256`.
 3. Open the DMG, drag **Okra** to **Applications**, and eject the DMG.
 4. Open **Okra** from Applications. The app and DMG are Developer ID signed,
    hardened, notarized by Apple, and stapled for normal Gatekeeper opening.
@@ -184,7 +184,7 @@ swift build
 To create a local `.app` and DMG:
 
 ```bash
-./scripts/build-dmg.sh 1.0.0-rc.11
+./scripts/build-dmg.sh 1.0.0-rc.12
 ```
 
 Local packages are ad-hoc signed. The release workflow supplies the Developer

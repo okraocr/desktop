@@ -38,6 +38,8 @@ struct StructuredExtractionOutputTests {
                   "malformedDetectionCount": 0,
                   "duplicateBlockCount": 0,
                   "loopDetected": false,
+                  "groundedBlockCount": 1,
+                  "ungroundedBlockCount": 2,
                   "warnings": []
                 }
               }]
@@ -58,6 +60,8 @@ struct StructuredExtractionOutputTests {
         #expect(bbox.width == 0.29)
         #expect(bbox.origin == "top-left")
         #expect(bbox.compactLabel == "x 1% · y 2% · 29% × 3%")
+        #expect(page.diagnostics.groundedBlockCount == 1)
+        #expect(page.diagnostics.ungroundedBlockCount == 2)
     }
 
     @Test("Structured table blocks expose readable preview text without changing JSON text")

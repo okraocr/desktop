@@ -173,6 +173,8 @@ struct StructuredExtractionDiagnostics: Codable, Equatable, Sendable {
     let loopDetected: Bool
     let warnings: [String]
     let blockCount: Int?
+    let groundedBlockCount: Int?
+    let ungroundedBlockCount: Int?
 
     init(
         rawCharacterCount: Int,
@@ -183,7 +185,9 @@ struct StructuredExtractionDiagnostics: Codable, Equatable, Sendable {
         duplicateBlockCount: Int,
         loopDetected: Bool,
         warnings: [String],
-        blockCount: Int? = nil
+        blockCount: Int? = nil,
+        groundedBlockCount: Int? = nil,
+        ungroundedBlockCount: Int? = nil
     ) {
         self.rawCharacterCount = rawCharacterCount
         self.decodedCharacterCount = decodedCharacterCount
@@ -194,6 +198,8 @@ struct StructuredExtractionDiagnostics: Codable, Equatable, Sendable {
         self.loopDetected = loopDetected
         self.warnings = warnings
         self.blockCount = blockCount
+        self.groundedBlockCount = groundedBlockCount
+        self.ungroundedBlockCount = ungroundedBlockCount
     }
 
     init(from decoder: any Decoder) throws {
@@ -233,6 +239,14 @@ struct StructuredExtractionDiagnostics: Codable, Equatable, Sendable {
         blockCount = try container.decodeIfPresent(
             Int.self,
             forKey: .blockCount
+        )
+        groundedBlockCount = try container.decodeIfPresent(
+            Int.self,
+            forKey: .groundedBlockCount
+        )
+        ungroundedBlockCount = try container.decodeIfPresent(
+            Int.self,
+            forKey: .ungroundedBlockCount
         )
     }
 }
