@@ -7,6 +7,10 @@ the source for signed DMGs, checksums, and publication dates.
 The current source is licensed under MIT. Historical notes retain the license
 language that accompanied their original release.
 
+## Windows alphas
+
+- [v0.1.0-alpha.2 — unstable](RELEASE_NOTES-windows-v0.1.0-alpha.2.md)
+
 ## v1.0 release candidates
 
 - [v1.0.0-rc.12](RELEASE_NOTES-v1.0.0-rc.12.md)

@@ -7,13 +7,15 @@ desktop app, and it owns public CI, signing, Releases, and the Sparkle
 appcast. It was formerly a generated projection of the `steventsao/okra`
 monorepo subtree `apps/desktop`; that subtree and its sync tooling were
 removed on 2026-08-20, so develop directly here. Product roadmap tracking
-(`D.6.x` item IDs) stays in the monorepo's `internal/roadmap.md`. The
-monorepo's git history (tag `windows/v0.1.0-alpha.1`) preserves the
-unprojected Windows alpha source that lived at `apps/desktop/windows`.
+(`D.6.x` item IDs) stays in the monorepo's `internal/roadmap.md`. The Windows
+port is canonical in this repository under `windows/`; its first alpha remains
+preserved in the monorepo's git history at tag `windows/v0.1.0-alpha.1`.
 
 ## Product boundary
 
-This app is currently a minimal macOS 13+ windowed PDF reader and local parser.
+The primary app is a minimal macOS 13+ windowed PDF reader and local parser.
+The separate `windows/` port uses a Go loopback host, WebView2, React, and
+PDF.js while preserving the same read-before-parse and source-preserving rules.
 Under `D.6.20` and `D.6.21`, the shell is a permanent center reader, grouped
 leading navigation, and a collapsible trailing Assistant. The navigation root
 separates installable **Plugins** (Extract, Redact) from **Activity** (Runs),
@@ -48,6 +50,7 @@ open/drop PDF → read → choose local provider → explicit Parse → readable
   hand-off into the same coordinator (completed flag:
   `localProcessing.setupGuide.completed`; reopen via Help → Parser Setup Guide…)
 - `OkraPDF/ProviderScripts/` — bundled managed-parser setup and worker scripts
+- `windows/` — unsigned Windows alpha source, tests, and portable build script
 
 ## Build and test
 
@@ -55,6 +58,9 @@ open/drop PDF → read → choose local provider → explicit Parse → readable
 swift build
 swift test
 ```
+
+On Windows, run `windows/scripts/build.ps1`; it performs the UI typecheck and
+production build, the Go suite, resource generation, and executable build.
 
 Do not start a dev server or watch process.
 
