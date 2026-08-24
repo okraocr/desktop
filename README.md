@@ -26,6 +26,9 @@ local, and source-preserving.
   <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.12">
     <img alt="Download for macOS" src="https://img.shields.io/badge/download-macOS%2013%2B-2f855a">
   </a>
+  <a href="https://github.com/okrapdf/desktop/releases/tag/windows-v0.1.0-alpha.2">
+    <img alt="Download unstable alpha for Windows" src="https://img.shields.io/badge/Windows-alpha.2%20unstable-c97a16">
+  </a>
   <a href="https://github.com/okrapdf/desktop/releases">
     <img alt="Latest release" src="https://img.shields.io/github/v/release/okrapdf/desktop?include_prereleases&label=release">
   </a>
@@ -171,6 +174,20 @@ The app checks its signed update feed daily. Choose **Check for Updates…** in
 the app menu at any time, or install a newer DMG from
 [GitHub Releases](https://github.com/okrapdf/desktop/releases).
 
+## Windows unstable alpha
+
+`windows-v0.1.0-alpha.2` is an unsigned portable build for technical testing
+on Windows 10/11. It adds multi-document tabs and split comparison, five page
+layouts, thumbnails, outlines, full-document search, selectable text and link
+navigation, plus source-preserving annotations with per-document undo/redo and
+crash recovery. **Save a Copy** always creates a new PDF.
+
+Download the ZIP and adjacent checksum from the
+[Windows alpha.2 prerelease](https://github.com/okrapdf/desktop/releases/tag/windows-v0.1.0-alpha.2).
+There is no installer, code signing, or automatic update channel; SmartScreen
+may warn on first launch. Treat this build as unstable and keep the original
+PDFs available while testing.
+
 ## Build from source
 
 You need macOS 13 or later and Swift 5.9 or later.
@@ -210,6 +227,7 @@ OkraPDF/       SwiftUI app, PDFKit reader, and local parsing providers
 Tests/         Product, provider, persistence, and packaging tests
 scripts/       Verification, packaging, and release automation
 docs/releases/ Versioned user-facing release notes
+windows/       Go/WebView2 Windows alpha, React/PDF.js UI, and tests
 ```
 
 Maintainers should start with [CLAUDE.md](CLAUDE.md),
