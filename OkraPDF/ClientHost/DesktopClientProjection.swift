@@ -132,6 +132,29 @@ enum DesktopClientProjection {
         )
     }
 
+    static func redaction(_ detection: RedactionDetection) -> ClientRedactionDetection {
+        ClientRedactionDetection(
+            runId: detection.runID,
+            model: detection.ollamaModel,
+            createdAt: timestamp(detection.createdAt),
+            candidates: detection.boxes.map { box in
+                let x1 = min(max(box.x * 1_000, 0), 1_000)
+                let y1 = min(max(box.y * 1_000, 0), 1_000)
+                let x2 = min(max((box.x + box.width) * 1_000, x1), 1_000)
+                let y2 = min(max((box.y + box.height) * 1_000, y1), 1_000)
+                return ClientRedactionCandidate(
+                    id: box.id,
+                    type: box.type,
+                    text: box.text,
+                    score: box.score,
+                    source: box.source,
+                    page: box.page,
+                    bbox: [x1, y1, x2, y2]
+                )
+            }
+        )
+    }
+
     static func timestamp(_ date: Date) -> String {
         ISO8601DateFormatter().string(from: date)
     }

@@ -40,15 +40,17 @@ final class DesktopClientHTTPHost {
     typealias Route = @Sendable (DesktopHTTPRequest) async -> DesktopHTTPResponse
 
     private let route: Route
-    private let endpointURL: URL
+    private let endpointURL: URL?
     private let version: String
     private let token = UUID().uuidString.replacingOccurrences(of: "-", with: "")
         + UUID().uuidString.replacingOccurrences(of: "-", with: "")
     private let queue = DispatchQueue(label: "com.okrapdf.desktop.client-host")
     private let logger = Logger(subsystem: "com.okrapdf.desktop", category: "client-host")
+    private let endpointLock = NSLock()
     private var listener: NWListener?
+    private var publishedEndpoint: ClientEndpointRecord?
 
-    init(endpointURL: URL, version: String, route: @escaping Route) {
+    init(endpointURL: URL? = nil, version: String, route: @escaping Route) {
         self.endpointURL = endpointURL
         self.version = version
         self.route = route
@@ -92,6 +94,10 @@ final class DesktopClientHTTPHost {
         listener?.cancel()
         listener = nil
         removeOwnedEndpoint()
+    }
+
+    func endpointRecord() -> ClientEndpointRecord? {
+        endpointLock.withLock { publishedEndpoint }
     }
 
     deinit {
@@ -190,23 +196,27 @@ final class DesktopClientHTTPHost {
     }
 
     private func publishEndpoint(port: UInt16) throws {
-        let directory = endpointURL.deletingLastPathComponent()
-        try FileManager.default.createDirectory(
-            at: directory,
-            withIntermediateDirectories: true,
-            attributes: [.posixPermissions: 0o700]
-        )
         let record = ClientEndpointRecord(
             baseURL: "http://127.0.0.1:\(port)",
             token: token,
             pid: ProcessInfo.processInfo.processIdentifier,
             version: version
         )
+        endpointLock.withLock { publishedEndpoint = record }
+        guard let endpointURL else { return }
+        let directory = endpointURL.deletingLastPathComponent()
+        try FileManager.default.createDirectory(
+            at: directory,
+            withIntermediateDirectories: true,
+            attributes: [.posixPermissions: 0o700]
+        )
         try ClientJSON.encoder(pretty: true).encode(record).write(to: endpointURL, options: .atomic)
         try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: endpointURL.path)
     }
 
     private func removeOwnedEndpoint() {
+        endpointLock.withLock { publishedEndpoint = nil }
+        guard let endpointURL else { return }
         guard let data = try? Data(contentsOf: endpointURL),
               let record = try? ClientJSON.decoder.decode(ClientEndpointRecord.self, from: data),
               record.token == token else { return }

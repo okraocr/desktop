@@ -1,6 +1,7 @@
 import AppKit
 import Combine
 import Foundation
+import OkraClientCore
 import PDFKit
 import UniformTypeIdentifiers
 
@@ -95,6 +96,15 @@ final class AppState: ObservableObject {
         localProcessing.load(document: document)
     }
 
+    func handleOpenURL(_ url: URL) {
+        guard url.scheme == OkraClientCallback.scheme,
+              url.host == OkraClientCallback.host else {
+            openPDF(url)
+            return
+        }
+        deliverClientEndpoint(for: url)
+    }
+
     func parseSelectedDocument() {
         guard let selectedDocument else { return }
         localProcessing.run(document: selectedDocument)
@@ -166,16 +176,8 @@ final class AppState: ObservableObject {
     }
 
     private func startClientHost() {
-        let applicationSupport = FileManager.default.urls(
-            for: .applicationSupportDirectory,
-            in: .userDomainMask
-        ).first ?? FileManager.default.temporaryDirectory
-        let endpointURL = applicationSupport
-            .appendingPathComponent("Okra", isDirectory: true)
-            .appendingPathComponent("client-endpoint.json")
         let router = DesktopClientRouter(appState: self)
         let host = DesktopClientHTTPHost(
-            endpointURL: endpointURL,
             version: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
                 ?? "1.0.0-rc.13",
             route: { request in await router.route(request) }
@@ -186,5 +188,52 @@ final class AppState: ObservableObject {
         } catch {
             importError = "The local CLI endpoint could not start: \(error.localizedDescription)"
         }
+    }
+
+    private func deliverClientEndpoint(for url: URL) {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let portValue = components.queryItems?.first(where: { $0.name == "port" })?.value,
+              let port = UInt16(portValue),
+              port > 0,
+              let nonce = components.queryItems?.first(where: { $0.name == "nonce" })?.value,
+              nonce.count == 64,
+              nonce.allSatisfy({ $0.isHexDigit }),
+              let callbackURL = URL(
+                string: "http://127.0.0.1:\(port)\(OkraClientCallback.path)"
+              ) else {
+            importError = "The local CLI callback was invalid."
+            return
+        }
+
+        Task {
+            guard let endpoint = await waitForClientEndpoint() else {
+                importError = "The local CLI endpoint was not ready."
+                return
+            }
+            var request = URLRequest(url: callbackURL)
+            request.httpMethod = "POST"
+            request.timeoutInterval = 10
+            request.setValue("Bearer \(nonce)", forHTTPHeaderField: "Authorization")
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue(OkraClientProtocol.version, forHTTPHeaderField: OkraClientProtocol.header)
+            request.httpBody = try ClientJSON.encoder().encode(endpoint)
+            do {
+                let (_, response) = try await URLSession.shared.data(for: request)
+                guard let http = response as? HTTPURLResponse,
+                      (200..<300).contains(http.statusCode) else {
+                    throw URLError(.badServerResponse)
+                }
+            } catch {
+                importError = "The local CLI callback could not complete."
+            }
+        }
+    }
+
+    private func waitForClientEndpoint() async -> ClientEndpointRecord? {
+        for _ in 0..<50 {
+            if let endpoint = clientHost?.endpointRecord() { return endpoint }
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+        return nil
     }
 }

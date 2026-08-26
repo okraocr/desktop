@@ -118,9 +118,10 @@ jobs:
           codesign --verify --strict --deep "build/Okra.app"
           codesign --display --verbose=4 "build/Okra.app" 2>&1 | grep -E 'Authority=Developer ID Application|TeamIdentifier=|Runtime Version='
           [[ "$(lipo -archs build/Okra.app/Contents/MacOS/Okra)" == "arm64" ]]
-          [[ "$(lipo -archs build/Okra.app/Contents/MacOS/okra)" == "arm64" ]]
-          codesign --verify --strict "build/Okra.app/Contents/MacOS/okra"
-          build/Okra.app/Contents/MacOS/okra version | grep -F "${{ steps.release.outputs.version }}"
+          [[ "$(lipo -archs build/Okra.app/Contents/Resources/okra)" == "arm64" ]]
+          codesign --verify --strict "build/Okra.app/Contents/Resources/okra"
+          build/Okra.app/Contents/Resources/okra help | grep -F 'okra chandra'
+          build/Okra.app/Contents/Resources/okra version | grep -F "${{ steps.release.outputs.version }}"
           RELEASE_BIN_PATH="$(swift build -c release --show-bin-path)"
           OKRA_DESKTOP_PACKAGED_APP_PATH="${PWD}/build/Okra.app" \
           OKRA_DESKTOP_RESOURCE_BUNDLE_FALLBACK_PATH="${RELEASE_BIN_PATH}/okraPDF_Okra.bundle" \

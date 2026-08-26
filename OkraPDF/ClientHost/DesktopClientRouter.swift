@@ -91,6 +91,12 @@ final class DesktopClientRouter {
                segments[2] == "redactions", segments[3] == "detect" {
                 return await detectPII(run, in: appState)
             }
+            if request.method == "POST", segments.count == 3, segments[2] == "detect" {
+                return await detectPII(run, in: appState)
+            }
+            if request.method == "GET", segments.count == 3, segments[2] == "redactions" {
+                return redactions(run, in: appState)
+            }
         }
         if request.method == "GET", path == "/global/event" {
             return globalEvents(in: appState)
@@ -166,10 +172,26 @@ final class DesktopClientRouter {
             appState.localProcessing.selectRun(run)
         }
         do {
-            return .json(try await appState.localProcessing.redaction.detectForClient(runID: run.id))
+            let detection = try await appState.localProcessing.redaction.detectForClient(runID: run.id)
+            return .json(DesktopClientProjection.redaction(detection))
         } catch {
             return .failure(status: 409, code: "presidio_not_ready", message: "\(error.localizedDescription) Set up Presidio explicitly in Okra.app, then retry.")
         }
+    }
+
+    private func redactions(_ run: LocalProcessingRun, in appState: AppState) -> DesktopHTTPResponse {
+        let coordinator = appState.localProcessing.redaction
+        if let detection = coordinator.detectionForClient(run: run) {
+            return .json(DesktopClientProjection.redaction(detection))
+        }
+        if coordinator.isDetectingForClient(runID: run.id) {
+            return .json(ClientRedactionStatus(runId: run.id), status: 202)
+        }
+        return .failure(
+            status: 404,
+            code: "redactions_not_found",
+            message: "No Presidio detection exists for run \(run.id)."
+        )
     }
 
     private func project(_ document: LocalPDFDocument) -> ClientDocument {

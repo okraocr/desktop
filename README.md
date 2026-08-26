@@ -78,17 +78,21 @@ and sends it commands, so it never starts a second model worker or maintains a
 second parse history.
 
 ```bash
-/Applications/Okra.app/Contents/MacOS/okra status
-/Applications/Okra.app/Contents/MacOS/okra providers
-/Applications/Okra.app/Contents/MacOS/okra parse invoice.pdf
-/Applications/Okra.app/Contents/MacOS/okra detect <run-id>
+sudo mkdir -p /usr/local/bin
+sudo ln -sf /Applications/Okra.app/Contents/Resources/okra /usr/local/bin/okra
+
+okra status
+okra providers
+okra chandra invoice.pdf
+okra presidio invoice.pdf
 ```
 
 On a clean eligible Apple-silicon Mac, `okra parse` selects Chandra OCR 2.
 Review its model license and complete the one-time setup in **Plugins →
 Extract** first. `okra detect` invokes the explicitly configured Presidio
 plugin after a positioned parse; it returns candidates but never approves or
-exports redactions. Keep Okra.app open while using the CLI.
+exports redactions. The CLI launches or reconnects to Okra.app through
+LaunchServices and never reads the app's sandbox container directly.
 
 <table>
   <tr>
