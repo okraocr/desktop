@@ -89,6 +89,25 @@ class ReleaseWorkflowTests(unittest.TestCase):
         self.assertNotIn("SOURCE_SMOKE_APP", self.dmg_validator)
         self.assertNotIn("CFFIXED_USER_HOME", self.dmg_validator)
         self.assertNotIn("com.okrapdf.desktop.release-validation", self.dmg_validator)
+        quarantine = 'xattr -w \\\n  com.apple.quarantine'
+        gatekeeper = "spctl --assess"
+        clear_quarantine = 'xattr -d com.apple.quarantine "${COPIED_DMG}"'
+        attach = "hdiutil attach"
+        self.assertIn(quarantine, self.dmg_validator)
+        self.assertIn(gatekeeper, self.dmg_validator)
+        self.assertIn(clear_quarantine, self.dmg_validator)
+        self.assertLess(
+            self.dmg_validator.index(quarantine),
+            self.dmg_validator.index(gatekeeper),
+        )
+        self.assertLess(
+            self.dmg_validator.index(gatekeeper),
+            self.dmg_validator.index(clear_quarantine),
+        )
+        self.assertLess(
+            self.dmg_validator.index(clear_quarantine),
+            self.dmg_validator.index(attach),
+        )
         self.assertIn('payload.get("healthy") is not True', self.dmg_validator)
         self.assertIn('payload.get("version") != sys.argv[2]', self.dmg_validator)
         self.assertNotIn(
