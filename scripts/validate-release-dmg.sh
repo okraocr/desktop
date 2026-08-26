@@ -24,6 +24,48 @@ find_app_pids() {
   pgrep -x Okra 2>/dev/null || true
 }
 
+dump_launch_diagnostics() {
+  local container_path="${HOME}/Library/Containers/com.okrapdf.desktop"
+  local diagnostic_reports="${HOME}/Library/Logs/DiagnosticReports"
+  local pid
+  local report
+
+  echo "Okra launch diagnostics:" >&2
+  if [[ -n "$(find_app_pids)" ]]; then
+    while IFS= read -r pid; do
+      if [[ -n "${pid}" ]]; then
+        ps -p "${pid}" -o pid=,ppid=,state=,etime=,comm= >&2 || true
+      fi
+    done < <(find_app_pids)
+  else
+    echo "  no Okra process is running" >&2
+  fi
+
+  if [[ -e "${container_path}" ]]; then
+    ls -ld "${container_path}" >&2 || true
+  else
+    echo "  production sandbox container was not created" >&2
+  fi
+
+  xattr -p com.apple.quarantine "${COPIED_DMG}" >&2 || true
+  xattr -p com.apple.quarantine "${MOUNTED_APP}" >&2 || true
+
+  /usr/bin/log show \
+    --last 2m \
+    --style compact \
+    --predicate '(process == "containermanagerd") OR (process == "syspolicyd")' \
+    2>/dev/null \
+    | tail -n 200 >&2 || true
+
+  if [[ -d "${diagnostic_reports}" ]]; then
+    report="$(find "${diagnostic_reports}" -type f -name 'Okra-*.ips' -mmin -5 -print | tail -n 1)"
+    if [[ -n "${report}" ]]; then
+      echo "Recent Okra crash report: ${report}" >&2
+      sed -n '1,240p' "${report}" >&2 || true
+    fi
+  fi
+}
+
 cleanup() {
   local pid
   while IFS= read -r pid; do
@@ -94,6 +136,7 @@ if ! run_with_timeout 45 \
     "OKRA_APP_PATH=${MOUNTED_APP}" \
     "${MOUNTED_CLI}" status >"${STATUS_OUTPUT}" 2>&1; then
   cat "${STATUS_OUTPUT}" >&2
+  dump_launch_diagnostics
   echo "Final packaged CLI did not reach the quarantined app within 45 seconds" >&2
   exit 1
 fi
