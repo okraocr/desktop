@@ -7,12 +7,12 @@
     <language>en</language>
     <item>
       <title>okraPDF Desktop v1.0.0-rc.17</title>
-      <sparkle:version>202608260723</sparkle:version>
+      <sparkle:version>202608260727</sparkle:version>
       <sparkle:shortVersionString>1.0.0-rc.17</sparkle:shortVersionString>
-      <pubDate>Wed, 26 Aug 2026 07:26:52 +0000</pubDate>
+      <pubDate>Wed, 26 Aug 2026 07:30:59 +0000</pubDate>
       <link>https://github.com/okra-project/desktop/releases/tag/desktop-v1.0.0-rc.17</link>
       <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
-      <enclosure url="https://github.com/okraocr/desktop/releases/download/desktop-v1.0.0-rc.17/Okra-1.0.0-rc.17.dmg" sparkle:edSignature="MFGp/DkQDA2t3Wts93WqWFMJxS1Ssu70T3WEVYzkN17HVXe/ElBW8BL2rbKFX9faBOJpcb+0cG+/fxC7o7fVDA==" length="3538564" type="application/octet-stream" />
+      <enclosure url="https://github.com/okraocr/desktop/releases/download/desktop-v1.0.0-rc.17/Okra-1.0.0-rc.17.dmg" sparkle:edSignature="ed4Hui+7LSC+yfUQApfVHAwjsNfLWE0Fo0T+s0f1jRE2smbxzJEGT2ztRsF8KOazKefp4/uJGIMvzGpAETdWBA==" length="3538560" type="application/octet-stream" />
     </item>
     <item>
       <title>okraPDF Desktop v1.0.0-rc.12</title>
