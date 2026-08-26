@@ -59,8 +59,9 @@ per-page run history on this Mac.
   under **Activity → Runs**. Assistant handoffs open one focused destination;
   installation, cancellation, retry, and live progress remain attached to the
   plugin even when navigation is closed.
-- Parse with the managed Dots OCR 1.5 default, built-in Apple Vision, optional
-  Chandra OCR 2 or Baidu Unlimited-OCR, or an installed Ollama vision model.
+- Parse with the managed Chandra OCR 2 default on eligible Macs, built-in Apple
+  Vision fallback, optional Dots OCR 1.5 or Baidu Unlimited-OCR, or an installed
+  Ollama vision model.
 - Compare parser/model pairings in the first-run setup guide and use the local
   parser doctor's host-adaptive recommendation without triggering a download.
 - Inspect extracted blocks against their source boxes without modifying the PDF.
@@ -68,6 +69,26 @@ per-page run history on this Mac.
   export a new raster-burned PDF without changing the source.
 - Preview, copy, save, or reveal Markdown and JSON output.
 - Cancel and resume long runs without throwing away completed pages.
+
+## Command-line client
+
+Okra.app owns one authenticated, loopback-only `okra.client.v1` host. The
+bundled `okra` executable is deliberately thin: it discovers the running app
+and sends it commands, so it never starts a second model worker or maintains a
+second parse history.
+
+```bash
+/Applications/Okra.app/Contents/MacOS/okra status
+/Applications/Okra.app/Contents/MacOS/okra providers
+/Applications/Okra.app/Contents/MacOS/okra parse invoice.pdf
+/Applications/Okra.app/Contents/MacOS/okra detect <run-id>
+```
+
+On a clean eligible Apple-silicon Mac, `okra parse` selects Chandra OCR 2.
+Review its model license and complete the one-time setup in **Plugins →
+Extract** first. `okra detect` invokes the explicitly configured Presidio
+plugin after a positioned parse; it returns candidates but never approves or
+exports redactions. Keep Okra.app open while using the CLI.
 
 <table>
   <tr>

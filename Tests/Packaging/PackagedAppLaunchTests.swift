@@ -32,6 +32,10 @@ struct PackagedAppLaunchTests {
             .appendingPathComponent("Contents", isDirectory: true)
             .appendingPathComponent("MacOS", isDirectory: true)
             .appendingPathComponent("Okra")
+        let cliURL = appURL
+            .appendingPathComponent("Contents", isDirectory: true)
+            .appendingPathComponent("MacOS", isDirectory: true)
+            .appendingPathComponent("okra")
         let outputPipe = Pipe()
         let process = Process()
         process.executableURL = executableURL
@@ -162,6 +166,7 @@ struct PackagedAppLaunchTests {
         let entitlements = try signedEntitlements(at: appURL)
 
         try #require(fileManager.isExecutableFile(atPath: executableURL.path))
+        try #require(fileManager.isExecutableFile(atPath: cliURL.path))
         try #require(fileManager.fileExists(atPath: providerScriptsURL.path))
         try #require(
             fileManager.fileExists(
@@ -196,6 +201,7 @@ struct PackagedAppLaunchTests {
                 == true
         )
         #expect(entitlements["com.apple.security.network.client"] as? Bool == true)
+        #expect(entitlements["com.apple.security.network.server"] as? Bool == true)
         #expect(
             entitlements[
                 "com.apple.security.temporary-exception.files.absolute-path.read-only"

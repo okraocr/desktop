@@ -8,9 +8,14 @@ let package = Package(
         .package(url: "https://github.com/sparkle-project/Sparkle", from: "2.9.4")
     ],
     targets: [
+        .target(
+            name: "OkraClientCore",
+            path: "OkraClientCore"
+        ),
         .executableTarget(
             name: "Okra",
             dependencies: [
+                "OkraClientCore",
                 .product(name: "Sparkle", package: "Sparkle")
             ],
             path: "OkraPDF",
@@ -19,9 +24,14 @@ let package = Package(
                 .copy("ProviderScripts")
             ]
         ),
+        .executableTarget(
+            name: "okra",
+            dependencies: ["OkraClientCore"],
+            path: "OkraCLI"
+        ),
         .testTarget(
             name: "okraPDFTests",
-            dependencies: ["Okra"],
+            dependencies: ["Okra", "OkraClientCore"],
             path: "Tests",
             exclude: ["OkraDesktopTests"]
         )
