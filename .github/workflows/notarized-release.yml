@@ -233,8 +233,6 @@ jobs:
           if [[ "${OKRA_RELEASE_USES_SMOKE_CONTAINER}" == "true" ]]; then
             bash .release-control/scripts/validate-release-dmg.sh \
               "${PWD}/${DMG}" \
-              "${OKRA_RELEASE_SMOKE_APP_PATH}" \
-              "com.okrapdf.desktop.release-validation" \
               "${VERSION}"
           else
             OKRA_DESKTOP_PACKAGED_DMG_PATH="${PWD}/${DMG}" \
