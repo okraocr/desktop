@@ -4,7 +4,6 @@ struct LocalExtractionView: View {
     let document: LocalPDFDocument?
     @ObservedObject var coordinator: LocalProcessingCoordinator
     let parse: () -> Void
-    let revealPDF: () -> Void
     /// Opens Extract under Plugins, where parsers are chosen and set up.
     let showPlugin: () -> Void
 

@@ -1,9 +1,8 @@
-/// A local feature that mounts into the assistant panel as a card.
+/// A local capability configured from workspace navigation.
 ///
-/// The reader stays permanent in the center. Features mount on demand in the
-/// trailing Assistant, while their status and dependency setup live in the
-/// Plugins section of the leading navigation. Nothing here talks to the network.
-enum AssistantPlugin: String, CaseIterable, Identifiable {
+/// Plugins own dependency and provider setup. Their document-facing results
+/// live in the permanent Facet surface beside the source PDF.
+enum WorkspacePlugin: String, CaseIterable, Identifiable {
     case extract
     case redact
 
@@ -32,11 +31,7 @@ enum AssistantPlugin: String, CaseIterable, Identifiable {
         case .extract:
             return "Parse the open PDF with a local provider"
         case .redact:
-            return "Review PII candidates, export burned-in boxes"
+            return "Review PII candidates and export burned-in boxes"
         }
-    }
-
-    var command: String {
-        "/\(rawValue)"
     }
 }

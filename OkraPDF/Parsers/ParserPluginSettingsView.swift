@@ -3,7 +3,7 @@ import SwiftUI
 /// Extract plugin configuration embedded in its focused navigation destination.
 ///
 /// Choosing and preparing an engine lives here; running it remains in the
-/// assistant's Extract card. The selected parser expands in place to expose
+/// Facet workspace. The selected parser expands in place to expose
 /// its status and installation progress.
 struct ParserPluginSettingsView: View {
     @ObservedObject var coordinator: LocalProcessingCoordinator

@@ -5,8 +5,13 @@ import Testing
 struct WorkspaceNavigationDestinationTests {
     @Test("Plugin inventory excludes activity")
     func pluginInventoryExcludesActivity() {
-        #expect(AssistantPlugin.allCases == [.extract, .redact])
+        #expect(WorkspacePlugin.allCases == [.extract, .redact])
         #expect(WorkspaceActivity.allCases == [.runs])
+    }
+
+    @Test("Facet modes remain source-linked workflows")
+    func facetModesRemainSourceLinkedWorkflows() {
+        #expect(FacetWorkspaceMode.allCases == [.extraction, .redaction])
     }
 
     @Test("Destinations retain their navigation section")

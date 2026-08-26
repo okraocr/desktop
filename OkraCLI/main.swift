@@ -182,7 +182,7 @@ struct OkraCLI {
             }
         }
         return Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
-            ?? "1.0.0-rc.13"
+            ?? "1.0.0-rc.15"
     }
 
     private static func pretty<T: Encodable>(_ value: T) throws -> String {
@@ -460,6 +460,12 @@ private enum EndpointDiscovery {
             arguments.append(contentsOf: ["-a", appURL.path])
         }
         arguments.append(callbackURL.absoluteString)
+        // LaunchServices delivers the URL as an open event to an existing app.
+        // On a cold packaged launch it has occasionally missed SwiftUI's first
+        // onOpenURL delivery, so pass the same authenticated callback URL as a
+        // process argument as well. AppState deduplicates by nonce if both paths
+        // arrive.
+        arguments.append(contentsOf: ["--args", callbackURL.absoluteString])
         try runOpen(arguments)
     }
 
