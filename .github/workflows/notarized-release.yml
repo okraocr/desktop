@@ -139,20 +139,30 @@ jobs:
           codesign --verify --strict "build/Okra.app/Contents/Resources/okra"
           build/Okra.app/Contents/Resources/okra help | grep -F 'okra chandra'
           build/Okra.app/Contents/Resources/okra version | grep -F "${{ steps.release.outputs.version }}"
-          SMOKE_APP="${RUNNER_TEMP}/Okra Release Validation.app"
-          bash .release-control/scripts/prepare-release-smoke-app.sh \
-            "build/Okra.app" \
-            "${SMOKE_APP}" \
-            "com.okrapdf.desktop.release-validation" \
-            "${APPLE_SIGNING_IDENTITY}"
-          codesign --verify --strict --deep "${SMOKE_APP}"
-          codesign --display --verbose=4 "${SMOKE_APP}" 2>&1 | grep -E 'Authority=Developer ID Application|TeamIdentifier=|Runtime Version='
-          echo "OKRA_RELEASE_SMOKE_APP_PATH=${SMOKE_APP}" >> "${GITHUB_ENV}"
           RELEASE_BIN_PATH="$(swift build -c release --show-bin-path)"
-          OKRA_DESKTOP_PACKAGED_APP_PATH="${SMOKE_APP}" \
-          OKRA_DESKTOP_EXPECTED_BUNDLE_IDENTIFIER="com.okrapdf.desktop.release-validation" \
-          OKRA_DESKTOP_RESOURCE_BUNDLE_FALLBACK_PATH="${RELEASE_BIN_PATH}/okraPDF_Okra.bundle" \
-            swift test --filter PackagedAppLaunchTests.packagedAppRemainsAlive
+          if grep -q 'OKRA_DESKTOP_EXPECTED_BUNDLE_IDENTIFIER' \
+            Tests/Packaging/PackagedAppLaunchTests.swift; then
+            SMOKE_APP="${RUNNER_TEMP}/Okra Release Validation.app"
+            bash .release-control/scripts/prepare-release-smoke-app.sh \
+              "build/Okra.app" \
+              "${SMOKE_APP}" \
+              "com.okrapdf.desktop.release-validation" \
+              "${APPLE_SIGNING_IDENTITY}"
+            codesign --verify --strict --deep "${SMOKE_APP}"
+            codesign --display --verbose=4 "${SMOKE_APP}" 2>&1 | grep -E 'Authority=Developer ID Application|TeamIdentifier=|Runtime Version='
+            echo "OKRA_RELEASE_USES_SMOKE_CONTAINER=true" >> "${GITHUB_ENV}"
+            echo "OKRA_RELEASE_SMOKE_APP_PATH=${SMOKE_APP}" >> "${GITHUB_ENV}"
+            OKRA_DESKTOP_PACKAGED_APP_PATH="${SMOKE_APP}" \
+            OKRA_DESKTOP_EXPECTED_BUNDLE_IDENTIFIER="com.okrapdf.desktop.release-validation" \
+            OKRA_DESKTOP_RESOURCE_BUNDLE_FALLBACK_PATH="${RELEASE_BIN_PATH}/okraPDF_Okra.bundle" \
+              swift test --filter PackagedAppLaunchTests.packagedAppRemainsAlive
+          else
+            echo "OKRA_RELEASE_USES_SMOKE_CONTAINER=false" >> "${GITHUB_ENV}"
+            echo "OKRA_RELEASE_SMOKE_APP_PATH=${PWD}/build/Okra.app" >> "${GITHUB_ENV}"
+            OKRA_DESKTOP_PACKAGED_APP_PATH="${PWD}/build/Okra.app" \
+            OKRA_DESKTOP_RESOURCE_BUNDLE_FALLBACK_PATH="${RELEASE_BIN_PATH}/okraPDF_Okra.bundle" \
+              swift test --filter PackagedAppLaunchTests.packagedAppRemainsAlive
+          fi
 
       - name: Notarize and staple app
         id: notarize
@@ -162,9 +172,11 @@ jobs:
           NOTARY_PAYLOAD="${RUNNER_TEMP}/notary-payload"
           mkdir -p "${NOTARY_PAYLOAD}"
           ditto "build/Okra.app" "${NOTARY_PAYLOAD}/Okra.app"
-          ditto \
-            "${OKRA_RELEASE_SMOKE_APP_PATH}" \
-            "${NOTARY_PAYLOAD}/Okra Release Validation.app"
+          if [[ "${OKRA_RELEASE_USES_SMOKE_CONTAINER}" == "true" ]]; then
+            ditto \
+              "${OKRA_RELEASE_SMOKE_APP_PATH}" \
+              "${NOTARY_PAYLOAD}/Okra Release Validation.app"
+          fi
           ditto -c -k --keepParent "${NOTARY_PAYLOAD}" "${RUNNER_TEMP}/Okra.zip"
           xcrun notarytool submit "${RUNNER_TEMP}/Okra.zip" \
             --apple-id "${APPLE_ID}" \
@@ -173,8 +185,10 @@ jobs:
             --wait 2>&1 | tee "${RUNNER_TEMP}/notary-submit.log"
           xcrun stapler staple "build/Okra.app"
           xcrun stapler validate "build/Okra.app"
-          xcrun stapler staple "${OKRA_RELEASE_SMOKE_APP_PATH}"
-          xcrun stapler validate "${OKRA_RELEASE_SMOKE_APP_PATH}"
+          if [[ "${OKRA_RELEASE_USES_SMOKE_CONTAINER}" == "true" ]]; then
+            xcrun stapler staple "${OKRA_RELEASE_SMOKE_APP_PATH}"
+            xcrun stapler validate "${OKRA_RELEASE_SMOKE_APP_PATH}"
+          fi
 
       - name: Dump notarization log on failure
         if: failure() && steps.notarize.outcome == 'failure'
@@ -209,14 +223,22 @@ jobs:
           xcrun stapler validate "${DMG}"
           hdiutil verify "${DMG}"
           spctl --assess --type execute --verbose=4 "build/Okra.app"
-          spctl --assess --type execute --verbose=4 "${OKRA_RELEASE_SMOKE_APP_PATH}"
+          if [[ "${OKRA_RELEASE_USES_SMOKE_CONTAINER}" == "true" ]]; then
+            spctl --assess --type execute --verbose=4 "${OKRA_RELEASE_SMOKE_APP_PATH}"
+          fi
           spctl --assess --type open --context context:primary-signature --verbose=4 "${DMG}"
           RELEASE_BIN_PATH="$(swift build -c release --show-bin-path)"
-          OKRA_DESKTOP_PACKAGED_DMG_PATH="${PWD}/${DMG}" \
-          OKRA_DESKTOP_RELEASE_SMOKE_APP_PATH="${OKRA_RELEASE_SMOKE_APP_PATH}" \
-          OKRA_DESKTOP_EXPECTED_BUNDLE_IDENTIFIER="com.okrapdf.desktop.release-validation" \
-          OKRA_DESKTOP_RESOURCE_BUNDLE_FALLBACK_PATH="${RELEASE_BIN_PATH}/okraPDF_Okra.bundle" \
-            swift test --filter PackagedAppLaunchTests.quarantinedDMGAndReleaseEquivalentAppPassLaunchServices
+          if [[ "${OKRA_RELEASE_USES_SMOKE_CONTAINER}" == "true" ]]; then
+            OKRA_DESKTOP_PACKAGED_DMG_PATH="${PWD}/${DMG}" \
+            OKRA_DESKTOP_RELEASE_SMOKE_APP_PATH="${OKRA_RELEASE_SMOKE_APP_PATH}" \
+            OKRA_DESKTOP_EXPECTED_BUNDLE_IDENTIFIER="com.okrapdf.desktop.release-validation" \
+            OKRA_DESKTOP_RESOURCE_BUNDLE_FALLBACK_PATH="${RELEASE_BIN_PATH}/okraPDF_Okra.bundle" \
+              swift test --filter PackagedAppLaunchTests.quarantinedDMGAndReleaseEquivalentAppPassLaunchServices
+          else
+            OKRA_DESKTOP_PACKAGED_DMG_PATH="${PWD}/${DMG}" \
+            OKRA_DESKTOP_RESOURCE_BUNDLE_FALLBACK_PATH="${RELEASE_BIN_PATH}/okraPDF_Okra.bundle" \
+              swift test --filter PackagedAppLaunchTests.quarantinedDMGLaunchesThroughLaunchServices
+          fi
           shasum -a 256 "${DMG}" | sed 's#  build/#  #' > "${DMG}.sha256"
           echo "dmg=${DMG}" >> "${GITHUB_OUTPUT}"
           echo "checksum=${DMG}.sha256" >> "${GITHUB_OUTPUT}"

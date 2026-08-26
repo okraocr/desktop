@@ -59,6 +59,21 @@ class ReleaseWorkflowTests(unittest.TestCase):
             self.workflow,
         )
 
+    def test_manual_replay_keeps_older_tag_launch_tests_compatible(self):
+        self.assertIn(
+            "grep -q 'OKRA_DESKTOP_EXPECTED_BUNDLE_IDENTIFIER'",
+            self.workflow,
+        )
+        self.assertIn("OKRA_RELEASE_USES_SMOKE_CONTAINER=false", self.workflow)
+        self.assertIn(
+            'OKRA_DESKTOP_PACKAGED_APP_PATH="${PWD}/build/Okra.app"',
+            self.workflow,
+        )
+        self.assertIn(
+            "PackagedAppLaunchTests.quarantinedDMGLaunchesThroughLaunchServices",
+            self.workflow,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
