@@ -21,10 +21,12 @@ concurrency:
 jobs:
   build-sign-notarize-release:
     # Use a clean Apple-silicon image for DiskImages, LaunchServices, signing,
-    # and notarization. The certificate lives only in a temporary keychain and
-    # is removed by the always-run cleanup step below.
+    # and notarization. Apple may queue app and DMG submissions for longer than
+    # the build itself, so leave enough job headroom for both `--wait` calls.
+    # The certificate lives only in a temporary keychain and is removed by the
+    # always-run cleanup step below.
     runs-on: macos-15
-    timeout-minutes: 45
+    timeout-minutes: 120
     env:
       APPLE_ID: ${{ secrets.APPLE_ID }}
       APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
