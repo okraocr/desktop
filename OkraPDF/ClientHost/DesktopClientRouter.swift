@@ -57,7 +57,9 @@ final class DesktopClientRouter {
         }
         if request.method == "GET", path == "/run" {
             appState.localProcessing.refreshRecentRuns()
-            return .json(appState.localProcessing.recentRuns.map(DesktopClientProjection.run))
+            return .json(appState.localProcessing.recentRuns.map {
+                DesktopClientProjection.run($0)
+            })
         }
         if segments.count >= 2, segments[0] == "run" {
             let runID = segments[1]
