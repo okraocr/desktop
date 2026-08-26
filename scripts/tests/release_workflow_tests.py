@@ -80,10 +80,15 @@ class ReleaseWorkflowTests(unittest.TestCase):
             self.workflow,
         )
 
-    def test_final_dmg_smoke_is_bounded_and_uses_the_packaged_cli(self):
+    def test_final_dmg_smoke_is_bounded_and_uses_the_production_app(self):
         self.assertIn("run_with_timeout 45", self.dmg_validator)
         self.assertIn('"${MOUNTED_CLI}" status', self.dmg_validator)
-        self.assertIn('"OKRA_APP_PATH=${SMOKE_APP}"', self.dmg_validator)
+        self.assertIn('"OKRA_APP_PATH=${MOUNTED_APP}"', self.dmg_validator)
+        self.assertIn("pgrep -x Okra", self.dmg_validator)
+        self.assertNotIn("OKRA_APP_PATH=${SMOKE_APP}", self.dmg_validator)
+        self.assertNotIn("SOURCE_SMOKE_APP", self.dmg_validator)
+        self.assertNotIn("CFFIXED_USER_HOME", self.dmg_validator)
+        self.assertNotIn("com.okrapdf.desktop.release-validation", self.dmg_validator)
         self.assertIn('payload.get("healthy") is not True', self.dmg_validator)
         self.assertIn('payload.get("version") != sys.argv[2]', self.dmg_validator)
         self.assertNotIn(
