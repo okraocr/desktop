@@ -41,6 +41,7 @@ Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.
 - [x] Chandra layout-HTML parsing into labeled typed blocks with normalized source-PDF boxes
 - [x] Chandra per-token loop guard halts repeated generation tails; duplicate suppression remains as backstop
 - [x] Truthfully labeled Chandra OCR 2 simulation mode
+- [x] Chandra OCR 2 is the clean-install extraction default on eligible Macs; saved choices and incompatible-host fallback remain explicit
 - [x] Dots model terms disclosed before setup
 - [x] Truthfully labeled Dots OCR 1.5 simulation mode
 - [x] Streaming progress and local errors
@@ -85,6 +86,7 @@ Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.
 - [x] Ollama is represented as a loopback HTTP integration, separate from Okra-managed Dots and Baidu setup
 - [x] Presidio installs under its own pinned managed runtime and analyzes only after an explicit Detect action
 - [x] Presidio candidate boxes persist beside the run as `redactions.json`; analyzed text is not logged
+- [x] Presidio remains the explicit post-parse PII default; CLI detection returns candidates without approving or exporting them
 
 ## Automated verification
 
@@ -105,6 +107,8 @@ Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.
 - [x] Default app state constructs every bundled provider without terminating
 - [x] Ollama `/api/tags`, `/api/show`, and `/api/chat` request contracts have hermetic unit coverage
 - [x] Presidio simulation, loopback-only URL policy, source-block mapping, box persistence, and rasterized export coverage
+- [x] Authenticated loopback `okra.client.v1` host is owned by Okra.app and rejects unauthenticated clients
+- [x] Signed app bundle includes the thin `okra` CLI with health, catalogs, open, parse, run events/status, artifacts, cancel/resume, and detect commands
 - [x] Document-first default and independent Workspace/Extract toggles have unit coverage
 - [x] Packaged app starts with builder-only SwiftPM resources hidden
 - [x] Quarantined notarized beta.8 through beta.15 DMGs start through LaunchServices before publishing (2026-07-28)

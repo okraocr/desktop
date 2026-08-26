@@ -16,6 +16,7 @@ final class AppState: ObservableObject {
     let localProcessing: LocalProcessingCoordinator
     let conversation = AssistantConversation()
     private let userDefaults: UserDefaults
+    private var clientHost: DesktopClientHTTPHost?
 
     init() {
         let userDefaults = UserDefaults.standard
@@ -25,6 +26,7 @@ final class AppState: ObservableObject {
         openCommandLinePDFIfPresent()
         showsSetupGuide = userDefaults.object(forKey: Self.setupGuideCompletedDefaultsKey) == nil
         ShellCaptureHarness.startIfRequested(state: self)
+        startClientHost()
     }
 
     init(localProcessing: LocalProcessingCoordinator) {
@@ -161,5 +163,28 @@ final class AppState: ObservableObject {
             }
             .removeDuplicates()
             .assign(to: &$canOpenPDF)
+    }
+
+    private func startClientHost() {
+        let applicationSupport = FileManager.default.urls(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask
+        ).first ?? FileManager.default.temporaryDirectory
+        let endpointURL = applicationSupport
+            .appendingPathComponent("Okra", isDirectory: true)
+            .appendingPathComponent("client-endpoint.json")
+        let router = DesktopClientRouter(appState: self)
+        let host = DesktopClientHTTPHost(
+            endpointURL: endpointURL,
+            version: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+                ?? "1.0.0-rc.13",
+            route: { request in await router.route(request) }
+        )
+        do {
+            try host.start()
+            clientHost = host
+        } catch {
+            importError = "The local CLI endpoint could not start: \(error.localizedDescription)"
+        }
     }
 }

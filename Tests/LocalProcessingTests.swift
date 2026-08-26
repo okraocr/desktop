@@ -24,7 +24,7 @@ struct LocalProcessingProviderTests {
         #expect(provider.availability() == .simulated("Simulation ready"))
     }
 
-    @Test("Dots OCR is selected by default")
+    @Test("The host recommendation remains the fallback when Chandra is absent")
     func simulationModeDefaultsToDotsOCR() throws {
         let workspace = try TestWorkspace(prefix: "okra-simulation-selection")
         let simulatedProvider = DotsOCRProcessingProvider(

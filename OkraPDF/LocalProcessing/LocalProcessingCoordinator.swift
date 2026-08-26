@@ -135,7 +135,7 @@ final class LocalProcessingCoordinator: ObservableObject {
                 HybridAutoProcessingProvider(ollama: ollamaProvider),
                 DotsOCRProcessingProvider(hostProfile: hostProfile),
                 UnlimitedOCRProcessingProvider(),
-                ChandraOCRProcessingProvider(),
+                ChandraOCRProcessingProvider(hostProfile: hostProfile),
                 ollamaProvider,
             ]
         }
@@ -165,11 +165,18 @@ final class LocalProcessingCoordinator: ObservableObject {
             if case .unavailable = provider.availability() { return nil }
             return provider.descriptor.id
         } ?? nil
+        let chandraDefault = resolvedProviders.first { provider in
+            guard provider.descriptor.id == .chandraOCR2 else { return false }
+            if case .unavailable = provider.availability() { return false }
+            return true
+        }?.descriptor.id
         let storedProvider = userDefaults.string(forKey: Self.providerDefaultsKey)
         if let stored = storedProvider,
            let providerID = LocalProviderID.persisted(rawValue: stored),
            self.providers.contains(where: { $0.descriptor.id == providerID }) {
             selectedProviderID = providerID
+        } else if let chandraDefault {
+            selectedProviderID = chandraDefault
         } else if let doctorDefault {
             selectedProviderID = doctorDefault
         } else if self.providers.contains(where: { $0.descriptor.id == .appleVision }) {
@@ -198,6 +205,16 @@ final class LocalProcessingCoordinator: ObservableObject {
 
     var selectedAvailability: LocalProviderAvailability {
         availabilityByProvider[selectedProviderID] ?? .unavailable("Unavailable")
+    }
+
+    func availability(for id: LocalProviderID) -> LocalProviderAvailability {
+        availabilityByProvider[id] ?? .unavailable("Unavailable")
+    }
+
+    func run(id: String) -> LocalProcessingRun? {
+        if activeRun?.id == id { return activeRun }
+        if latestRun?.id == id { return latestRun }
+        return recentRuns.first { $0.id == id }
     }
 
     var selectedProviderUsesOllama: Bool {
@@ -426,24 +443,25 @@ final class LocalProcessingCoordinator: ObservableObject {
         installationTask?.cancel()
     }
 
-    func run(document: LocalPDFDocument) {
+    @discardableResult
+    func run(document: LocalPDFDocument) -> String? {
         guard !isRunning, redaction.isBusy == false else {
             statusMessage = "Another extraction is already running."
-            return
+            return nil
         }
         guard let provider = provider(for: selectedProviderID) else {
             statusMessage = "The selected parser is unavailable."
-            return
+            return nil
         }
         guard provider.availability().isReady else {
             statusMessage = provider.availability().message
-            return
+            return nil
         }
         do {
             try PDFPageRenderLimits.standard.validate(pageCount: document.totalPages)
         } catch {
             statusMessage = error.localizedDescription
-            return
+            return nil
         }
 
         let runID = UUID().uuidString
@@ -455,7 +473,7 @@ final class LocalProcessingCoordinator: ObservableObject {
             )
         } catch {
             statusMessage = error.localizedDescription
-            return
+            return nil
         }
         var run = LocalProcessingRun(
             id: runID,
@@ -490,12 +508,13 @@ final class LocalProcessingCoordinator: ObservableObject {
             try recordTransition(&run, type: "run.started", in: runDirectory)
         } catch {
             statusMessage = "Could not start extraction: \(error.localizedDescription)"
-            return
+            return nil
         }
 
         redaction.load(run: run, structuredDocument: nil, sourceURL: document.fileURL)
 
         beginProcessing(run: run, document: document, provider: provider, in: runDirectory)
+        return runID
     }
 
     func cancelRun() {

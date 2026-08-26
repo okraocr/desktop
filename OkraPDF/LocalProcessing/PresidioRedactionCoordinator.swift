@@ -198,9 +198,27 @@ final class PresidioRedactionCoordinator: ObservableObject {
     }
 
     func detect() {
+        detectionTask = Task { [weak self] in
+            guard let self else { return }
+            do {
+                _ = try await detectForClient()
+            } catch is CancellationError {
+                statusMessage = "PII detection canceled."
+            } catch {
+                errorMessage = error.localizedDescription
+                statusMessage = error.localizedDescription
+            }
+            detectionTask = nil
+        }
+    }
+
+    func detectForClient(runID: String? = nil) async throws -> RedactionDetection {
         guard canDetect,
               let run = currentRun,
-              let document = currentDocument else { return }
+              let document = currentDocument,
+              runID == nil || run.id == runID else {
+            throw PresidioClientError.unavailable(statusMessage)
+        }
         let model = usesOllama ? selectedOllamaModelName : nil
         isDetecting = true
         errorMessage = nil
@@ -209,29 +227,28 @@ final class PresidioRedactionCoordinator: ObservableObject {
         statusMessage = model == nil
             ? "Detecting PII with Presidio on this Mac…"
             : "Detecting PII with Presidio and \(model!) through local Ollama…"
-        detectionTask = Task { [weak self] in
-            guard let self else { return }
-            do {
-                let result = try await service.detect(
-                    runID: run.id,
-                    document: document,
-                    ollamaModel: model,
-                    redactionsURL: redactionsURL(for: run)
-                )
-                guard currentRun?.id == run.id else { return }
-                detection = result
-                approvedBoxIDs = Set(result.boxes.map(\.id))
-                statusMessage = result.boxes.isEmpty
-                    ? "Presidio found no PII candidates above the confidence threshold."
-                    : "Review \(result.boxes.count) PII candidates before export."
-            } catch is CancellationError {
-                statusMessage = "PII detection canceled."
-            } catch {
-                errorMessage = error.localizedDescription
-                statusMessage = error.localizedDescription
+        defer { isDetecting = false }
+
+        do {
+            let result = try await service.detect(
+                runID: run.id,
+                document: document,
+                ollamaModel: model,
+                redactionsURL: redactionsURL(for: run)
+            )
+            guard currentRun?.id == run.id else {
+                throw PresidioClientError.runChanged
             }
-            isDetecting = false
-            detectionTask = nil
+            detection = result
+            approvedBoxIDs = Set(result.boxes.map(\.id))
+            statusMessage = result.boxes.isEmpty
+                ? "Presidio found no PII candidates above the confidence threshold."
+                : "Review \(result.boxes.count) PII candidates before export."
+            return result
+        } catch {
+            errorMessage = error.localizedDescription
+            statusMessage = error.localizedDescription
+            throw error
         }
     }
 
@@ -301,5 +318,19 @@ final class PresidioRedactionCoordinator: ObservableObject {
         URL(fileURLWithPath: run.outputPath ?? run.sourcePath)
             .deletingLastPathComponent()
             .appendingPathComponent("redactions.json")
+    }
+}
+
+private enum PresidioClientError: LocalizedError {
+    case unavailable(String)
+    case runChanged
+
+    var errorDescription: String? {
+        switch self {
+        case .unavailable(let detail):
+            return "Presidio is not ready for this run. \(detail)"
+        case .runChanged:
+            return "The selected run changed while Presidio was detecting PII."
+        }
     }
 }
