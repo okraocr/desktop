@@ -20,7 +20,10 @@ concurrency:
 
 jobs:
   build-sign-notarize-release:
-    runs-on: [self-hosted, macOS, ARM64, okrapdf-desktop-release]
+    # Use a clean Apple-silicon image for DiskImages, LaunchServices, signing,
+    # and notarization. The certificate lives only in a temporary keychain and
+    # is removed by the always-run cleanup step below.
+    runs-on: macos-15
     timeout-minutes: 45
     env:
       APPLE_ID: ${{ secrets.APPLE_ID }}

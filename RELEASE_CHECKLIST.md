@@ -138,7 +138,7 @@ job.
   `notarized-release.yml` on `desktop-v*` tags, and a green PR check never
   publishes or mutates `main`.
 - Concurrency cancels superseded runs for the same PR/branch ref so the
-  constrained self-hosted macOS lane is not wasted on stale commits.
+  hosted macOS lane is not wasted on stale commits.
 - Each run executes `scripts/verify-brand-surface.sh`, the Python unit suite
   (`scripts/tests`), `swift test`, `swift build -c release`, an ad-hoc packaged
   app build, and the app-attached CLI startup smoke.
@@ -147,21 +147,15 @@ job.
   suites per test, and no live provider credentials or network inference are
   required.
 
-#### macOS lane maintenance and recovery
+#### macOS lane and credential isolation
 
-- Lane: self-hosted runner `stevens-mac-mini-okrapdf-desktop` on the Mac
-  mini, labels `self-hosted, macOS, ARM64, okrapdf-desktop-release`. PR
-  checks match on the base labels only; the release job alone claims the
-  `okrapdf-desktop-release` label.
-- Required toolchains on the lane: Xcode/Swift 5.9+, `rg`, `python3`.
-- Inspect runner health: `gh api repos/okra-project/desktop/actions/runners`
-  (status should be `online`), or the repo's Settings → Actions → Runners
-  page. Failed runs list their logs under the PR Checks workflow.
-- Recover an offline runner: on the Mac mini, restart the runner service from
-  its install directory (`./svc.sh stop && ./svc.sh start`, or the LaunchDaemon
-  equivalent used at install time), then re-check the runners API. If the
-  runner needs re-registration, replace it under Settings → Actions → Runners
-  with a fresh registration token and the same labels.
+- PR checks and releases use clean GitHub-hosted Apple-silicon `macos-15`
+  images so DiskImages and LaunchServices state cannot leak between runs.
+- The release job imports the Developer ID certificate into a randomized
+  temporary keychain, notarizes with repository secrets, and removes the
+  keychain in an `always()` cleanup step. PR checks remain secretless.
+- Required toolchains come from the hosted image plus `actions/setup-python`:
+  Xcode/Swift 5.9+, `rg`, and Python 3.12.
 - Branch protection: the `macos-checks` job is the required pre-merge check
   for `main`.
 - Release appcasts are pushed to a dedicated `automation/appcast-*` branch.
