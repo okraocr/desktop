@@ -537,12 +537,9 @@ private enum EndpointDiscovery {
     }
 
     private static func runOpen(_ arguments: [String]) throws {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
-        process.arguments = arguments
-        try process.run()
-        process.waitUntilExit()
-        guard process.terminationStatus == 0 else {
+        do {
+            try LaunchServicesCommand.dispatch(arguments: arguments)
+        } catch {
             throw CLIError.connection("LaunchServices could not open Okra.app.")
         }
     }
