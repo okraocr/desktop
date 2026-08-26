@@ -57,6 +57,18 @@ jobs:
         with:
           ref: ${{ steps.release.outputs.tag }}
 
+      # Manual replay can use a newer protected workflow than the immutable
+      # release tag. Keep release-control helpers pinned to the workflow event
+      # SHA while all app source, tests, and packaging stay on the tag above.
+      - name: Checkout release controls
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: .release-control
+          sparse-checkout: scripts/prepare-release-smoke-app.sh
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
       - name: Import Developer ID certificate
         shell: bash
         run: |
@@ -128,7 +140,7 @@ jobs:
           build/Okra.app/Contents/Resources/okra help | grep -F 'okra chandra'
           build/Okra.app/Contents/Resources/okra version | grep -F "${{ steps.release.outputs.version }}"
           SMOKE_APP="${RUNNER_TEMP}/Okra Release Validation.app"
-          ./scripts/prepare-release-smoke-app.sh \
+          bash .release-control/scripts/prepare-release-smoke-app.sh \
             "build/Okra.app" \
             "${SMOKE_APP}" \
             "com.okrapdf.desktop.release-validation" \
