@@ -71,8 +71,8 @@ struct WorkspaceNavigationView: View {
                     title: WorkspaceNavigationSection.plugins.rawValue,
                     note: "Capabilities you can configure and run locally"
                 ) {
-                    ForEach(AssistantPlugin.allCases) { plugin in
-                        if plugin != AssistantPlugin.allCases.first { Divider() }
+                    ForEach(WorkspacePlugin.allCases) { plugin in
+                        if plugin != WorkspacePlugin.allCases.first { Divider() }
                         navigationButton(
                             destination: .plugin(plugin),
                             statusMessage: pluginStatusMessage(plugin),
@@ -162,7 +162,7 @@ struct WorkspaceNavigationView: View {
         }
     }
 
-    private func pluginStatusMessage(_ plugin: AssistantPlugin) -> String {
+    private func pluginStatusMessage(_ plugin: WorkspacePlugin) -> String {
         switch plugin {
         case .extract:
             if coordinator.isInstalling {
@@ -177,7 +177,7 @@ struct WorkspaceNavigationView: View {
         }
     }
 
-    private func pluginStatusImage(_ plugin: AssistantPlugin) -> String {
+    private func pluginStatusImage(_ plugin: WorkspacePlugin) -> String {
         switch plugin {
         case .extract:
             if coordinator.isInstalling { return "arrow.down.circle" }

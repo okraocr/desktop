@@ -7,7 +7,8 @@ enum WorkspaceTheme {
     static let sectionSpacing = 18.0
     static let panelPadding = 18.0
     static let cardRadius = 10.0
-    static let assistantPanelWidth = 380.0
+    static let facetMinimumWidth = 360.0
+    static let facetIdealWidth = 440.0
     static let navigationPanelWidth = 360.0
     static let readerMinimumWidth = 520.0
 }

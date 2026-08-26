@@ -15,9 +15,9 @@ final class AppState: ObservableObject {
     static let setupGuideCompletedDefaultsKey = "localProcessing.setupGuide.completed"
 
     let localProcessing: LocalProcessingCoordinator
-    let conversation = AssistantConversation()
     private let userDefaults: UserDefaults
     private var clientHost: DesktopClientHTTPHost?
+    private var handledClientCallbackNonces: Set<String> = []
 
     init() {
         let userDefaults = UserDefaults.standard
@@ -28,6 +28,7 @@ final class AppState: ObservableObject {
         showsSetupGuide = userDefaults.object(forKey: Self.setupGuideCompletedDefaultsKey) == nil
         ShellCaptureHarness.startIfRequested(state: self)
         startClientHost()
+        openCommandLineClientCallbackIfPresent()
     }
 
     init(localProcessing: LocalProcessingCoordinator) {
@@ -153,6 +154,19 @@ final class AppState: ObservableObject {
         openPDF(URL(fileURLWithPath: path))
     }
 
+    private func openCommandLineClientCallbackIfPresent() {
+        guard let callbackURL = ProcessInfo.processInfo.arguments
+            .dropFirst()
+            .compactMap({ URL(string: $0) })
+            .first(where: {
+                $0.scheme == OkraClientCallback.scheme
+                    && $0.host == OkraClientCallback.host
+            }) else {
+            return
+        }
+        deliverClientEndpoint(for: callbackURL)
+    }
+
     private var activeOperationMessage: String {
         "Finish or cancel the active local operation before opening another PDF."
     }
@@ -179,7 +193,7 @@ final class AppState: ObservableObject {
         let router = DesktopClientRouter(appState: self)
         let host = DesktopClientHTTPHost(
             version: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
-                ?? "1.0.0-rc.13",
+                ?? "1.0.0-rc.15",
             route: { request in await router.route(request) }
         )
         do {
@@ -198,6 +212,7 @@ final class AppState: ObservableObject {
               let nonce = components.queryItems?.first(where: { $0.name == "nonce" })?.value,
               nonce.count == 64,
               nonce.allSatisfy({ $0.isHexDigit }),
+              handledClientCallbackNonces.insert(nonce).inserted,
               let callbackURL = URL(
                 string: "http://127.0.0.1:\(port)\(OkraClientCallback.path)"
               ) else {

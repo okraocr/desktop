@@ -3,6 +3,7 @@ import SwiftUI
 struct DocumentWorkspaceView: View {
     let document: LocalPDFDocument?
     let isDropTargeted: Bool
+    let facetMode: FacetWorkspaceMode
     @ObservedObject var coordinator: LocalProcessingCoordinator
     @ObservedObject var redaction: PresidioRedactionCoordinator
     let canOpenPDF: Bool
@@ -36,7 +37,7 @@ struct DocumentWorkspaceView: View {
     }
 
     private var reviewingRedactions: Bool {
-        redaction.detection != nil
+        facetMode == .redaction && redaction.detection != nil
     }
 
     private var activeOverlays: [PDFBoundingBoxOverlay] {

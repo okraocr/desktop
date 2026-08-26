@@ -1,25 +1,25 @@
 # okraPDF Desktop — Release Checklist
 
-Current train: `desktop-v1.0.0-rc.14`
+Current train: `desktop-v1.0.0-rc.15`
 
-Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.6.16`, `D.6.17`, `D.6.18`, `D.6.19`, `D.6.20`, `D.6.21`, `D.6.22`, `D.6.23`
+Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.6.16`, `D.6.17`, `D.6.18`, `D.6.19`, `D.6.20`, `D.6.21`, `D.6.22`, `D.6.23`, `D.6.24`
 
 ## Product contract
 
 - [x] Windowed app with native PDFKit preview
 - [x] Regular activation policy and Dock lifecycle
-- [x] Document-first workspace with a permanent center reader, compact edge rails, and independently collapsible left navigation and trailing Assistant
+- [x] Document-first workspace with a permanent resizable source PDF on the left and Facet output/review surface on the right
 - [x] Grouped left navigation separates Plugins (Extract, Redact) from Activity (Runs)
-- [x] Focused plugin destinations own setup, progress, cancellation, and retry; Assistant setup handoffs only navigate there
-- [x] Native toolbar with the canonical mark, document title, Open, source reveal, and extraction-box controls; panel toggles live in their corresponding edge rails rather than title-bar tabs
-- [x] Assistant visible and navigation tucked away by default; hiding either panel preserves its local state
-- [x] Panel transitions honor Reduce Motion and expose accessible labels, help, and selected state
-- [x] Hidden drawer controls are disabled and removed from accessibility; closing a drawer returns keyboard focus to its persistent rail
+- [x] Focused plugin destinations own setup, progress, cancellation, and retry; Facet setup handoffs only navigate there
+- [x] Native toolbar with the canonical mark, document title, Open, source reveal, extraction-box controls, and workspace navigation toggle
+- [x] Facet remains visible while optional navigation is tucked away by default; changing navigation never discards output state
+- [x] Navigation transitions honor Reduce Motion and expose accessible labels, help, and selected state
+- [x] Hidden navigation controls are disabled and removed from accessibility; the toolbar toggle remains available
 - [x] Open and document replacement are disabled and centrally guarded during setup or parsing
 - [x] PDF drag-and-drop
 - [x] **Open PDF…** picker
 - [x] Explicit Parse action; opening/replacing a PDF creates no run
-- [x] Dots OCR 1.5 selected by default on eligible clean installs; setup and Parse remain explicit
+- [x] Chandra OCR 2 selected by default on eligible clean installs; license, setup, and Parse remain explicit
 - [x] Dots host gate requires Apple silicon, macOS 14+, 16 GB+ memory, and setup space; incompatible hosts fall back to Apple Vision, and setup separately requires Python 3.10+
 - [x] Apple Vision remains available without setup
 - [x] Local parser doctor recommends a compatible pairing without downloading or parsing
@@ -109,7 +109,7 @@ Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.
 - [x] Presidio simulation, loopback-only URL policy, source-block mapping, box persistence, and rasterized export coverage
 - [x] Authenticated loopback `okra.client.v1` host is owned by Okra.app and rejects unauthenticated clients
 - [x] Signed app bundle includes the thin `okra` CLI with health, catalogs, open, parse, run events/status, artifacts, cancel/resume, and detect commands
-- [x] Document-first default and independent Workspace/Extract toggles have unit coverage
+- [x] Document-first defaults, source/facet modes, and Plugins/Activity navigation inventory have unit coverage
 - [x] Packaged app starts with builder-only SwiftPM resources hidden
 - [x] Quarantined notarized beta.8 through beta.15 DMGs start through LaunchServices before publishing (2026-07-28)
 - [x] DMG packaging stages an Applications shortcut, embeds a checksummed Finder icon layout without GUI automation, and verifies both from the mounted release image
@@ -140,7 +140,8 @@ job.
 - Concurrency cancels superseded runs for the same PR/branch ref so the
   constrained self-hosted macOS lane is not wasted on stale commits.
 - Each run executes `scripts/verify-brand-surface.sh`, the Python unit suite
-  (`scripts/tests`), `swift test`, and `swift build -c release`.
+  (`scripts/tests`), `swift test`, `swift build -c release`, an ad-hoc packaged
+  app build, and the app-attached CLI startup smoke.
 - Tests stay hermetic: `OKRA_DESKTOP_TEST_TMPDIR` routes test workspaces to
   the runner-temporary root, `TestWorkspace` already isolates `UserDefaults`
   suites per test, and no live provider credentials or network inference are
@@ -173,9 +174,10 @@ Run every line below against the exact downloadable prerelease candidate.
 Record evidence on its release tracking issue or pull request; do not use
 a local build.
 
-- [ ] Launch with Assistant visible and navigation hidden; confirm the center reader remains the largest surface
-- [ ] Toggle navigation and Assistant independently from their toolbar controls, then close each from its panel
-- [ ] Hide and reopen Extract during a completed run; confirm the selected provider and output remain intact
+- [ ] Launch with navigation hidden; confirm source PDF and Facet are both visible with the source as the larger surface
+- [ ] Drag the source/facet divider and toggle navigation; confirm neither action discards document or output state
+- [ ] Open Extract settings during a completed run, close navigation, and confirm the selected provider and Facet output remain intact
+- [ ] Hover and select grounded blocks in Facet; confirm the matching source boxes highlight, then hover and select source boxes and confirm Facet scrolls to the block
 - [ ] Open a one-page text PDF and confirm no extraction starts until **Parse** is clicked
 - [ ] Replace it with a multi-page scanned PDF and again confirm no automatic extraction
 - [ ] Parse both documents with Apple Vision

@@ -304,6 +304,6 @@ final class DesktopClientRouter {
 
     private var appVersion: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
-            ?? "1.0.0-rc.13"
+            ?? "1.0.0-rc.15"
     }
 }

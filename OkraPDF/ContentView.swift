@@ -5,9 +5,9 @@ import UniformTypeIdentifiers
 struct ContentView: View {
     @EnvironmentObject private var state: AppState
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var isAssistantPresented = true
     @State private var isNavigationPresented = false
     @State private var navigationDestination: WorkspaceNavigationDestination?
+    @State private var facetMode: FacetWorkspaceMode = .extraction
     @State private var isDropTargeted = false
 
     var body: some View {
@@ -29,38 +29,31 @@ struct ContentView: View {
                 }
             }
 
-            DocumentWorkspaceView(
-                document: state.selectedDocument,
-                isDropTargeted: isDropTargeted,
-                coordinator: state.localProcessing,
-                redaction: state.localProcessing.redaction,
-                canOpenPDF: state.canOpenPDF,
-                openPDF: state.openPDFPicker,
-                openSetupGuide: state.presentSetupGuide
-            )
-            .frame(minWidth: WorkspaceTheme.readerMinimumWidth)
-            .layoutPriority(1)
-
-            WorkspaceCollapsiblePanel(
-                isPresented: isAssistantPresented,
-                width: WorkspaceTheme.assistantPanelWidth,
-                alignment: .leading
-            ) {
-                AssistantPanelView(
+            HSplitView {
+                DocumentWorkspaceView(
                     document: state.selectedDocument,
-                    importError: state.importError,
+                    isDropTargeted: isDropTargeted,
+                    facetMode: facetMode,
                     coordinator: state.localProcessing,
-                    conversation: state.conversation,
-                    parse: state.parseSelectedDocument,
-                    revealPDF: state.revealSelectedPDF,
+                    redaction: state.localProcessing.redaction,
+                    canOpenPDF: state.canOpenPDF,
                     openPDF: state.openPDFPicker,
-                    showPlugin: presentPlugin,
-                    showActivity: presentActivity,
-                    dismiss: toggleAssistant
+                    openSetupGuide: state.presentSetupGuide
                 )
-                .overlay(alignment: .leading) {
-                    Divider()
-                }
+                .frame(minWidth: WorkspaceTheme.readerMinimumWidth)
+                .layoutPriority(1)
+
+                FacetWorkspaceView(
+                    document: state.selectedDocument,
+                    coordinator: state.localProcessing,
+                    mode: $facetMode,
+                    parse: state.parseSelectedDocument,
+                    showPlugin: presentPlugin
+                )
+                .frame(
+                    minWidth: WorkspaceTheme.facetMinimumWidth,
+                    idealWidth: WorkspaceTheme.facetIdealWidth
+                )
             }
         }
         .background(.background)
@@ -85,37 +78,23 @@ struct ContentView: View {
         .toolbar {
             WorkspaceToolbarContent(
                 document: state.selectedDocument,
-                isAssistantPresented: isAssistantPresented,
                 isNavigationPresented: isNavigationPresented,
                 coordinator: state.localProcessing,
-                toggleAssistant: toggleAssistant,
                 toggleNavigation: toggleNavigation,
                 openPDF: state.openPDFPicker,
                 revealPDF: state.revealSelectedPDF
             )
         }
-        .animation(panelAnimation, value: isAssistantPresented)
         .animation(panelAnimation, value: isNavigationPresented)
-    }
-
-    private func toggleAssistant() {
-        isAssistantPresented.toggle()
     }
 
     private func toggleNavigation() {
         isNavigationPresented.toggle()
     }
 
-    private func presentPlugin(_ plugin: AssistantPlugin) {
+    private func presentPlugin(_ plugin: WorkspacePlugin) {
         navigationDestination = .plugin(plugin)
         isNavigationPresented = true
-        isAssistantPresented = false
-    }
-
-    private func presentActivity(_ activity: WorkspaceActivity) {
-        navigationDestination = .activity(activity)
-        isNavigationPresented = true
-        isAssistantPresented = false
     }
 
     private var panelAnimation: Animation? {

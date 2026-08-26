@@ -12,7 +12,6 @@ enum WorkspaceActivity: String, CaseIterable, Identifiable {
 
     var summary: String { "Recent local runs and outputs" }
 
-    var command: String { "/runs" }
 }
 
 enum WorkspaceNavigationSection: String, Equatable {
@@ -23,7 +22,7 @@ enum WorkspaceNavigationSection: String, Equatable {
 /// A stable left-navigation destination. The enum makes the plugin/activity
 /// boundary explicit so activity can never leak into plugin iteration again.
 enum WorkspaceNavigationDestination: Identifiable, Equatable {
-    case plugin(AssistantPlugin)
+    case plugin(WorkspacePlugin)
     case activity(WorkspaceActivity)
 
     var id: String {

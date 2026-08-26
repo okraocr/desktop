@@ -16,14 +16,14 @@
 > formerly a generated projection of the Okra monorepo; development now
 > happens directly here.
 
-RC.12 keeps every marked Unlimited-OCR entity as its own structured block,
-even when the model omits source coordinates. Grounded blocks still drive PDF
-overlays; the inspector reports how many blocks have no source boxes instead of
-silently folding their text into a neighboring region. Parsing remains explicit,
-local, and source-preserving.
+RC.15 replaces the macOS chat shell with a permanent source/facet workspace.
+The source PDF stays on the left; extracted blocks, Markdown, JSON, and local
+redaction review stay on the right. Hover or select a grounded block on either
+side to find its linked source region. Parsing remains explicit, local, and
+source-preserving.
 
 <p align="center">
-  <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.12">
+  <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.15">
     <img alt="Download for macOS" src="https://img.shields.io/badge/download-macOS%2013%2B-2f855a">
   </a>
   <a href="https://github.com/okrapdf/desktop/releases/tag/windows-v0.1.0-alpha.2">
@@ -38,12 +38,12 @@ local, and source-preserving.
 </p>
 
 <p align="center">
-  <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.12">Download</a> ·
+  <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.15">Download</a> ·
   <a href="docs/releases/README.md">Release notes</a> ·
   <a href="https://github.com/okrapdf/desktop/issues/new">Report an issue</a>
 </p>
 
-![okraPDF reading a public SEC filing beside the local assistant panel](.github/assets/okra-reader-overview.png)
+![okraPDF source PDF and structured extraction linked by bounding boxes](.github/assets/okra-structured-extraction.png)
 
 ## Read first. Parse when you choose.
 
@@ -53,12 +53,11 @@ The selected local parser then produces reviewable output beside a persistent
 per-page run history on this Mac.
 
 - Read text, charts, forms, and scanned pages in a native document-first workspace:
-  the PDF stays the main window, with grouped left navigation and a collapsible
-  Assistant that uses a deterministic local command router (no cloud model).
+  the source PDF stays on the left and the permanent Facet surface stays on the
+  right, with a draggable split between them.
 - Configure **Extract** and **Redact** under **Plugins**. Browse parse history
-  under **Activity → Runs**. Assistant handoffs open one focused destination;
-  installation, cancellation, retry, and live progress remain attached to the
-  plugin even when navigation is closed.
+  under **Activity → Runs**. Installation, cancellation, retry, and live
+  progress remain attached to the plugin even when navigation is closed.
 - Parse with the managed Chandra OCR 2 default on eligible Macs, built-in Apple
   Vision fallback, optional Dots OCR 1.5 or Baidu Unlimited-OCR, or an installed
   Ollama vision model.
@@ -129,12 +128,13 @@ Local parser runs accept up to 2,000 PDF pages, cap prepared page images at
 4 GB per run, and preserve at least 1 GB of free disk space. Split larger PDFs
 before parsing; opening and reading them does not create rendered-page artifacts.
 
-Dots OCR 1.5 is selected by default on an eligible clean install but never
+Chandra OCR 2 is selected by default on an eligible clean install but never
 downloads or parses automatically. Hardware eligibility requires Apple silicon,
-macOS 14+, at least 16 GB unified memory, and at least 5 GB free disk; an
+macOS 14+, at least 16 GB unified memory, and enough setup space; an
 ineligible Mac falls back to Apple Vision. Completing setup also requires
-Python 3.10+. The explicit setup downloads about 3.54 GB, shows the upstream
-model terms, and verifies every pinned model artifact with SHA-256. Baidu
+Python 3.10+. The explicit setup downloads the pinned 8-bit MLX model, shows
+the upstream OpenRAIL terms, and verifies every pinned artifact with SHA-256.
+Dots OCR 1.5 remains an optional managed parser. Baidu
 Unlimited-OCR remains selectable as an optional legacy parser with its separate
 pinned setup. A stored Baidu selection stays on Baidu, and an interrupted Baidu
 run resumes only with Baidu. Managed extraction is forced offline after setup.
@@ -148,9 +148,9 @@ and treats Homebrew installations as user-managed local dependencies.
 
 ## Local PII redaction
 
-After a positioned parse finishes, open the **Redact** plugin in the assistant
-panel. If Presidio is not ready, its one setup button opens **Plugins →
-Redact**; installation never runs inside Assistant. The Redact destination installs
+After a positioned parse finishes, choose **Redact** in the permanent Facet
+surface. If Presidio is not ready, its setup button opens **Plugins → Redact**;
+installation stays in the plugin destination. The Redact destination installs
 the pinned Microsoft Presidio 2.2.364 and English spaCy 3.8 model under Okra's
 sandboxed Application Support `Okra/Providers/presidio` directory, tracks
 progress, and supports cancel/retry.
@@ -173,8 +173,8 @@ must be parsed with a source-aligned provider before redaction is available.
 
 | Parser | Setup | Best fit |
 | --- | --- | --- |
-| **Dots OCR 1.5** (dots.mocr) | Eligible-Mac default; explicit pinned 4-bit MLX setup, about 3.54 GB | Structured OCR, reading order, tables, formulas, and source boxes on Apple silicon with macOS 14+, Python 3.10+, and 16 GB+ memory |
-| **Chandra OCR 2** (datalab-to) | Optional pinned 8-bit MLX setup, about 5.16 GB | Layout-rich OCR with labeled blocks, tables, forms, math, chemistry, and source boxes on Apple silicon with macOS 14+, Python 3.10+, and 16 GB+ memory |
+| **Chandra OCR 2** (datalab-to) | Eligible-Mac default; explicit pinned 8-bit MLX setup, about 5.16 GB | Layout-rich OCR with labeled blocks, tables, forms, math, chemistry, and source boxes on Apple silicon with macOS 14+, Python 3.10+, and 16 GB+ memory |
+| **Dots OCR 1.5** (dots.mocr) | Optional pinned 4-bit MLX setup, about 3.54 GB | Structured OCR, reading order, tables, formulas, and source boxes on Apple silicon with macOS 14+, Python 3.10+, and 16 GB+ memory |
 | **Apple Vision** | None; built into macOS | Zero-setup text and scanned PDFs |
 | **Baidu Unlimited-OCR** | Optional legacy pinned 4-bit MLX setup, about 2.4 GB | Existing Baidu workflows, checkpoints, and layout extraction on Apple silicon |
 | **Auto (Hybrid)** | Start Ollama and choose an installed vision model | Mixed PDFs; native text with page-level vision fallback |
@@ -182,15 +182,15 @@ must be parsed with a source-aligned provider before redaction is available.
 
 ## Download
 
-`desktop-v1.0.0-rc.12` is the current signed public release candidate for
-Apple-silicon Macs running macOS 13 or later. RC.12 preserves bbox-less
-Unlimited-OCR blocks and reports grounded and ungrounded output counts on top
-of RC.11's focused Plugins and Activity navigation.
+`desktop-v1.0.0-rc.15` is the current signed public release candidate for
+Apple-silicon Macs running macOS 13 or later. RC.15 makes the source PDF and
+source-linked Facet output permanent side-by-side surfaces and removes the
+former Assistant/chat UI.
 
-1. Download `Okra-1.0.0-rc.12.dmg` from the
-   [v1.0.0-rc.12 release](https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.12).
+1. Download `Okra-1.0.0-rc.15.dmg` from the
+   [v1.0.0-rc.15 release](https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.15).
 2. Optionally download the adjacent checksum and run
-   `shasum -a 256 -c Okra-1.0.0-rc.12.dmg.sha256`.
+   `shasum -a 256 -c Okra-1.0.0-rc.15.dmg.sha256`.
 3. Open the DMG, drag **Okra** to **Applications**, and eject the DMG.
 4. Open **Okra** from Applications. The app and DMG are Developer ID signed,
    hardened, notarized by Apple, and stapled for normal Gatekeeper opening.
@@ -226,7 +226,7 @@ swift build
 To create a local `.app` and DMG:
 
 ```bash
-./scripts/build-dmg.sh 1.0.0-rc.12
+./scripts/build-dmg.sh 1.0.0-rc.15
 ```
 
 Local packages are ad-hoc signed. The release workflow supplies the Developer

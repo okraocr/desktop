@@ -6,8 +6,7 @@ import PDFKit
 ///
 /// Set `OKRA_SHELL_CAPTURE_DIR` to a writable directory and launch a debug
 /// build with a PDF argument: the harness waits for the reader to render,
-/// drives the assistant through the same `AssistantConversation.send` path a
-/// user hits, and renders the app's own window to PNGs — no screen-recording
+/// then renders the source/facet workspace to a PNG — no screen-recording
 /// permission involved, and nothing runs in release builds.
 enum ShellCaptureHarness {
     @MainActor
@@ -26,26 +25,8 @@ enum ShellCaptureHarness {
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
             state.dismissSetupGuide()
-            capture(to: directoryURL, name: "01-reader-assistant.png")
-
-            state.conversation.send(
-                "parse the tables in this filing",
-                documentIsOpen: state.selectedDocument != nil,
-                openPDF: {}
-            )
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                capture(to: directoryURL, name: "02-extract-plugin.png")
-
-                state.conversation.send(
-                    "redact the PII before I share it",
-                    documentIsOpen: state.selectedDocument != nil,
-                    openPDF: {}
-                )
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    capture(to: directoryURL, name: "03-redact-plugin.png")
-                    log(in: directoryURL, "harness finished")
-                }
-            }
+            capture(to: directoryURL, name: "01-source-facet.png")
+            log(in: directoryURL, "harness finished")
         }
         #endif
     }
