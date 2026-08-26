@@ -9,6 +9,12 @@ private let packagedAppPath = ProcessInfo.processInfo.environment[
 private let packagedDMGPath = ProcessInfo.processInfo.environment[
     "OKRA_DESKTOP_PACKAGED_DMG_PATH"
 ]
+private let releaseSmokeAppPath = ProcessInfo.processInfo.environment[
+    "OKRA_DESKTOP_RELEASE_SMOKE_APP_PATH"
+]
+private let expectedBundleIdentifier = ProcessInfo.processInfo.environment[
+    "OKRA_DESKTOP_EXPECTED_BUNDLE_IDENTIFIER"
+] ?? "com.okrapdf.desktop"
 
 @MainActor
 struct PackagedAppLaunchTests {
@@ -26,7 +32,10 @@ struct PackagedAppLaunchTests {
         let appVersion = try #require(
             appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
         )
-        try verifyBundleLayout(at: appURL)
+        try verifyBundleLayout(
+            at: appURL,
+            expectedBundleIdentifier: expectedBundleIdentifier
+        )
         let resourceIsolation = try ResourceFallbackIsolation.fromEnvironment()
         defer { resourceIsolation?.restore() }
 
@@ -70,14 +79,18 @@ struct PackagedAppLaunchTests {
     }
 
     @Test(
-        "Quarantined DMG launches through LaunchServices",
-        .disabled(if: packagedDMGPath == nil, "Runs after the final DMG is packaged"),
+        "Quarantined DMG and release-equivalent app pass LaunchServices",
+        .disabled(
+            if: packagedDMGPath == nil || releaseSmokeAppPath == nil,
+            "Runs after the final DMG and notarized smoke app are packaged"
+        ),
         .bug("https://github.com/okrapdf/desktop/issues/98"),
         .tags(.packaging, .smoke),
         .timeLimit(.minutes(1))
     )
-    func quarantinedDMGLaunchesThroughLaunchServices() async throws {
+    func quarantinedDMGAndReleaseEquivalentAppPassLaunchServices() async throws {
         let dmgPath = try #require(packagedDMGPath)
+        let sourceSmokeAppPath = try #require(releaseSmokeAppPath)
         let workspace = try TestWorkspace(prefix: "okra-dmg-launch")
         try FileManager.default.createDirectory(at: workspace.root, withIntermediateDirectories: true)
         let copiedDMG = workspace.root.appendingPathComponent("Okra.dmg")
@@ -114,9 +127,42 @@ struct PackagedAppLaunchTests {
 
         try verifyDMGPresentation(at: mountURL)
         let appURL = mountURL.appendingPathComponent("Okra.app", isDirectory: true)
-        try verifyBundleLayout(at: appURL)
+        try verifyBundleLayout(
+            at: appURL,
+            expectedBundleIdentifier: "com.okrapdf.desktop"
+        )
         let resourceIsolation = try ResourceFallbackIsolation.fromEnvironment()
         defer { resourceIsolation?.restore() }
+
+        // A developer workstation may already have a production container that
+        // an ad-hoc build created. macOS then waits for interactive approval
+        // before a Developer ID build can claim that container, which is not a
+        // release regression and cannot be answered by a headless runner. The
+        // notarized smoke copy has identical code and entitlements but a stable,
+        // release-only bundle identity, so LaunchServices and Gatekeeper remain
+        // exercised without touching the runner's real Okra data.
+        let sourceSmokeAppURL = URL(
+            fileURLWithPath: sourceSmokeAppPath,
+            isDirectory: true
+        )
+        let smokeAppURL = workspace.root.appendingPathComponent(
+            "Okra Release Validation.app",
+            isDirectory: true
+        )
+        try FileManager.default.copyItem(at: sourceSmokeAppURL, to: smokeAppURL)
+        try runCommand(
+            URL(fileURLWithPath: "/usr/bin/xattr"),
+            arguments: [
+                "-w",
+                "com.apple.quarantine",
+                "0083;6696e1a0;Safari;D1A3A2E0-7D6E-4FE5-A8A4-2E9D2F2CFA01",
+                smokeAppURL.path,
+            ]
+        )
+        try verifyBundleLayout(
+            at: smokeAppURL,
+            expectedBundleIdentifier: expectedBundleIdentifier
+        )
 
         let configuration = NSWorkspace.OpenConfiguration()
         configuration.activates = false
@@ -125,7 +171,7 @@ struct PackagedAppLaunchTests {
         configuration.environment = isolatedEnvironment(home: workspace.root)
         let launchStartedAt = Date()
         let runningApplication = try await NSWorkspace.shared.openApplication(
-            at: appURL,
+            at: smokeAppURL,
             configuration: configuration
         )
         defer {
@@ -140,14 +186,17 @@ struct PackagedAppLaunchTests {
             attachMostRecentCrashReport(since: launchStartedAt)
         }
         #expect(runningApplication.isTerminated == false)
-        #expect(runningApplication.bundleIdentifier == "com.okrapdf.desktop")
+        #expect(runningApplication.bundleIdentifier == expectedBundleIdentifier)
         runningApplication.forceTerminate()
         try await waitUntil("DMG app process to terminate") {
             runningApplication.isTerminated
         }
     }
 
-    private func verifyBundleLayout(at appURL: URL) throws {
+    private func verifyBundleLayout(
+        at appURL: URL,
+        expectedBundleIdentifier: String
+    ) throws {
         let fileManager = FileManager.default
         let executableURL = appURL
             .appendingPathComponent("Contents", isDirectory: true)
@@ -202,7 +251,7 @@ struct PackagedAppLaunchTests {
             )
         )
         try #require(fileManager.fileExists(atPath: brandMarkURL.path))
-        #expect(bundle.bundleIdentifier == "com.okrapdf.desktop")
+        #expect(bundle.bundleIdentifier == expectedBundleIdentifier)
         #expect(bundle.object(forInfoDictionaryKey: "LSUIElement") == nil)
         #expect(
             bundle.object(forInfoDictionaryKey: "SUEnableInstallerLauncherService") as? Bool

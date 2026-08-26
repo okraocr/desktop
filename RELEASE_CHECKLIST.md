@@ -1,6 +1,6 @@
 # okraPDF Desktop — Release Checklist
 
-Current train: `desktop-v1.0.0-rc.15`
+Current train: `desktop-v1.0.0-rc.16`
 
 Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.6.16`, `D.6.17`, `D.6.18`, `D.6.19`, `D.6.20`, `D.6.21`, `D.6.22`, `D.6.23`, `D.6.24`
 
@@ -111,6 +111,7 @@ Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.
 - [x] Signed app bundle includes the thin `okra` CLI with health, catalogs, open, parse, run events/status, artifacts, cancel/resume, and detect commands
 - [x] Document-first defaults, source/facet modes, and Plugins/Activity navigation inventory have unit coverage
 - [x] Packaged app starts with builder-only SwiftPM resources hidden
+- [x] Headless release launch gates use a separately identified, Developer ID-signed and notarized copy, while the production app and DMG retain their exact signature, Gatekeeper, staple, and layout checks
 - [x] Quarantined notarized beta.8 through beta.15 DMGs start through LaunchServices before publishing (2026-07-28)
 - [x] DMG packaging stages an Applications shortcut, embeds a checksummed Finder icon layout without GUI automation, and verifies both from the mounted release image
 - [x] Remote-control, dispatch, registry, and model-catalog tests removed
@@ -268,6 +269,8 @@ the real-provider checks complete from Dots or Baidu simulation.
 - [x] RC.12 appcast branch passes `macos-checks` and merges to protected `main` (PR #105, 2026-08-22)
 - [x] Exact RC.12 DMG is re-downloaded, matches published SHA-256 `8c174a3bff9760c9f94e06290bceb293f2c0528d6bceb256b27ecc9bbfee60b8`, passes disk-image integrity and staple validation, and is accepted as `Notarized Developer ID` (2026-08-22)
 - [x] RC.12 release workflow passes signing, notarization/stapling, Gatekeeper, packaged launch, DMG integrity, publication, and signed-appcast generation (run `32605739729`, 2026-08-22)
+- [x] RC.13, RC.14, and RC.15 tags produced no public release assets; all three candidates fix forward without moving any immutable tag (2026-08-25)
+- [ ] Public `desktop-v1.0.0-rc.16` prerelease publishes the signed/notarized source/facet workspace, Chandra OCR 2, Presidio, and local CLI DMG plus SHA-256 asset
 - [x] RC.8 appcast branch passes `macos-checks` and merges to protected `main` (PR #80, 2026-08-17)
 - [x] Exact RC.8 DMG is re-downloaded and matches published SHA-256 `86559fbb63d6c7f151b603c56a3022095bdba836af76fa9e03fb227e55f60267` (2026-08-17)
 - [x] RC.8 release workflow passes disk-image integrity, Developer ID, notarization/stapling, Gatekeeper, embedded build, and quarantined LaunchServices checks (run `32057788576`, 2026-08-17)

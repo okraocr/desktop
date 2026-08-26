@@ -33,6 +33,26 @@ class ReleaseWorkflowTests(unittest.TestCase):
         self.assertLess(self.workflow.index(app_staple), self.workflow.index(package_dmg))
         self.assertNotIn("hdiutil create", self.workflow)
 
+    def test_packaged_launch_uses_a_release_only_container_identity(self):
+        self.assertIn("./scripts/prepare-release-smoke-app.sh", self.workflow)
+        self.assertIn("com.okrapdf.desktop.release-validation", self.workflow)
+        self.assertIn(
+            'OKRA_DESKTOP_PACKAGED_APP_PATH="${SMOKE_APP}"',
+            self.workflow,
+        )
+        self.assertIn(
+            'OKRA_DESKTOP_RELEASE_SMOKE_APP_PATH="${OKRA_RELEASE_SMOKE_APP_PATH}"',
+            self.workflow,
+        )
+        self.assertIn(
+            'codesign --verify --strict --deep "build/Okra.app"',
+            self.workflow,
+        )
+        self.assertIn(
+            'spctl --assess --type execute --verbose=4 "build/Okra.app"',
+            self.workflow,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

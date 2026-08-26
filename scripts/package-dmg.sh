@@ -5,7 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LAYOUT_TEMPLATE="${SCRIPT_DIR}/assets/dmg-layout.dsstore.b64"
 LAYOUT_SHA256="0eae0115c4a2e16f5ecdf57cff3acf326ef53fd413454581b0c8aa090a0f5222"
-VOLUME_NAME="Okra"
+VOLUME_NAME="okraPDF"
 APP_NAME="Okra.app"
 APPLICATIONS_LINK_NAME="Applications"
 
