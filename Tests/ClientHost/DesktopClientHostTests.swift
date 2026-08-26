@@ -4,6 +4,31 @@ import Testing
 @testable import Okra
 
 struct DesktopClientHostTests {
+    @Test("A stuck LaunchServices helper cannot block the CLI")
+    func launchServicesHelperIsBounded() throws {
+        let clock = ContinuousClock()
+        let startedAt = clock.now
+
+        try LaunchServicesCommand.dispatch(
+            arguments: ["30"],
+            executableURL: URL(fileURLWithPath: "/bin/sleep"),
+            waitLimit: 0.1
+        )
+
+        #expect(startedAt.duration(to: clock.now) < .seconds(2))
+    }
+
+    @Test("A prompt LaunchServices helper failure is reported")
+    func launchServicesHelperFailureIsReported() {
+        #expect(throws: LaunchServicesCommandError.self) {
+            try LaunchServicesCommand.dispatch(
+                arguments: [],
+                executableURL: URL(fileURLWithPath: "/usr/bin/false"),
+                waitLimit: 1
+            )
+        }
+    }
+
     @Test("The client host binds to loopback and requires its published token")
     func loopbackHostRequiresAuthentication() async throws {
         let workspace = try TestWorkspace(prefix: "okra-client-host")
