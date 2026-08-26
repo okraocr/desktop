@@ -123,4 +123,41 @@ struct DesktopClientHostTests {
         #expect(artifacts.blocks.first?.bbox == [125, 250, 375, 750])
         #expect(artifacts.manifest.durationMs == 1_000)
     }
+
+    @Test("Presidio boxes project to the canonical client redaction shape")
+    func redactionsUseCanonicalCoordinates() {
+        let detection = RedactionDetection(
+            schemaVersion: 1,
+            object: "pii_redaction_detection",
+            runID: "run-1",
+            createdAt: Date(timeIntervalSince1970: 100),
+            ollamaModel: nil,
+            boxes: [
+                RedactionBox(
+                    id: "pii-1",
+                    page: 1,
+                    x: 0.125,
+                    y: 0.25,
+                    width: 0.25,
+                    height: 0.5,
+                    type: "EMAIL_ADDRESS",
+                    text: "reader@example.com",
+                    score: 0.98,
+                    source: "presidio",
+                    blockID: "block-1"
+                ),
+            ],
+            stats: RedactionStats(
+                total: 1,
+                byType: ["EMAIL_ADDRESS": 1],
+                bySource: ["presidio": 1]
+            )
+        )
+
+        let client = DesktopClientProjection.redaction(detection)
+
+        #expect(client.object == "client_redaction_detection")
+        #expect(client.engine == "presidio")
+        #expect(client.candidates.first?.bbox == [125, 250, 375, 750])
+    }
 }

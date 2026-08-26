@@ -252,6 +252,17 @@ final class PresidioRedactionCoordinator: ObservableObject {
         }
     }
 
+    func detectionForClient(run: LocalProcessingRun) -> RedactionDetection? {
+        if currentRun?.id == run.id, let detection { return detection }
+        guard let cached = try? RedactionDetection.load(from: redactionsURL(for: run)),
+              cached.runID == run.id else { return nil }
+        return cached
+    }
+
+    func isDetectingForClient(runID: String) -> Bool {
+        currentRun?.id == runID && isDetecting
+    }
+
     func setApproved(_ approved: Bool, for id: String) {
         guard detection?.boxes.contains(where: { $0.id == id }) == true else { return }
         if approved {

@@ -16,7 +16,7 @@ struct okraPDFApp: App {
             ContentView()
                 .environmentObject(appState)
                 .frame(minWidth: 960, minHeight: 680)
-                .onOpenURL(perform: appState.openPDF)
+                .onOpenURL(perform: appState.handleOpenURL)
         }
         .defaultSize(width: 1_320, height: 820)
         .windowStyle(.hiddenTitleBar)

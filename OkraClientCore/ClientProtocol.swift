@@ -5,6 +5,12 @@ public enum OkraClientProtocol {
     public static let header = "x-okra-client-protocol"
 }
 
+public enum OkraClientCallback {
+    public static let scheme = "okra"
+    public static let host = "client-connect"
+    public static let path = "/endpoint"
+}
+
 public struct ClientEndpointRecord: Codable, Equatable, Sendable {
     public let protocolVersion: String
     public let baseURL: String
@@ -31,13 +37,7 @@ public struct ClientEndpointRecord: Codable, Equatable, Sendable {
            override.isEmpty == false {
             return [URL(fileURLWithPath: override).standardizedFileURL]
         }
-        let home = FileManager.default.homeDirectoryForCurrentUser
-        return [
-            home.appendingPathComponent(
-                "Library/Containers/com.okrapdf.desktop/Data/Library/Application Support/Okra/client-endpoint.json"
-            ),
-            home.appendingPathComponent("Library/Application Support/Okra/client-endpoint.json"),
-        ]
+        return []
     }
 
     public static func load() throws -> Self {
@@ -61,7 +61,7 @@ public enum ClientProtocolError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .appNotRunning:
-            return "Okra.app is not running. Open the app, then retry."
+            return "Okra.app could not be reached through LaunchServices."
         case .incompatibleProtocol(let version):
             return "Okra.app is using unsupported client protocol \(version)."
         case .invalidEndpoint:
@@ -308,6 +308,71 @@ public struct ClientArtifacts: Codable, Equatable, Sendable {
         self.markdown = markdown
         self.blocks = blocks
         self.manifest = manifest
+    }
+}
+
+public struct ClientRedactionCandidate: Codable, Equatable, Sendable {
+    public let id: String
+    public let type: String
+    public let text: String
+    public let score: Double
+    public let source: String
+    public let page: Int
+    public let bbox: [Double]
+
+    public init(
+        id: String,
+        type: String,
+        text: String,
+        score: Double,
+        source: String,
+        page: Int,
+        bbox: [Double]
+    ) {
+        self.id = id
+        self.type = type
+        self.text = text
+        self.score = score
+        self.source = source
+        self.page = page
+        self.bbox = bbox
+    }
+}
+
+public struct ClientRedactionDetection: Codable, Equatable, Sendable {
+    public let object: String
+    public let runId: String
+    public let engine: String
+    public let model: String?
+    public let createdAt: String
+    public let candidates: [ClientRedactionCandidate]
+
+    public init(
+        runId: String,
+        model: String?,
+        createdAt: String,
+        candidates: [ClientRedactionCandidate]
+    ) {
+        object = "client_redaction_detection"
+        self.runId = runId
+        engine = "presidio"
+        self.model = model
+        self.createdAt = createdAt
+        self.candidates = candidates
+    }
+}
+
+public struct ClientRedactionStatus: Codable, Equatable, Sendable {
+    public let object: String
+    public let runId: String
+    public let status: String
+    public let engine: String
+
+    public init(runId: String) {
+        object = "client_redaction_status"
+        self.runId = runId
+        status = "running"
+        engine = "presidio"
     }
 }
 

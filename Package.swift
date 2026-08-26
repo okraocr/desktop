@@ -6,7 +6,7 @@ let package = Package(
     platforms: [.macOS(.v13)],
     products: [
         .executable(name: "Okra", targets: ["Okra"]),
-        .executable(name: "okra", targets: ["OkraCLI"]),
+        .executable(name: "okra-cli", targets: ["OkraCLI"]),
     ],
     dependencies: [
         .package(url: "https://github.com/sparkle-project/Sparkle", from: "2.9.4")

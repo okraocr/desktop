@@ -8,4 +8,4 @@ This release makes local automation a first-class companion to the native app.
 - Keeps Microsoft Presidio as the explicit post-parse PII default. The CLI can request candidate detection, but approval and destructive-looking redaction export remain human-controlled in the app.
 - Preserves Apple Vision fallback on incompatible Macs and every saved parser choice.
 
-The CLI is bundled at `/Applications/Okra.app/Contents/MacOS/okra`. Keep Okra.app open while using it.
+The CLI is bundled at `/Applications/Okra.app/Contents/Resources/okra`. Link it once with `sudo ln -sf /Applications/Okra.app/Contents/Resources/okra /usr/local/bin/okra`, then use `okra chandra document.pdf` for the default Chandra OCR 2 path or `okra presidio document.pdf` for explicit Presidio candidate detection. It launches or reconnects to Okra.app through an authenticated LaunchServices callback, then talks only to the app-owned loopback service.

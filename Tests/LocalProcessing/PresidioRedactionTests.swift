@@ -268,7 +268,8 @@ private final class PresidioInstallationFixtureService: PresidioRedactionServici
         if suspendsUntilCanceled {
             try await Task.sleep(for: .seconds(60))
         } else {
-            try await Task.sleep(for: .milliseconds(100))
+            // Keep the observable installing phase alive under parallel full-suite load.
+            try await Task.sleep(for: .milliseconds(500))
         }
 
         try Task.checkCancellation()

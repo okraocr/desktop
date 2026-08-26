@@ -37,8 +37,8 @@ swift build -c release 2>&1 | tail -3
 rm -rf "build/${APP_NAME}.app"
 mkdir -p "$APP_DIR/MacOS" "$APP_DIR/Resources" "$APP_DIR/Frameworks"
 cp .build/release/Okra "$APP_DIR/MacOS/${APP_NAME}"
-cp .build/release/okra "$APP_DIR/MacOS/okra"
-chmod 755 "$APP_DIR/MacOS/okra"
+cp .build/release/okra-cli "$APP_DIR/Resources/okra"
+chmod 755 "$APP_DIR/Resources/okra"
 cp -R .build/release/okraPDF_Okra.bundle "$APP_DIR/Resources/"
 
 # Embed Sparkle (in-app updater) and point the loader at Contents/Frameworks.
@@ -110,6 +110,17 @@ cat > "$APP_DIR/Info.plist" << PLIST
             </array>
         </dict>
     </array>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.okrapdf.desktop.client</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>okra</string>
+            </array>
+        </dict>
+    </array>
     <key>NSHighResolutionCapable</key>
     <true/>
 </dict>
@@ -150,7 +161,7 @@ if [[ -n "${SIGNING_IDENTITY}" ]]; then
     --options runtime \
     --timestamp \
     --sign "${SIGNING_IDENTITY}" \
-    "$APP_DIR/MacOS/okra"
+    "$APP_DIR/Resources/okra"
   codesign \
     --force \
     --options runtime \
@@ -170,7 +181,7 @@ else
     "${SPARKLE_FW}"; do
     sign_sparkle_component "${component}" --sign -
   done
-  codesign --force --sign - "$APP_DIR/MacOS/okra"
+  codesign --force --sign - "$APP_DIR/Resources/okra"
   codesign --force --sign - --entitlements okraPDF.entitlements "build/${APP_NAME}.app"
 fi
 

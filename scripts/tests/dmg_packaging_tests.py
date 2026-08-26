@@ -161,7 +161,15 @@ class DMGPackagingTests(unittest.TestCase):
             build_script,
             r"<key>SUEnableInstallerLauncherService</key>\s*<true/>",
         )
+        self.assertRegex(
+            build_script,
+            r"<key>CFBundleURLSchemes</key>\s*<array>\s*<string>okra</string>",
+        )
         self.assertIn("--preserve-metadata=entitlements", build_script)
+        self.assertIn(
+            'cp .build/release/okra-cli "$APP_DIR/Resources/okra"',
+            build_script,
+        )
 
 
 if __name__ == "__main__":
