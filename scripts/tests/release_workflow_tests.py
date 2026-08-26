@@ -34,7 +34,13 @@ class ReleaseWorkflowTests(unittest.TestCase):
         self.assertNotIn("hdiutil create", self.workflow)
 
     def test_packaged_launch_uses_a_release_only_container_identity(self):
-        self.assertIn("./scripts/prepare-release-smoke-app.sh", self.workflow)
+        self.assertIn("name: Checkout release controls", self.workflow)
+        self.assertIn("ref: ${{ github.workflow_sha }}", self.workflow)
+        self.assertIn("path: .release-control", self.workflow)
+        self.assertIn(
+            "bash .release-control/scripts/prepare-release-smoke-app.sh",
+            self.workflow,
+        )
         self.assertIn("com.okrapdf.desktop.release-validation", self.workflow)
         self.assertIn(
             'OKRA_DESKTOP_PACKAGED_APP_PATH="${SMOKE_APP}"',
