@@ -16,21 +16,20 @@
 > formerly a generated projection of the Okra monorepo; development now
 > happens directly here.
 
-RC.15 replaces the macOS chat shell with a permanent source/facet workspace.
-The source PDF stays on the left; extracted blocks, Markdown, JSON, and local
-redaction review stay on the right. Hover or select a grounded block on either
-side to find its linked source region. Parsing remains explicit, local, and
-source-preserving.
+RC.17 combines the permanent source/facet workspace with app-owned local
+automation. Chandra OCR 2 is the clean-install extraction default on eligible
+Macs, Presidio is the explicit post-parse PII default, and the bundled `okra`
+CLI starts or reconnects to the same sandboxed app runtime and parse history.
 
 <p align="center">
-  <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.15">
+  <a href="https://github.com/okraocr/desktop/releases/tag/desktop-v1.0.0-rc.17">
     <img alt="Download for macOS" src="https://img.shields.io/badge/download-macOS%2013%2B-2f855a">
   </a>
-  <a href="https://github.com/okrapdf/desktop/releases/tag/windows-v0.1.0-alpha.2">
+  <a href="https://github.com/okraocr/desktop/releases/tag/windows-v0.1.0-alpha.2">
     <img alt="Download unstable alpha for Windows" src="https://img.shields.io/badge/Windows-alpha.2%20unstable-c97a16">
   </a>
-  <a href="https://github.com/okrapdf/desktop/releases">
-    <img alt="Latest release" src="https://img.shields.io/github/v/release/okrapdf/desktop?include_prereleases&label=release">
+  <a href="https://github.com/okraocr/desktop/releases">
+    <img alt="Latest release" src="https://img.shields.io/github/v/release/okraocr/desktop?include_prereleases&label=release">
   </a>
   <a href="LICENSE">
     <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue">
@@ -38,9 +37,9 @@ source-preserving.
 </p>
 
 <p align="center">
-  <a href="https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.15">Download</a> ·
+  <a href="https://github.com/okraocr/desktop/releases/tag/desktop-v1.0.0-rc.17">Download</a> ·
   <a href="docs/releases/README.md">Release notes</a> ·
-  <a href="https://github.com/okrapdf/desktop/issues/new">Report an issue</a>
+  <a href="https://github.com/okraocr/desktop/issues/new">Report an issue</a>
 </p>
 
 ![okraPDF source PDF and structured extraction linked by bounding boxes](.github/assets/okra-structured-extraction.png)
@@ -182,22 +181,22 @@ must be parsed with a source-aligned provider before redaction is available.
 
 ## Download
 
-`desktop-v1.0.0-rc.15` is the current signed public release candidate for
-Apple-silicon Macs running macOS 13 or later. RC.15 makes the source PDF and
-source-linked Facet output permanent side-by-side surfaces and removes the
-former Assistant/chat UI.
+`desktop-v1.0.0-rc.17` is the current signed public release candidate for
+Apple-silicon Macs running macOS 13 or later. It adds the app-owned local CLI,
+Chandra OCR 2 default, and Presidio workflow to the permanent source-linked
+Facet workspace.
 
-1. Download `Okra-1.0.0-rc.15.dmg` from the
-   [v1.0.0-rc.15 release](https://github.com/okrapdf/desktop/releases/tag/desktop-v1.0.0-rc.15).
+1. Download `Okra-1.0.0-rc.17.dmg` from the
+   [v1.0.0-rc.17 release](https://github.com/okraocr/desktop/releases/tag/desktop-v1.0.0-rc.17).
 2. Optionally download the adjacent checksum and run
-   `shasum -a 256 -c Okra-1.0.0-rc.15.dmg.sha256`.
+   `shasum -a 256 -c Okra-1.0.0-rc.17.dmg.sha256`.
 3. Open the DMG, drag **Okra** to **Applications**, and eject the DMG.
 4. Open **Okra** from Applications. The app and DMG are Developer ID signed,
    hardened, notarized by Apple, and stapled for normal Gatekeeper opening.
 
 The app checks its signed update feed daily. Choose **Check for Updates…** in
 the app menu at any time, or install a newer DMG from
-[GitHub Releases](https://github.com/okrapdf/desktop/releases).
+[GitHub Releases](https://github.com/okraocr/desktop/releases).
 
 ## Windows unstable alpha
 
@@ -208,7 +207,7 @@ navigation, plus source-preserving annotations with per-document undo/redo and
 crash recovery. **Save a Copy** always creates a new PDF.
 
 Download the ZIP and adjacent checksum from the
-[Windows alpha.2 prerelease](https://github.com/okrapdf/desktop/releases/tag/windows-v0.1.0-alpha.2).
+[Windows alpha.2 prerelease](https://github.com/okraocr/desktop/releases/tag/windows-v0.1.0-alpha.2).
 There is no installer, code signing, or automatic update channel; SmartScreen
 may warn on first launch. Treat this build as unstable and keep the original
 PDFs available while testing.
@@ -218,7 +217,7 @@ PDFs available while testing.
 You need macOS 13 or later and Swift 5.9 or later.
 
 ```bash
-git clone https://github.com/okrapdf/desktop.git
+git clone https://github.com/okraocr/desktop.git
 cd desktop
 swift build
 ```
@@ -226,7 +225,7 @@ swift build
 To create a local `.app` and DMG:
 
 ```bash
-./scripts/build-dmg.sh 1.0.0-rc.15
+./scripts/build-dmg.sh 1.0.0-rc.17
 ```
 
 Local packages are ad-hoc signed. The release workflow supplies the Developer
