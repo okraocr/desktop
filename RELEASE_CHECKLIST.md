@@ -140,7 +140,8 @@ job.
 - Concurrency cancels superseded runs for the same PR/branch ref so the
   constrained self-hosted macOS lane is not wasted on stale commits.
 - Each run executes `scripts/verify-brand-surface.sh`, the Python unit suite
-  (`scripts/tests`), `swift test`, and `swift build -c release`.
+  (`scripts/tests`), `swift test`, `swift build -c release`, an ad-hoc packaged
+  app build, and the app-attached CLI startup smoke.
 - Tests stay hermetic: `OKRA_DESKTOP_TEST_TMPDIR` routes test workspaces to
   the runner-temporary root, `TestWorkspace` already isolates `UserDefaults`
   suites per test, and no live provider credentials or network inference are

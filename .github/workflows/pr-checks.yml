@@ -46,3 +46,19 @@ jobs:
             -p '*_tests.py'
           swift test
           swift build -c release
+
+      - name: Verify packaged app and CLI launch
+        shell: bash
+        env:
+          OKRA_DESKTOP_TEST_TMPDIR: ${{ runner.temp }}/okra-packaged-workspaces
+        run: |
+          set -euo pipefail
+          mkdir -p "${OKRA_DESKTOP_TEST_TMPDIR}"
+          ./scripts/build-dmg.sh \
+            "1.0.0-pr.${{ github.run_number }}" \
+            "${{ github.run_id }}" \
+            --app-only
+          RELEASE_BIN_PATH="$(swift build -c release --show-bin-path)"
+          OKRA_DESKTOP_PACKAGED_APP_PATH="${PWD}/build/Okra.app" \
+          OKRA_DESKTOP_RESOURCE_BUNDLE_FALLBACK_PATH="${RELEASE_BIN_PATH}/okraPDF_Okra.bundle" \
+            swift test --filter PackagedAppLaunchTests.packagedAppRemainsAlive
