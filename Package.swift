@@ -4,6 +4,10 @@ import PackageDescription
 let package = Package(
     name: "okraPDF",
     platforms: [.macOS(.v13)],
+    products: [
+        .executable(name: "Okra", targets: ["Okra"]),
+        .executable(name: "okra", targets: ["OkraCLI"]),
+    ],
     dependencies: [
         .package(url: "https://github.com/sparkle-project/Sparkle", from: "2.9.4")
     ],
@@ -25,7 +29,7 @@ let package = Package(
             ]
         ),
         .executableTarget(
-            name: "okra",
+            name: "OkraCLI",
             dependencies: ["OkraClientCore"],
             path: "OkraCLI"
         ),
