@@ -47,6 +47,7 @@ class DMGPackagingTests(unittest.TestCase):
             self.assertEqual(os.readlink(applications_link), "/Applications")
 
     def test_packager_and_layout_template_are_valid(self):
+        packager_source = self.packager.read_text(encoding="utf-8")
         subprocess.run(
             ["/bin/bash", "-n", str(self.packager)],
             check=True,
@@ -63,6 +64,7 @@ class DMGPackagingTests(unittest.TestCase):
         self.assertEqual(layout_bytes[4:8], b"Bud1")
         self.assertIn("Applications".encode("utf-16-be"), layout_bytes)
         self.assertIn("Okra.app".encode("utf-16-be"), layout_bytes)
+        self.assertIn('VOLUME_NAME="okraPDF"', packager_source)
 
     def test_packager_creates_install_ready_disk_image(self):
         with tempfile.TemporaryDirectory(prefix="okra-dmg-package-") as temporary_directory:
