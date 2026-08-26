@@ -69,15 +69,15 @@ Do not start a dev server or watch process.
 - User-facing brand copy is always `okraPDF`.
 - Extraction is local. Only explicit provider setup may download dependencies.
 - Opening or replacing a PDF must never start parsing; only the Parse action may run a provider.
-- Dots OCR 1.5 is the selected managed default on eligible clean installs, but
+- Chandra OCR 2 is the selected managed default on eligible clean installs, but
   setup and parsing remain explicit. Hardware eligibility requires Apple
   silicon, macOS 14+, and 16 GB+ memory; Apple Vision is the incompatible-host
-  and zero-setup fallback. Completing Dots setup requires Python 3.10+.
+  and zero-setup fallback. Completing managed-model setup requires Python 3.10+.
+  Dots OCR 1.5 remains an optional managed provider.
   Baidu Unlimited-OCR remains an optional selectable legacy provider; preserve
   a stored Baidu selection and resume an interrupted Baidu run only with Baidu.
-  Chandra OCR 2 is an optional managed provider (pinned 8-bit MLX, ~5.16 GB)
-  with the same explicit setup, host gate, offline inference, and per-run
-  provider pinning rules as the other managed parsers.
+  Chandra OCR 2 uses a pinned 8-bit MLX package (~5.16 GB), explicit setup,
+  offline inference, and per-run provider pinning.
 - The source PDF remains in place; do not reintroduce a copied-file library.
 - Successful output is normalized to `result.md` beside a small `run.json` manifest.
   Providers with structured output also write `result.json` with typed blocks and normalized
@@ -89,6 +89,9 @@ Do not start a dev server or watch process.
   Ollama recognizer stay on loopback. Human-approved export rasterizes affected
   pages before burning black boxes into a new PDF; never add printable overlay
   annotations that leave the underlying glyphs recoverable.
+- The bundled `okra` executable is a thin authenticated client for the
+  app-owned loopback host. It may start/open the app through LaunchServices but
+  must never load models, parse, detect, or mutate run state out of process.
 - Do not add SQLite, cloud fields, policy/spend models, chat, or document agents
   without a new roadmap item and architecture decision.
 - Use system controls and accessible SF Symbols only for functional affordances.

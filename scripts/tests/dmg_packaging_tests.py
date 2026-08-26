@@ -143,6 +143,7 @@ class DMGPackagingTests(unittest.TestCase):
             True,
         )
         self.assertIs(entitlements["com.apple.security.network.client"], True)
+        self.assertIs(entitlements["com.apple.security.network.server"], True)
         self.assertEqual(
             entitlements[
                 "com.apple.security.temporary-exception.files.absolute-path.read-only"
@@ -161,7 +162,19 @@ class DMGPackagingTests(unittest.TestCase):
             build_script,
             r"<key>SUEnableInstallerLauncherService</key>\s*<true/>",
         )
+        self.assertRegex(
+            build_script,
+            r"<key>CFBundleURLSchemes</key>\s*<array>\s*<string>okra</string>",
+        )
         self.assertIn("--preserve-metadata=entitlements", build_script)
+        self.assertIn(
+            'cp .build/release/okra-desktop-cli "$APP_DIR/Resources/okra"',
+            build_script,
+        )
+        self.assertIn(
+            'codesign --force --sign - "$APP_DIR/Resources/okra"',
+            build_script,
+        )
 
 
 if __name__ == "__main__":

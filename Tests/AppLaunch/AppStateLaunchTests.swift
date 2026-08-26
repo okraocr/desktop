@@ -11,7 +11,7 @@ struct AppStateLaunchTests {
         let coordinator = LocalProcessingCoordinator(
             runsRoot: workspace.runsRoot,
             userDefaults: workspace.defaults,
-            hostProfile: supportedDotsHost
+            hostProfile: supportedManagedModelHost
         )
         let state = AppState(localProcessing: coordinator)
 
@@ -19,11 +19,11 @@ struct AppStateLaunchTests {
             coordinator.descriptors.map(\.id)
                 == [.appleVision, .hybridAuto, .dotsOCR, .unlimitedOCR, .chandraOCR2, .ollama]
         )
-        #expect(coordinator.selectedProviderID == .dotsOCR)
+        #expect(coordinator.selectedProviderID == .chandraOCR2)
         #expect(state.selectedDocument == nil)
     }
 
-    @Test("Stored Docling selection falls back to Dots OCR")
+    @Test("Stored Docling selection falls back to Chandra OCR 2")
     func storedDoclingSelectionFallsBack() throws {
         let workspace = try TestWorkspace(prefix: "okra-removed-docling-provider")
         workspace.defaults.set("docling", forKey: "localProcessing.selectedProvider")
@@ -31,20 +31,20 @@ struct AppStateLaunchTests {
         let coordinator = LocalProcessingCoordinator(
             runsRoot: workspace.runsRoot,
             userDefaults: workspace.defaults,
-            hostProfile: supportedDotsHost
+            hostProfile: supportedManagedModelHost
         )
 
-        #expect(coordinator.selectedProviderID == .dotsOCR)
-        #expect(coordinator.selectedDescriptor.id == .dotsOCR)
-        #expect(coordinator.selectedAvailability == .setupRequired("Setup required · ~3.5 GB"))
+        #expect(coordinator.selectedProviderID == .chandraOCR2)
+        #expect(coordinator.selectedDescriptor.id == .chandraOCR2)
+        #expect(coordinator.selectedAvailability == .setupRequired("Setup required · ~5.2 GB"))
     }
 
-    private var supportedDotsHost: LocalParserHostProfile {
+    private var supportedManagedModelHost: LocalParserHostProfile {
         LocalParserHostProfile(
             architecture: .appleSilicon,
             macOSMajorVersion: 14,
             unifiedMemoryGB: 16,
-            availableDiskBytes: 5_000_000_000
+            availableDiskBytes: 10_000_000_000
         )
     }
 

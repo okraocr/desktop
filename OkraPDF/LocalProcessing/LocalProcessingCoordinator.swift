@@ -135,7 +135,7 @@ final class LocalProcessingCoordinator: ObservableObject {
                 HybridAutoProcessingProvider(ollama: ollamaProvider),
                 DotsOCRProcessingProvider(hostProfile: hostProfile),
                 UnlimitedOCRProcessingProvider(),
-                ChandraOCRProcessingProvider(),
+                ChandraOCRProcessingProvider(hostProfile: hostProfile),
                 ollamaProvider,
             ]
         }
@@ -165,11 +165,21 @@ final class LocalProcessingCoordinator: ObservableObject {
             if case .unavailable = provider.availability() { return nil }
             return provider.descriptor.id
         } ?? nil
+        // Chandra OCR 2 is the product default on a clean, compatible Mac.
+        // The doctor remains advisory: it may still recommend a faster parser
+        // for this host, while explicit and previously stored choices win.
+        let cleanInstallDefault = resolvedProviders.first { provider in
+            guard provider.descriptor.id == .chandraOCR2 else { return false }
+            if case .unavailable = provider.availability() { return false }
+            return true
+        }?.descriptor.id
         let storedProvider = userDefaults.string(forKey: Self.providerDefaultsKey)
         if let stored = storedProvider,
            let providerID = LocalProviderID.persisted(rawValue: stored),
            self.providers.contains(where: { $0.descriptor.id == providerID }) {
             selectedProviderID = providerID
+        } else if let cleanInstallDefault {
+            selectedProviderID = cleanInstallDefault
         } else if let doctorDefault {
             selectedProviderID = doctorDefault
         } else if self.providers.contains(where: { $0.descriptor.id == .appleVision }) {

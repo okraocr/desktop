@@ -8,8 +8,8 @@ source-aligned output.
 ## Versioning
 
 - Tag format: `desktop-v{SEMVER}`, including prerelease suffixes such as
-  `desktop-v1.0.0-rc.12`.
-- Current train: `desktop-v1.0.0-rc.12`.
+  `desktop-v1.0.0-rc.13`.
+- Current train: `desktop-v1.0.0-rc.13`.
 - `1.0.0` means the parser flow and direct-download distribution are stable.
 - Chat, agents, cloud upload, document libraries, channels, and remote control
   are separate products and do not belong in this release train.
@@ -27,7 +27,7 @@ source-aligned output.
 - [x] PDF selection and parsing are separate actions
 - [x] Original PDF remains in place
 - [x] Apple Vision zero-setup parser
-- [x] Dots OCR 1.5 selected by default on eligible clean installs without automatic setup or parsing
+- [x] Chandra OCR 2 selected by default on eligible clean installs without automatic setup or parsing
 - [x] Hardware-incompatible hosts fall back to Apple Vision; Dots requires Apple silicon, macOS 14+, and 16 GB+ memory, while setup also requires Python 3.10+
 - [x] Resumable, byte-counted, SHA-256-verified Dots model setup
 - [x] Dots layout JSON adapter with normalized source boxes and offline inference
@@ -43,6 +43,7 @@ source-aligned output.
 - [x] Accessible lazy page-state UI with visible text and symbols in addition to color
 - [x] Explicit local Presidio PII detection, candidate review, and raster-burned export without source mutation
 - [x] Optional official Presidio Ollama recognizer restricted to loopback
+- [x] Bundled thin `okra` CLI and authenticated app-owned loopback protocol for Chandra and Presidio invocation
 - [x] No account, cloud workflow, SQLite, policy, agents, or remote sidecars
 - [ ] Clean-profile Dots OCR 1.5 dogfood on a 16 GB Apple-silicon Mac
 - [ ] Clean-profile Baidu Unlimited-OCR regression on Apple silicon
@@ -64,19 +65,19 @@ source-aligned output.
 - [ ] Second-Mac clean-install verification
 - [x] DMG Applications shortcut and intentional Finder window layout
 
-The app currently has an empty entitlement set. Do not add network, JIT,
-unsigned-executable-memory, or library-validation exceptions speculatively.
-Add the narrowest entitlement only when a signed distribution build proves it
-is required by one of the supported local parsers.
+The app has sandboxed client access for local provider integrations and server
+access for its authenticated `127.0.0.1` CLI host. Do not add JIT,
+unsigned-executable-memory, library-validation, broad file, or inbound-network
+exceptions. Keep every new entitlement tied to a tested product capability.
 
 ## Release command
 
 ```bash
 swift test
-./scripts/build-dmg.sh 1.0.0-rc.12
+./scripts/build-dmg.sh 1.0.0-rc.13
 ```
 
-RC.12 is the current release-candidate train, not the stable release. It is
+RC.13 is the current release-candidate train, not the stable release. It is
 appropriate for direct-download and in-app-update testing after passing the
 document-first layout and signed-artifact gates. Do not call it stable until the
 remaining friend-core, second-Mac install, and signed in-place update gates in

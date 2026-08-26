@@ -24,8 +24,8 @@ struct LocalProcessingProviderTests {
         #expect(provider.availability() == .simulated("Simulation ready"))
     }
 
-    @Test("Dots OCR is selected by default")
-    func simulationModeDefaultsToDotsOCR() throws {
+    @Test("Dots OCR remains the best available default when Chandra is absent")
+    func simulationModeDefaultsToDotsOCRWhenChandraIsAbsent() throws {
         let workspace = try TestWorkspace(prefix: "okra-simulation-selection")
         let simulatedProvider = DotsOCRProcessingProvider(
             environment: ["OKRA_DESKTOP_SIMULATE_DOTS_OCR": "1"]
@@ -45,6 +45,33 @@ struct LocalProcessingProviderTests {
         )
 
         #expect(coordinator.selectedProviderID == .dotsOCR)
+        #expect(coordinator.selectedAvailability == .simulated("Simulation ready"))
+    }
+
+    @Test("Chandra OCR 2 is selected by default on a compatible clean install")
+    func simulationModeDefaultsToChandraOCR2() throws {
+        let workspace = try TestWorkspace(prefix: "okra-chandra-default-selection")
+        let dots = DotsOCRProcessingProvider(
+            environment: ["OKRA_DESKTOP_SIMULATE_DOTS_OCR": "1"]
+        )
+        let chandra = ChandraOCRProcessingProvider(
+            environment: ["OKRA_DESKTOP_SIMULATE_CHANDRA_OCR": "1"]
+        )
+        let coordinator = LocalProcessingCoordinator(
+            providers: [FixtureProcessingProvider(), dots, chandra],
+            runsRoot: workspace.runsRoot,
+            userDefaults: workspace.defaults,
+            hostProfile: LocalParserHostProfile(
+                architecture: .appleSilicon,
+                macOSMajorVersion: 14,
+                unifiedMemoryGB: 16,
+                availableDiskBytes: 100_000_000_000,
+                chipName: "Apple M1",
+                memoryBandwidthClass: .entry
+            )
+        )
+
+        #expect(coordinator.selectedProviderID == .chandraOCR2)
         #expect(coordinator.selectedAvailability == .simulated("Simulation ready"))
     }
 

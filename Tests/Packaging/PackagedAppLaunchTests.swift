@@ -22,40 +22,51 @@ struct PackagedAppLaunchTests {
     func packagedAppRemainsAlive() async throws {
         let appPath = try #require(packagedAppPath)
         let appURL = URL(fileURLWithPath: appPath, isDirectory: true)
+        let appBundle = try #require(Bundle(url: appURL))
+        let appVersion = try #require(
+            appBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        )
         try verifyBundleLayout(at: appURL)
         let resourceIsolation = try ResourceFallbackIsolation.fromEnvironment()
         defer { resourceIsolation?.restore() }
 
         let workspace = try TestWorkspace(prefix: "okra-packaged-launch")
         try FileManager.default.createDirectory(at: workspace.root, withIntermediateDirectories: true)
-        let executableURL = appURL
+        let cliURL = appURL
             .appendingPathComponent("Contents", isDirectory: true)
-            .appendingPathComponent("MacOS", isDirectory: true)
-            .appendingPathComponent("Okra")
-        let outputPipe = Pipe()
-        let process = Process()
-        process.executableURL = executableURL
-        process.standardOutput = outputPipe
-        process.standardError = outputPipe
-        process.environment = isolatedEnvironment(home: workspace.root)
-
-        try process.run()
+            .appendingPathComponent("Resources", isDirectory: true)
+            .appendingPathComponent("okra")
+        let appEnvironment = isolatedEnvironment(home: workspace.root)
+        var cliEnvironment = appEnvironment
+        cliEnvironment["OKRA_APP_PATH"] = appURL.path
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.activates = false
+        configuration.addsToRecentItems = false
+        configuration.createsNewApplicationInstance = true
+        configuration.environment = appEnvironment
+        let runningApplication = try await NSWorkspace.shared.openApplication(
+            at: appURL,
+            configuration: configuration
+        )
+        defer {
+            if runningApplication.isTerminated == false {
+                runningApplication.forceTerminate()
+            }
+        }
         try await Task.sleep(for: .seconds(3))
-        let remainedRunning = process.isRunning
+        let remainedRunning = runningApplication.isTerminated == false
 
         if remainedRunning {
-            process.terminate()
-            try await waitUntil("packaged app process to terminate") {
-                process.isRunning == false
-            }
-        } else {
-            let output = String(
-                decoding: outputPipe.fileHandleForReading.readDataToEndOfFile(),
-                as: UTF8.self
+            let status = try runCommand(
+                cliURL,
+                arguments: ["status"],
+                environment: cliEnvironment
             )
-            #if compiler(>=6.2)
-            Attachment.record(output, named: "Packaged app launch output")
-            #endif
+            #expect(status.contains("Okra Desktop \(appVersion) is ready"))
+            runningApplication.forceTerminate()
+            try await waitUntil("packaged app process to terminate") {
+                runningApplication.isTerminated
+            }
         }
 
         #expect(
@@ -148,6 +159,10 @@ struct PackagedAppLaunchTests {
             .appendingPathComponent("Contents", isDirectory: true)
             .appendingPathComponent("MacOS", isDirectory: true)
             .appendingPathComponent("Okra")
+        let cliURL = appURL
+            .appendingPathComponent("Contents", isDirectory: true)
+            .appendingPathComponent("Resources", isDirectory: true)
+            .appendingPathComponent("okra")
         let providerScriptsURL = appURL
             .appendingPathComponent("Contents", isDirectory: true)
             .appendingPathComponent("Resources", isDirectory: true)
@@ -162,6 +177,15 @@ struct PackagedAppLaunchTests {
         let entitlements = try signedEntitlements(at: appURL)
 
         try #require(fileManager.isExecutableFile(atPath: executableURL.path))
+        try #require(fileManager.isExecutableFile(atPath: cliURL.path))
+        let cliHelp = try runCommand(cliURL, arguments: ["help"])
+        #expect(cliHelp.contains("okra chandra"))
+        #expect(cliHelp.contains("okra presidio"))
+        #expect(
+            try runCommand(cliURL, arguments: ["--version"])
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                == bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        )
         try #require(fileManager.fileExists(atPath: providerScriptsURL.path))
         try #require(
             fileManager.fileExists(
@@ -190,12 +214,17 @@ struct PackagedAppLaunchTests {
             bundle.object(forInfoDictionaryKey: "SUEnableInstallerLauncherService") as? Bool
                 == true
         )
+        let urlTypes = bundle.object(forInfoDictionaryKey: "CFBundleURLTypes")
+            as? [[String: Any]]
+        let urlSchemes = urlTypes?.flatMap { $0["CFBundleURLSchemes"] as? [String] ?? [] }
+        #expect(urlSchemes?.contains("okra") == true)
         #expect(entitlements["com.apple.security.app-sandbox"] as? Bool == true)
         #expect(
             entitlements["com.apple.security.files.user-selected.read-write"] as? Bool
                 == true
         )
         #expect(entitlements["com.apple.security.network.client"] as? Bool == true)
+        #expect(entitlements["com.apple.security.network.server"] as? Bool == true)
         #expect(
             entitlements[
                 "com.apple.security.temporary-exception.files.absolute-path.read-only"
@@ -302,6 +331,7 @@ struct PackagedAppLaunchTests {
     private func runCommand(
         _ executableURL: URL,
         arguments: [String],
+        environment: [String: String]? = nil,
         timeout: TimeInterval = 15
     ) throws -> String {
         let outputPipe = Pipe()
@@ -309,6 +339,7 @@ struct PackagedAppLaunchTests {
         let finished = DispatchSemaphore(value: 0)
         process.executableURL = executableURL
         process.arguments = arguments
+        process.environment = environment
         process.standardOutput = outputPipe
         process.standardError = outputPipe
         process.terminationHandler = { _ in finished.signal() }
