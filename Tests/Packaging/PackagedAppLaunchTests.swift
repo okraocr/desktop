@@ -32,10 +32,6 @@ struct PackagedAppLaunchTests {
             .appendingPathComponent("Contents", isDirectory: true)
             .appendingPathComponent("MacOS", isDirectory: true)
             .appendingPathComponent("Okra")
-        let cliURL = appURL
-            .appendingPathComponent("Contents", isDirectory: true)
-            .appendingPathComponent("MacOS", isDirectory: true)
-            .appendingPathComponent("okra")
         let outputPipe = Pipe()
         let process = Process()
         process.executableURL = executableURL
@@ -152,6 +148,10 @@ struct PackagedAppLaunchTests {
             .appendingPathComponent("Contents", isDirectory: true)
             .appendingPathComponent("MacOS", isDirectory: true)
             .appendingPathComponent("Okra")
+        let cliURL = appURL
+            .appendingPathComponent("Contents", isDirectory: true)
+            .appendingPathComponent("MacOS", isDirectory: true)
+            .appendingPathComponent("okra")
         let providerScriptsURL = appURL
             .appendingPathComponent("Contents", isDirectory: true)
             .appendingPathComponent("Resources", isDirectory: true)
