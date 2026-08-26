@@ -65,7 +65,9 @@ jobs:
         with:
           ref: ${{ github.workflow_sha }}
           path: .release-control
-          sparse-checkout: scripts/prepare-release-smoke-app.sh
+          sparse-checkout: |
+            scripts/prepare-release-smoke-app.sh
+            scripts/validate-release-dmg.sh
           sparse-checkout-cone-mode: false
           persist-credentials: false
 
@@ -229,11 +231,11 @@ jobs:
           spctl --assess --type open --context context:primary-signature --verbose=4 "${DMG}"
           RELEASE_BIN_PATH="$(swift build -c release --show-bin-path)"
           if [[ "${OKRA_RELEASE_USES_SMOKE_CONTAINER}" == "true" ]]; then
-            OKRA_DESKTOP_PACKAGED_DMG_PATH="${PWD}/${DMG}" \
-            OKRA_DESKTOP_RELEASE_SMOKE_APP_PATH="${OKRA_RELEASE_SMOKE_APP_PATH}" \
-            OKRA_DESKTOP_EXPECTED_BUNDLE_IDENTIFIER="com.okrapdf.desktop.release-validation" \
-            OKRA_DESKTOP_RESOURCE_BUNDLE_FALLBACK_PATH="${RELEASE_BIN_PATH}/okraPDF_Okra.bundle" \
-              swift test --filter PackagedAppLaunchTests.quarantinedDMGAndReleaseEquivalentAppPassLaunchServices
+            bash .release-control/scripts/validate-release-dmg.sh \
+              "${PWD}/${DMG}" \
+              "${OKRA_RELEASE_SMOKE_APP_PATH}" \
+              "com.okrapdf.desktop.release-validation" \
+              "${VERSION}"
           else
             OKRA_DESKTOP_PACKAGED_DMG_PATH="${PWD}/${DMG}" \
             OKRA_DESKTOP_RESOURCE_BUNDLE_FALLBACK_PATH="${RELEASE_BIN_PATH}/okraPDF_Okra.bundle" \

@@ -11,6 +11,11 @@ class ReleaseWorkflowTests(unittest.TestCase):
             / "workflows"
             / "notarized-release.yml"
         ).read_text(encoding="utf-8")
+        cls.dmg_validator = (
+            Path(__file__).resolve().parents[2]
+            / "scripts"
+            / "validate-release-dmg.sh"
+        ).read_text(encoding="utf-8")
 
     def test_signed_appcast_is_pushed_to_a_dedicated_branch(self):
         self.assertIn(
@@ -41,13 +46,14 @@ class ReleaseWorkflowTests(unittest.TestCase):
             "bash .release-control/scripts/prepare-release-smoke-app.sh",
             self.workflow,
         )
+        self.assertIn("scripts/validate-release-dmg.sh", self.workflow)
         self.assertIn("com.okrapdf.desktop.release-validation", self.workflow)
         self.assertIn(
             'OKRA_DESKTOP_PACKAGED_APP_PATH="${SMOKE_APP}"',
             self.workflow,
         )
         self.assertIn(
-            'OKRA_DESKTOP_RELEASE_SMOKE_APP_PATH="${OKRA_RELEASE_SMOKE_APP_PATH}"',
+            "bash .release-control/scripts/validate-release-dmg.sh",
             self.workflow,
         )
         self.assertIn(
@@ -71,6 +77,17 @@ class ReleaseWorkflowTests(unittest.TestCase):
         )
         self.assertIn(
             "PackagedAppLaunchTests.quarantinedDMGLaunchesThroughLaunchServices",
+            self.workflow,
+        )
+
+    def test_final_dmg_smoke_is_bounded_and_uses_the_packaged_cli(self):
+        self.assertIn("run_with_timeout 45", self.dmg_validator)
+        self.assertIn('"${MOUNTED_CLI}" status', self.dmg_validator)
+        self.assertIn('"OKRA_APP_PATH=${SMOKE_APP}"', self.dmg_validator)
+        self.assertIn('payload.get("healthy") is not True', self.dmg_validator)
+        self.assertIn('payload.get("version") != sys.argv[2]', self.dmg_validator)
+        self.assertNotIn(
+            "PackagedAppLaunchTests.quarantinedDMGAndReleaseEquivalentAppPassLaunchServices",
             self.workflow,
         )
 
