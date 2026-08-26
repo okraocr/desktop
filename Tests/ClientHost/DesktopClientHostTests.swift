@@ -48,6 +48,7 @@ struct DesktopClientHostTests {
     @Test("Desktop boxes convert explicitly to canonical 0-1000 coordinates")
     func artifactsUseCanonicalCoordinates() throws {
         let workspace = try TestWorkspace(prefix: "okra-client-artifacts")
+        try FileManager.default.createDirectory(at: workspace.root, withIntermediateDirectories: true)
         let outputURL = workspace.root.appendingPathComponent("result.md")
         let structuredURL = workspace.root.appendingPathComponent("result.json")
         try "hello".write(to: outputURL, atomically: true, encoding: .utf8)
