@@ -41,6 +41,7 @@ struct FacetWorkspaceView: View {
                 .padding(WorkspaceTheme.panelPadding)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .workspacePanelTextRendering()
         }
         .background(.bar)
         .accessibilityElement(children: .contain)
