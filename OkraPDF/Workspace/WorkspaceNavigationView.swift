@@ -94,6 +94,7 @@ struct WorkspaceNavigationView: View {
             }
             .padding(WorkspaceTheme.panelPadding)
         }
+        .workspacePanelTextRendering()
     }
 
     private func navigationSection<Content: View>(
@@ -160,6 +161,7 @@ struct WorkspaceNavigationView: View {
             .padding(WorkspaceTheme.panelPadding)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .workspacePanelTextRendering()
     }
 
     private func pluginStatusMessage(_ plugin: WorkspacePlugin) -> String {
