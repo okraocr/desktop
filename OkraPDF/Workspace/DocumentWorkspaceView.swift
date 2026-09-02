@@ -8,7 +8,7 @@ struct DocumentWorkspaceView: View {
     @ObservedObject var redaction: PresidioRedactionCoordinator
     let canOpenPDF: Bool
     let openPDF: () -> Void
-    let openSetupGuide: () -> Void
+    let openModelSettings: () -> Void
 
     var body: some View {
         if let document {
@@ -31,7 +31,7 @@ struct DocumentWorkspaceView: View {
                 isDropTargeted: isDropTargeted,
                 canOpenPDF: canOpenPDF,
                 openPDF: openPDF,
-                openSetupGuide: openSetupGuide
+                openModelSettings: openModelSettings
             )
         }
     }

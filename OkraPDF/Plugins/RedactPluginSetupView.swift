@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// Installation and optional recognizer configuration for the Redact plugin.
+/// Installation and optional recognizer configuration shown in Settings.
 /// The live task belongs to `PresidioRedactionCoordinator`, so closing and
-/// reopening Plugins returns to the same progress rather than restarting it.
+/// reopening Settings returns to the same progress rather than restarting it.
 struct RedactPluginSetupView: View {
     @ObservedObject var coordinator: LocalProcessingCoordinator
     @ObservedObject var redaction: PresidioRedactionCoordinator
@@ -52,7 +52,7 @@ struct RedactPluginSetupView: View {
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Text("You can close Plugins; installation will continue here.")
+                Text("You can close Settings; installation will continue.")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
 
@@ -118,7 +118,7 @@ struct RedactPluginSetupView: View {
         VStack(alignment: .leading, spacing: WorkspaceTheme.compactSpacing) {
             Text("One-time local dependency setup")
                 .font(.headline)
-            Text("okraPDF creates an isolated Python environment, installs the pinned Presidio runtime and English spaCy model, then verifies the installation before marking it ready.")
+            Text("The app creates an isolated Python environment, installs the pinned Presidio runtime and English spaCy model, then verifies the installation before marking it ready.")
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)

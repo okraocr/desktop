@@ -31,9 +31,12 @@ struct okraPDFApp: App {
                 Button("Check for Updates…", action: updaterController.checkForUpdates)
             }
             CommandGroup(after: .help) {
-                Button("Parser Setup Guide…", action: appState.presentSetupGuide)
                 Button("Copy Local Parser Diagnostics", action: appState.copyLocalParserDiagnostics)
             }
+        }
+
+        Settings {
+            DesktopSettingsView(coordinator: appState.localProcessing)
         }
     }
 }

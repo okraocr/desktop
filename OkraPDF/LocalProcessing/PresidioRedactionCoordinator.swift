@@ -11,7 +11,7 @@ final class PresidioRedactionCoordinator: ObservableObject {
     @Published private(set) var approvedBoxIDs: Set<String> = []
     @Published private(set) var selectedBoxID: String?
     @Published private(set) var hoveredBoxID: String?
-    @Published private(set) var statusMessage = "Detect PII only after reviewing a positioned extraction."
+    @Published private(set) var statusMessage = "Redact only after reviewing a positioned parse."
     @Published private(set) var errorMessage: String?
     @Published private(set) var isInstalling = false
     @Published private(set) var setupProgress: LocalProviderSetupProgress?
@@ -171,7 +171,7 @@ final class PresidioRedactionCoordinator: ObservableObject {
                 availability = await service.availability()
                 statusMessage = "Microsoft Presidio is ready locally."
             } catch is CancellationError {
-                statusMessage = "Presidio setup canceled. You can restart it from Plugins."
+                statusMessage = "Presidio setup canceled. You can restart it from Settings."
             } catch {
                 let diagnostic = LocalErrorPresentation.diagnosticDescription(for: error)
                 errorMessage = diagnostic

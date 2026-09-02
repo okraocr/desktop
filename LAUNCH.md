@@ -9,7 +9,7 @@ source-aligned output.
 
 - Tag format: `desktop-v{SEMVER}`, including prerelease suffixes such as
   `desktop-v1.0.0-rc.12`.
-- Current train: `desktop-v1.0.0-rc.12`.
+- Current train: `desktop-v1.0.0-rc.18`.
 - `1.0.0` means the parser flow and direct-download distribution are stable.
 - Chat, agents, cloud upload, document libraries, channels, and remote control
   are separate products and do not belong in this release train.
@@ -17,11 +17,12 @@ source-aligned output.
 ## Product gate
 
 - [x] Lightweight windowed SwiftUI PDF reader
-- [x] Permanent center PDF reader with compact edge rails
-- [x] Independently collapsible left navigation and trailing Assistant
-- [x] Grouped left navigation separates Plugins (Extract, Redact) from Activity (Runs)
-- [x] Focused plugin destinations own setup, progress, cancellation, and retry
-- [x] Assistant setup handoffs navigate to Plugins instead of installing in chat
+- [x] Permanent source/facet workspace with linked review state
+- [x] Facet exposes only Parse and Redact task modes
+- [x] Optional leading drawer contains local Runs only
+- [x] Native Settings window owns model selection, recommendation, setup, progress, cancellation, and retry
+- [x] Native Settings window owns Presidio configuration
+- [x] First-run comparison sheet and workspace plugin catalog are retired
 - [x] Native document toolbar with clean, functional controls and no promotional surfaces
 - [x] Open and Finder drag-and-drop
 - [x] PDF selection and parsing are separate actions
@@ -35,7 +36,7 @@ source-aligned output.
 - [x] Stored Baidu selection remains selected, and interrupted Baidu runs resume only with Baidu
 - [x] Docling provider removed for beta.20
 - [x] Historical Baidu run provenance and checkpoints remain readable
-- [x] Host-adaptive parser doctor and explicit ParseBench-style first-run setup guide
+- [x] Host-adaptive parser doctor feeds the recommended state in Settings without downloading
 - [x] Accessible Show boxes toolbar toggle with Reduce Motion support
 - [x] Markdown copy, save, and reveal
 - [x] File-backed `run.json` and `result.md` artifacts
@@ -73,10 +74,10 @@ is required by one of the supported local parsers.
 
 ```bash
 swift test
-./scripts/build-dmg.sh 1.0.0-rc.12
+./scripts/build-dmg.sh 1.0.0-rc.18
 ```
 
-RC.12 is the current release-candidate train, not the stable release. It is
+RC.18 is the current release-candidate train, not the stable release. It is
 appropriate for direct-download and in-app-update testing after passing the
 document-first layout and signed-artifact gates. Do not call it stable until the
 remaining friend-core, second-Mac install, and signed in-place update gates in

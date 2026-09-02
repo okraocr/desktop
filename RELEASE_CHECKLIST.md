@@ -1,16 +1,19 @@
 # okraPDF Desktop — Release Checklist
 
-Current train: `desktop-v1.0.0-rc.17`
+Current train: `desktop-v1.0.0-rc.18`
 
-Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.6.16`, `D.6.17`, `D.6.18`, `D.6.19`, `D.6.20`, `D.6.21`, `D.6.22`, `D.6.23`, `D.6.24`
+Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.6.16`, `D.6.17`, `D.6.18`, `D.6.19`, `D.6.20`, `D.6.21`, `D.6.22`, `D.6.23`, `D.6.24`, `D.6.25`
 
 ## Product contract
 
 - [x] Windowed app with native PDFKit preview
 - [x] Regular activation policy and Dock lifecycle
 - [x] Document-first workspace with a permanent resizable source PDF on the left and Facet output/review surface on the right
-- [x] Grouped left navigation separates Plugins (Extract, Redact) from Activity (Runs)
-- [x] Focused plugin destinations own setup, progress, cancellation, and retry; Facet setup handoffs only navigate there
+- [x] Facet exposes only Parse and Redact task modes
+- [x] Optional leading drawer contains Runs only
+- [x] Native Settings window owns model choice, active/recommended state, setup, progress, cancellation, and retry
+- [x] Native Settings window owns Presidio configuration; Facet setup handoffs open the relevant Settings page
+- [x] First-run comparison sheet and workspace plugin catalog are retired
 - [x] Native toolbar with the canonical mark, document title, Open, source reveal, extraction-box controls, and workspace navigation toggle
 - [x] Facet remains visible while optional navigation is tucked away by default; changing navigation never discards output state
 - [x] Navigation transitions honor Reduce Motion and expose accessible labels, help, and selected state
@@ -23,7 +26,7 @@ Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.
 - [x] Dots host gate requires Apple silicon, macOS 14+, 16 GB+ memory, and setup space; incompatible hosts fall back to Apple Vision, and setup separately requires Python 3.10+
 - [x] Apple Vision remains available without setup
 - [x] Local parser doctor recommends a compatible pairing without downloading or parsing
-- [x] First-run parser setup guide compares pairings and keeps setup/license consent explicit
+- [x] Settings keeps host-adaptive recommendation and setup/license consent explicit without auto-downloading
 - [x] Auto (Hybrid) native-text reuse with page-local Ollama vision fallback
 - [x] Generic Ollama provider with HTTP model discovery and vision-capability filtering
 - [x] Ollama model selection persists without inspecting its model directory or invoking its CLI
@@ -109,7 +112,7 @@ Roadmap items: `D.6.3`, `Stable #15`, `D.6.9`, `D.6.13`, `D.6.14`, `D.6.15`, `D.
 - [x] Presidio simulation, loopback-only URL policy, source-block mapping, box persistence, and rasterized export coverage
 - [x] Authenticated loopback `okra.client.v1` host is owned by Okra.app and rejects unauthenticated clients
 - [x] Signed app bundle includes the thin `okra` CLI with health, catalogs, open, parse, run events/status, artifacts, cancel/resume, and detect commands
-- [x] Document-first defaults, source/facet modes, and Plugins/Activity navigation inventory have unit coverage
+- [x] Document-first defaults, source/facet modes, model-settings collections, and Runs-only history have unit coverage
 - [x] Packaged app starts with builder-only SwiftPM resources hidden
 - [x] Headless release launch gates use a separately identified, Developer ID-signed and notarized copy, while the production app and DMG retain their exact signature, Gatekeeper, staple, and layout checks
 - [x] Quarantined notarized beta.8 through beta.15 DMGs start through LaunchServices before publishing (2026-07-28)
@@ -171,7 +174,7 @@ a local build.
 
 - [ ] Launch with navigation hidden; confirm source PDF and Facet are both visible with the source as the larger surface
 - [ ] Drag the source/facet divider and toggle navigation; confirm neither action discards document or output state
-- [ ] Open Extract settings during a completed run, close navigation, and confirm the selected provider and Facet output remain intact
+- [ ] Open Settings → Models during a completed run, close Settings, and confirm the selected provider and Facet output remain intact
 - [ ] Hover and select grounded blocks in Facet; confirm the matching source boxes highlight, then hover and select source boxes and confirm Facet scrolls to the block
 - [ ] Open a one-page text PDF and confirm no extraction starts until **Parse** is clicked
 - [ ] Replace it with a multi-page scanned PDF and again confirm no automatic extraction

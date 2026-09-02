@@ -16,14 +16,15 @@ preserved in the monorepo's git history at tag `windows/v0.1.0-alpha.1`.
 The primary app is a minimal macOS 13+ windowed PDF reader and local parser.
 The separate `windows/` port uses a Go loopback host, WebView2, React, and
 PDF.js while preserving the same read-before-parse and source-preserving rules.
-Under `D.6.24`, the shell is a permanent side-by-side workspace: the source PDF
+Under `D.6.25`, the shell is a permanent side-by-side workspace: the source PDF
 is on the left and the **Facet** output/review surface is on the right. Grounded
 extraction blocks and PDFKit bounding boxes share hover and selection state in
-both directions. Optional leading navigation separates installable **Plugins**
-(Extract, Redact) from **Activity** (Runs), then opens one focused destination
-with a clear back path. Dependency setup and progress stay with the focused
-plugin destination. There is no Assistant, composer, command router, or chat
-surface in the main window.
+both directions. The Facet exposes only **Parse** and **Redact** task modes;
+the optional leading drawer is local run history only. Model choice,
+host-adaptive recommendation, license/setup, download progress, cancellation,
+retry, Ollama discovery, and Presidio configuration live in the native Settings
+window. There is no Assistant, plugin catalog, first-run comparison sheet,
+composer, command router, or chat surface in the main window.
 Do not add per-feature tabs, edge rails, remote control, model-backed chat,
 cloud upload, remote registries, promotions, account gates, or backoffice UI.
 
@@ -39,15 +40,11 @@ open/drop PDF → read → choose local provider → explicit Parse → readable
 - `OkraPDF/Support/SparkleUpdaterController.swift` — Sparkle in-app updates (signed appcast, Install and Relaunch)
 - `OkraPDF/AppState.swift` — open/drop state separated from explicit parsing
 - `OkraPDF/ContentView.swift` — document-first split workspace, drop target, and grouped leading navigation
-- `OkraPDF/Plugins/` — focused plugin setup views and coordinator-backed installation progress
-- `OkraPDF/Parsers/` — parser choices and setup details embedded in the Extract plugin
-- `OkraPDF/Workspace/` — permanent source/facet split, grouped Plugins/Activity navigation, native toolbar, reader surface, and shared panel/theme primitives
+- `OkraPDF/Settings/` — native settings navigation, local model catalog, active/recommended state, and setup progress
+- `OkraPDF/Plugins/` — coordinator-backed Presidio setup content embedded in Settings
+- `OkraPDF/Workspace/` — permanent source/facet split, local Runs drawer, native toolbar, reader surface, and shared panel/theme primitives
 - `OkraPDF/PDFReaderView.swift` — native PDFKit reader bridge
 - `OkraPDF/LocalProcessing/` — provider contracts, setup, coordinator, and output UI
-- `OkraPDF/SetupGuide/` — first-run parser setup guide: ParseBench-style pairing
-  combinations, five-dimension radar comparison, filter combo bar, and install
-  hand-off into the same coordinator (completed flag:
-  `localProcessing.setupGuide.completed`; reopen via Help → Parser Setup Guide…)
 - `OkraPDF/ProviderScripts/` — bundled managed-parser setup and worker scripts
 - `windows/` — unsigned Windows alpha source, tests, and portable build script
 

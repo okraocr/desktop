@@ -2,11 +2,12 @@ import SwiftUI
 
 struct WorkspaceToolbarContent: ToolbarContent {
     let document: LocalPDFDocument?
-    let isNavigationPresented: Bool
+    let isHistoryPresented: Bool
     @ObservedObject var coordinator: LocalProcessingCoordinator
-    let toggleNavigation: () -> Void
+    let toggleHistory: () -> Void
     let openPDF: () -> Void
     let revealPDF: () -> Void
+    let openModelSettings: () -> Void
 
     var body: some ToolbarContent {
         ToolbarItem(placement: .navigation) {
@@ -16,18 +17,16 @@ struct WorkspaceToolbarContent: ToolbarContent {
         ToolbarItem(placement: .navigation) {
             Toggle(
                 isOn: Binding(
-                    get: { isNavigationPresented },
-                    set: { _ in toggleNavigation() }
+                    get: { isHistoryPresented },
+                    set: { _ in toggleHistory() }
                 )
             ) {
-                Label("Workspace navigation", systemImage: "sidebar.left")
+                Label("Run history", systemImage: "clock.arrow.circlepath")
             }
             .toggleStyle(.button)
             .labelStyle(.iconOnly)
-            .help(isNavigationPresented ? "Hide navigation" : "Show navigation")
-            .accessibilityValue(
-                "Plugins and activity. Selected parser: \(coordinator.selectedDescriptor.name)"
-            )
+            .help(isHistoryPresented ? "Hide run history" : "Show run history")
+            .accessibilityValue(isHistoryPresented ? "Shown" : "Hidden")
         }
 
         ToolbarItem(placement: .principal) {
@@ -38,6 +37,10 @@ struct WorkspaceToolbarContent: ToolbarContent {
         }
 
         ToolbarItemGroup(placement: .primaryAction) {
+            Button("Model Settings", systemImage: "cpu", action: openModelSettings)
+                .labelStyle(.iconOnly)
+                .help("Model Settings")
+
             if coordinator.pdfBoundingBoxOverlays.isEmpty == false {
                 Toggle(isOn: $coordinator.showsPDFBoundingBoxes) {
                     Label("Show extraction boxes", systemImage: "viewfinder.rectangular")

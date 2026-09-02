@@ -2,7 +2,7 @@ import Combine
 import SwiftUI
 
 enum FacetWorkspaceMode: String, CaseIterable, Identifiable {
-    case extraction = "Extracted"
+    case extraction = "Parse"
     case redaction = "Redact"
 
     var id: String { rawValue }
@@ -18,7 +18,7 @@ struct FacetWorkspaceView: View {
     @ObservedObject var coordinator: LocalProcessingCoordinator
     @Binding var mode: FacetWorkspaceMode
     let parse: () -> Void
-    let showPlugin: (WorkspacePlugin) -> Void
+    let openSettings: (DesktopSettingsSection) -> Void
 
     var body: some View {
         VStack(spacing: 0) {
@@ -32,7 +32,7 @@ struct FacetWorkspaceView: View {
                             document: document,
                             coordinator: coordinator,
                             parse: parse,
-                            showPlugin: { showPlugin(.extract) }
+                            openModelSettings: { openSettings(.models) }
                         )
                     case .redaction:
                         redactionFacet
@@ -104,7 +104,7 @@ struct FacetWorkspaceView: View {
         if coordinator.structuredOutput != nil {
             PresidioRedactionView(
                 redaction: coordinator.redaction,
-                showPlugin: { showPlugin(.redact) },
+                openSettings: { openSettings(.redaction) },
                 initiallyExpanded: true
             )
         } else {
@@ -117,13 +117,13 @@ struct FacetWorkspaceView: View {
                     color: .secondary
                 )
 
-                Button("Show Extracted Facet") {
+                Button("Go to Parse") {
                     mode = .extraction
                 }
                 .buttonStyle(.borderedProminent)
 
-                Button("Redact Plugin Settings") {
-                    showPlugin(.redact)
+                Button("Redaction Settings…") {
+                    openSettings(.redaction)
                 }
                 .buttonStyle(.bordered)
             }

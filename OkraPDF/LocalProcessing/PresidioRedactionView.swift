@@ -2,16 +2,16 @@ import SwiftUI
 
 struct PresidioRedactionView: View {
     @ObservedObject var redaction: PresidioRedactionCoordinator
-    let showPlugin: () -> Void
+    let openSettings: () -> Void
     @State private var isExpanded: Bool
 
     init(
         redaction: PresidioRedactionCoordinator,
-        showPlugin: @escaping () -> Void,
+        openSettings: @escaping () -> Void,
         initiallyExpanded: Bool = false
     ) {
         _redaction = ObservedObject(wrappedValue: redaction)
-        self.showPlugin = showPlugin
+        self.openSettings = openSettings
         _isExpanded = State(initialValue: initiallyExpanded)
     }
 
@@ -39,7 +39,7 @@ struct PresidioRedactionView: View {
                             if redaction.isDetecting {
                                 ProgressView().controlSize(.small)
                             }
-                            Text(redaction.detection == nil ? "Detect PII" : "Detect Again")
+                            Text(redaction.detection == nil ? "Redact" : "Redact Again")
                                 .frame(maxWidth: .infinity)
                         }
                     }
@@ -89,9 +89,9 @@ struct PresidioRedactionView: View {
                     systemImage: "checkmark.shield.fill",
                     color: WorkspaceTheme.brand
                 )
-                Button("Plugin Settings", action: showPlugin)
+                Button("Redaction Settings…", action: openSettings)
                     .buttonStyle(.bordered)
-                    .accessibilityHint("Opens Presidio configuration in Plugins")
+                    .accessibilityHint("Opens Presidio configuration in Settings")
             }
         case .simulated(let message):
             VStack(alignment: .leading, spacing: WorkspaceTheme.compactSpacing) {
@@ -100,24 +100,24 @@ struct PresidioRedactionView: View {
                     systemImage: "testtube.2",
                     color: .orange
                 )
-                Button("Plugin Settings", action: showPlugin)
+                Button("Redaction Settings…", action: openSettings)
                     .buttonStyle(.bordered)
             }
         case .setupRequired(let message):
             VStack(alignment: .leading, spacing: WorkspaceTheme.compactSpacing) {
                 WorkspaceNoticeView(
                     message: redaction.isInstalling
-                        ? "Presidio is being installed in Plugins."
+                        ? "Presidio is being installed in Settings."
                         : "Setup required · \(message)",
                     systemImage: "arrow.down.circle",
                     color: .orange
                 )
-                Button(action: showPlugin) {
-                    Text(redaction.isInstalling ? "View Installation" : "Open Redact Plugin")
+                Button(action: openSettings) {
+                    Text(redaction.isInstalling ? "View Installation" : "Open Redaction Settings")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
-                .accessibilityHint("Opens Redact under Plugins where Presidio setup is managed")
+                .accessibilityHint("Opens Redaction Settings where Presidio setup is managed")
             }
         case .unavailable(let message):
             VStack(alignment: .leading, spacing: WorkspaceTheme.compactSpacing) {
@@ -126,9 +126,9 @@ struct PresidioRedactionView: View {
                     systemImage: "exclamationmark.triangle.fill",
                     color: .red
                 )
-                Button("Open Redact Plugin", action: showPlugin)
+                Button("Open Redaction Settings", action: openSettings)
                     .buttonStyle(.bordered)
-                    .accessibilityHint("Opens Redact under Plugins for Presidio status and configuration")
+                    .accessibilityHint("Opens Redaction Settings for Presidio status and configuration")
             }
         }
     }
