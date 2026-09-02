@@ -5,24 +5,21 @@ import UniformTypeIdentifiers
 struct ContentView: View {
     @EnvironmentObject private var state: AppState
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var isNavigationPresented = false
-    @State private var navigationDestination: WorkspaceNavigationDestination?
+    @State private var isHistoryPresented = false
     @State private var facetMode: FacetWorkspaceMode = .extraction
     @State private var isDropTargeted = false
 
     var body: some View {
         HStack(spacing: 0) {
             WorkspaceCollapsiblePanel(
-                isPresented: isNavigationPresented,
+                isPresented: isHistoryPresented,
                 width: WorkspaceTheme.navigationPanelWidth,
                 alignment: .trailing
             ) {
-                WorkspaceNavigationView(
+                RunHistoryPanelView(
                     coordinator: state.localProcessing,
-                    redaction: state.localProcessing.redaction,
-                    destination: $navigationDestination,
                     openRun: state.openRun,
-                    dismiss: { isNavigationPresented = false }
+                    dismiss: { isHistoryPresented = false }
                 )
                 .overlay(alignment: .trailing) {
                     Divider()
@@ -38,7 +35,7 @@ struct ContentView: View {
                     redaction: state.localProcessing.redaction,
                     canOpenPDF: state.canOpenPDF,
                     openPDF: state.openPDFPicker,
-                    openSetupGuide: state.presentSetupGuide
+                    openModelSettings: { DesktopSettingsWindow.open(.models) }
                 )
                 .frame(minWidth: WorkspaceTheme.readerMinimumWidth)
                 .layoutPriority(1)
@@ -48,7 +45,7 @@ struct ContentView: View {
                     coordinator: state.localProcessing,
                     mode: $facetMode,
                     parse: state.parseSelectedDocument,
-                    showPlugin: presentPlugin
+                    openSettings: DesktopSettingsWindow.open
                 )
                 .frame(
                     minWidth: WorkspaceTheme.facetMinimumWidth,
@@ -68,33 +65,22 @@ struct ContentView: View {
         } message: {
             Text(state.importError ?? "The PDF could not be opened.")
         }
-        .sheet(isPresented: setupGuideIsPresented) {
-            SetupGuideView(
-                coordinator: state.localProcessing,
-                close: state.dismissSetupGuide,
-                openPDF: state.openPDFPicker
-            )
-        }
         .toolbar {
             WorkspaceToolbarContent(
                 document: state.selectedDocument,
-                isNavigationPresented: isNavigationPresented,
+                isHistoryPresented: isHistoryPresented,
                 coordinator: state.localProcessing,
-                toggleNavigation: toggleNavigation,
+                toggleHistory: toggleHistory,
                 openPDF: state.openPDFPicker,
-                revealPDF: state.revealSelectedPDF
+                revealPDF: state.revealSelectedPDF,
+                openModelSettings: { DesktopSettingsWindow.open(.models) }
             )
         }
-        .animation(panelAnimation, value: isNavigationPresented)
+        .animation(panelAnimation, value: isHistoryPresented)
     }
 
-    private func toggleNavigation() {
-        isNavigationPresented.toggle()
-    }
-
-    private func presentPlugin(_ plugin: WorkspacePlugin) {
-        navigationDestination = .plugin(plugin)
-        isNavigationPresented = true
+    private func toggleHistory() {
+        isHistoryPresented.toggle()
     }
 
     private var panelAnimation: Animation? {
@@ -107,17 +93,6 @@ struct ContentView: View {
             set: { isPresented in
                 if isPresented == false {
                     state.dismissImportError()
-                }
-            }
-        )
-    }
-
-    private var setupGuideIsPresented: Binding<Bool> {
-        Binding(
-            get: { state.showsSetupGuide },
-            set: { isPresented in
-                if isPresented == false {
-                    state.dismissSetupGuide()
                 }
             }
         )

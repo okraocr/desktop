@@ -10,22 +10,15 @@ final class AppState: ObservableObject {
     @Published private(set) var selectedDocument: LocalPDFDocument?
     @Published var importError: String?
     @Published private(set) var canOpenPDF = true
-    @Published var showsSetupGuide = false
-
-    static let setupGuideCompletedDefaultsKey = "localProcessing.setupGuide.completed"
 
     let localProcessing: LocalProcessingCoordinator
-    private let userDefaults: UserDefaults
     private var clientHost: DesktopClientHTTPHost?
     private var handledClientCallbackNonces: Set<String> = []
 
     init() {
-        let userDefaults = UserDefaults.standard
-        self.userDefaults = userDefaults
         localProcessing = LocalProcessingCoordinator()
         bindLocalProcessingState()
         openCommandLinePDFIfPresent()
-        showsSetupGuide = userDefaults.object(forKey: Self.setupGuideCompletedDefaultsKey) == nil
         ShellCaptureHarness.startIfRequested(state: self)
         startClientHost()
         openCommandLineClientCallbackIfPresent()
@@ -33,19 +26,8 @@ final class AppState: ObservableObject {
 
     init(localProcessing: LocalProcessingCoordinator) {
         self.localProcessing = localProcessing
-        self.userDefaults = .standard
         bindLocalProcessingState()
     }
-
-    func presentSetupGuide() {
-        showsSetupGuide = true
-    }
-
-    func dismissSetupGuide() {
-        showsSetupGuide = false
-        userDefaults.set(true, forKey: Self.setupGuideCompletedDefaultsKey)
-    }
-
 
     func openPDFPicker() {
         guard canOpenPDF else {
@@ -193,7 +175,7 @@ final class AppState: ObservableObject {
         let router = DesktopClientRouter(appState: self)
         let host = DesktopClientHTTPHost(
             version: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
-                ?? "1.0.0-rc.15",
+                ?? "1.0.0-rc.18",
             route: { request in await router.route(request) }
         )
         do {

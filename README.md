@@ -16,13 +16,15 @@
 > formerly a generated projection of the Okra monorepo; development now
 > happens directly here.
 
-RC.17 combines the permanent source/facet workspace with app-owned local
-automation. Chandra OCR 2 is the clean-install extraction default on eligible
-Macs, Presidio is the explicit post-parse PII default, and the bundled `okra`
-CLI starts or reconnects to the same sandboxed app runtime and parse history.
+RC.18 keeps the permanent source/facet workspace and reduces the visible task
+vocabulary to **Parse** and **Redact**. Local model downloads, recommendation,
+selection, and Presidio setup now live in one native Settings window. Chandra
+OCR 2 remains the clean-install extraction default on eligible Macs, Presidio
+remains explicit, and the bundled `okra` CLI reconnects to the same sandboxed
+app runtime and parse history.
 
 <p align="center">
-  <a href="https://github.com/okraocr/desktop/releases/tag/desktop-v1.0.0-rc.17">
+  <a href="https://github.com/okraocr/desktop/releases/tag/desktop-v1.0.0-rc.18">
     <img alt="Download for macOS" src="https://img.shields.io/badge/download-macOS%2013%2B-2f855a">
   </a>
   <a href="https://github.com/okraocr/desktop/releases/tag/windows-v0.1.0-alpha.2">
@@ -37,7 +39,7 @@ CLI starts or reconnects to the same sandboxed app runtime and parse history.
 </p>
 
 <p align="center">
-  <a href="https://github.com/okraocr/desktop/releases/tag/desktop-v1.0.0-rc.17">Download</a> ·
+  <a href="https://github.com/okraocr/desktop/releases/tag/desktop-v1.0.0-rc.18">Download</a> ·
   <a href="docs/releases/README.md">Release notes</a> ·
   <a href="https://github.com/okraocr/desktop/issues/new">Report an issue</a>
 </p>
@@ -54,16 +56,19 @@ per-page run history on this Mac.
 - Read text, charts, forms, and scanned pages in a native document-first workspace:
   the source PDF stays on the left and the permanent Facet surface stays on the
   right, with a draggable split between them.
-- Configure **Extract** and **Redact** under **Plugins**. Browse parse history
-  under **Activity → Runs**. Installation, cancellation, retry, and live
-  progress remain attached to the plugin even when navigation is closed.
+- Use the permanent Facet as either **Parse** or **Redact**. Browse local run
+  history from the toolbar without turning history into another task mode.
+- Open **Settings → Models** to choose or install parsers. Active and
+  host-recommended models, downloaded models, available downloads, progress,
+  cancellation, and retry stay in one place.
+- Open **Settings → Redaction** to install or configure Presidio.
 - Parse with the managed Chandra OCR 2 default on eligible Macs, built-in Apple
   Vision fallback, optional Dots OCR 1.5 or Baidu Unlimited-OCR, or an installed
   Ollama vision model.
-- Compare parser/model pairings in the first-run setup guide and use the local
-  parser doctor's host-adaptive recommendation without triggering a download.
+- Use the local parser doctor's host-adaptive recommendation without triggering
+  a download or interrupting the document workspace.
 - Inspect extracted blocks against their source boxes without modifying the PDF.
-- Detect PII locally with Presidio, approve source-aligned candidates, and
+- Redact PII locally with Presidio, approve source-aligned candidates, and
   export a new raster-burned PDF without changing the source.
 - Preview, copy, save, or reveal Markdown and JSON output.
 - Cancel and resume long runs without throwing away completed pages.
@@ -86,8 +91,8 @@ okra presidio invoice.pdf
 ```
 
 On a clean eligible Apple-silicon Mac, `okra parse` selects Chandra OCR 2.
-Review its model license and complete the one-time setup in **Plugins →
-Extract** first. `okra detect` invokes the explicitly configured Presidio
+Review its model license and complete the one-time setup in **Settings →
+Models** first. `okra detect` invokes the explicitly configured Presidio
 plugin after a positioned parse; it returns candidates but never approves or
 exports redactions. The CLI launches or reconnects to Okra.app through
 LaunchServices and never reads the app's sandbox container directly.
@@ -148,8 +153,8 @@ and treats Homebrew installations as user-managed local dependencies.
 ## Local PII redaction
 
 After a positioned parse finishes, choose **Redact** in the permanent Facet
-surface. If Presidio is not ready, its setup button opens **Plugins → Redact**;
-installation stays in the plugin destination. The Redact destination installs
+surface. If Presidio is not ready, its setup button opens **Settings →
+Redaction**; installation stays in Settings. The Redaction page installs
 the pinned Microsoft Presidio 2.2.364 and English spaCy 3.8 model under Okra's
 sandboxed Application Support `Okra/Providers/presidio` directory, tracks
 progress, and supports cancel/retry.
@@ -181,15 +186,15 @@ must be parsed with a source-aligned provider before redaction is available.
 
 ## Download
 
-`desktop-v1.0.0-rc.17` is the current signed public release candidate for
-Apple-silicon Macs running macOS 13 or later. It adds the app-owned local CLI,
-Chandra OCR 2 default, and Presidio workflow to the permanent source-linked
-Facet workspace.
+`desktop-v1.0.0-rc.18` is the current signed public release candidate for
+Apple-silicon Macs running macOS 13 or later. It adds the action-first
+Parse/Redact workspace and Settings-owned local model manager to the
+source-linked Facet workspace.
 
-1. Download `Okra-1.0.0-rc.17.dmg` from the
-   [v1.0.0-rc.17 release](https://github.com/okraocr/desktop/releases/tag/desktop-v1.0.0-rc.17).
+1. Download `Okra-1.0.0-rc.18.dmg` from the
+   [v1.0.0-rc.18 release](https://github.com/okraocr/desktop/releases/tag/desktop-v1.0.0-rc.18).
 2. Optionally download the adjacent checksum and run
-   `shasum -a 256 -c Okra-1.0.0-rc.17.dmg.sha256`.
+   `shasum -a 256 -c Okra-1.0.0-rc.18.dmg.sha256`.
 3. Open the DMG, drag **Okra** to **Applications**, and eject the DMG.
 4. Open **Okra** from Applications. The app and DMG are Developer ID signed,
    hardened, notarized by Apple, and stapled for normal Gatekeeper opening.
@@ -225,7 +230,7 @@ swift build
 To create a local `.app` and DMG:
 
 ```bash
-./scripts/build-dmg.sh 1.0.0-rc.17
+./scripts/build-dmg.sh 1.0.0-rc.18
 ```
 
 Local packages are ad-hoc signed. The release workflow supplies the Developer

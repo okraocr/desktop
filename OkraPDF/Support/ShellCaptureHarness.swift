@@ -24,7 +24,6 @@ enum ShellCaptureHarness {
         log(in: directoryURL, "harness started")
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
-            state.dismissSetupGuide()
             capture(to: directoryURL, name: "01-source-facet.png")
             log(in: directoryURL, "harness finished")
         }

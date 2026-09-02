@@ -139,7 +139,7 @@ final class DesktopClientRouter {
             return .failure(
                 status: 409,
                 code: "provider_setup_required",
-                message: "\(availability.message) Open Okra.app → Plugins to review the model license and finish setup."
+                message: "\(availability.message) Open Okra.app → Settings → Models to review the model license and finish setup."
             )
         }
         guard let runID = appState.localProcessing.run(document: document),

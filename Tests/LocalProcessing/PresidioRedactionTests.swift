@@ -33,7 +33,7 @@ struct PresidioRedactionTests {
         #expect(coordinator.statusMessage == "Microsoft Presidio is ready locally.")
     }
 
-    @Test("Presidio installation can be canceled from Plugins")
+    @Test("Presidio installation can be canceled from Settings")
     @MainActor
     func cancelInstallation() async throws {
         let workspace = try TestWorkspace(prefix: "okra-presidio-plugin-cancel")

@@ -7,6 +7,8 @@ SURFACE_PATHS=(
   OkraPDF/AppState.swift
   OkraPDF/Brand
   OkraPDF/ContentView.swift
+  OkraPDF/Settings
+  OkraPDF/Plugins
   OkraPDF/Workspace
   OkraPDF/LocalProcessing
 )

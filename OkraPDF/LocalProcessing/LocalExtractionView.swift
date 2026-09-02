@@ -4,8 +4,7 @@ struct LocalExtractionView: View {
     let document: LocalPDFDocument?
     @ObservedObject var coordinator: LocalProcessingCoordinator
     let parse: () -> Void
-    /// Opens Extract under Plugins, where parsers are chosen and set up.
-    let showPlugin: () -> Void
+    let openModelSettings: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: WorkspaceTheme.sectionSpacing) {
@@ -58,10 +57,10 @@ struct LocalExtractionView: View {
 
             Spacer()
 
-            Button("Change", action: showPlugin)
+            Button("Models…", action: openModelSettings)
                 .buttonStyle(.bordered)
                 .disabled(coordinator.isRunning || coordinator.isInstalling)
-                .accessibilityHint("Opens the Extract plugin")
+                .accessibilityHint("Opens local model settings")
         }
         .padding(WorkspaceTheme.standardSpacing)
         .background(.quaternary.opacity(0.35), in: .rect(cornerRadius: WorkspaceTheme.cardRadius))
@@ -75,7 +74,7 @@ struct LocalExtractionView: View {
     private var extractionControls: some View {
         if coordinator.isInstalling {
             pluginHandoff(message: coordinator.setupProgress?.message
-                ?? "Setting this parser up. Progress is in Plugins.")
+                ?? "Setting this model up. Progress is in Settings.")
         } else if coordinator.isRunning {
             RunProgressView(coordinator: coordinator)
         } else if coordinator.canResumeLatestRun, let document {
@@ -105,7 +104,7 @@ struct LocalExtractionView: View {
                     .fixedSize(horizontal: false, vertical: true)
 
                 Button(action: parse) {
-                    Text("Parse with \(coordinator.selectedDescriptor.name)")
+                    Text("Parse")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
@@ -125,12 +124,12 @@ struct LocalExtractionView: View {
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Button(action: showPlugin) {
-                Text("Open Extract Plugin")
+            Button(action: openModelSettings) {
+                Text("Open Model Settings")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .accessibilityHint("Choose or set up a parser under Plugins")
+            .accessibilityHint("Choose or install a local model in Settings")
         }
     }
 
