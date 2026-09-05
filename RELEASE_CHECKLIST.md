@@ -279,4 +279,7 @@ the real-provider checks complete from Dots or Baidu simulation.
 - [x] Exact RC.8 DMG is re-downloaded and matches published SHA-256 `86559fbb63d6c7f151b603c56a3022095bdba836af76fa9e03fb227e55f60267` (2026-08-17)
 - [x] RC.8 release workflow passes disk-image integrity, Developer ID, notarization/stapling, Gatekeeper, embedded build, and quarantined LaunchServices checks (run `32057788576`, 2026-08-17)
 - [ ] Exact RC.8 is installed on a release Mac and dogfooded with managed Presidio redaction plus optional Ollama inference
+- [x] Public `desktop-v1.0.0-rc.19` prerelease publishes the D.6.26 managed-model installation repair as a signed/notarized DMG plus SHA-256 asset (2026-09-05)
+- [x] RC.19 release workflow passes 157 Swift tests, 48 Python tests, Developer ID signing, app/DMG notarization and stapling, Gatekeeper, disk-image integrity, and the production app/CLI health and version handshake (run `33959527915`, 2026-09-05)
+- [x] Exact RC.19 DMG is independently downloaded at 3,694,742 bytes and matches sidecar and GitHub SHA-256 `a0166f5b7a36ae5e8be9aac71fbf44e6e1890b4ded51f6156f94e5f9f43e8d2f`; disk-image integrity, app/DMG staples and Gatekeeper, app/helper signatures, embedded version/build `1.0.0-rc.19` / `202609051001`, and Sparkle Ed25519 verification against the embedded app public key pass (2026-09-05)
 - [ ] Signed in-place **Install and Relaunch** update evidence recorded on issue #39
