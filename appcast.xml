@@ -6,6 +6,15 @@
     <description>In-app beta updates for the okraPDF desktop app.</description>
     <language>en</language>
     <item>
+      <title>okraPDF Desktop v1.0.0-rc.19</title>
+      <sparkle:version>202609051001</sparkle:version>
+      <sparkle:shortVersionString>1.0.0-rc.19</sparkle:shortVersionString>
+      <pubDate>Sat, 05 Sep 2026 10:05:43 +0000</pubDate>
+      <link>https://github.com/okra-project/desktop/releases/tag/desktop-v1.0.0-rc.19</link>
+      <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+      <enclosure url="https://github.com/okraocr/desktop/releases/download/desktop-v1.0.0-rc.19/Okra-1.0.0-rc.19.dmg" sparkle:edSignature="n4ntJ98SUtsjBQGMCO4hT6Kx1TxKoGDrq7cNQlx9V/J9r1c2zqGpzPbXs2TXyzJhGRBywWLeRSm2RWZ0WuygDQ==" length="3694742" type="application/octet-stream" />
+    </item>
+    <item>
       <title>okraPDF Desktop v1.0.0-rc.18</title>
       <sparkle:version>202609020343</sparkle:version>
       <sparkle:shortVersionString>1.0.0-rc.18</sparkle:shortVersionString>
