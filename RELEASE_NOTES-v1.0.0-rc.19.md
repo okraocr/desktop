@@ -1,4 +1,4 @@
-# okraPDF Desktop v1.0.0-rc.19 — unreleased
+# okraPDF Desktop v1.0.0-rc.19
 
 Fixes managed model installation in Settings, including the Python `ensurepip`
 error shown when installing Baidu Unlimited-OCR.
