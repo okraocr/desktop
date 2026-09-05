@@ -14,6 +14,9 @@
     <array>
         <string>/opt/homebrew/</string>
         <string>/usr/local/</string>
+        <!-- Python's mimetypes module reads this system registry during pip/ensurepip.
+             macOS resolves /etc to /private/etc; allow only this public data file. -->
+        <string>/private/etc/apache2/mime.types</string>
     </array>
     <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
     <array>

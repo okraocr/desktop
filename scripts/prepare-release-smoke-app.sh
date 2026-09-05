@@ -56,6 +56,7 @@ for component in \
   sign_component "${component}"
 done
 sign_component "${DESTINATION_APP}/Contents/Resources/okra"
+sign_component "${DESTINATION_APP}/Contents/XPCServices/com.okrapdf.desktop.provider-installer.xpc"
 codesign \
   "${SIGN_ARGUMENTS[@]}" \
   --entitlements okraPDF.entitlements \

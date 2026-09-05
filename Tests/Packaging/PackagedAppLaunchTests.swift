@@ -218,6 +218,19 @@ struct PackagedAppLaunchTests {
             .appendingPathComponent("AppIcon.png")
         let bundle = try #require(Bundle(url: appURL))
         let entitlements = try signedEntitlements(at: appURL)
+        let installerURL = appURL.appendingPathComponent(
+            "Contents/XPCServices/com.okrapdf.desktop.provider-installer.xpc"
+        )
+        let installer = try #require(Bundle(url: installerURL))
+        #expect(installer.bundleIdentifier == "com.okrapdf.desktop.provider-installer")
+        try #require(fileManager.isExecutableFile(atPath: try #require(installer.executableURL).path))
+        let installerEntitlements = try signedEntitlements(at: installerURL, allowEmpty: true)
+        #expect(installerEntitlements["com.apple.security.app-sandbox"] as? Bool != true)
+        for lockName in ["requirements-mlx.lock", "requirements-presidio.lock"] {
+            let installedLock = try #require(installer.resourceURL)
+                .appendingPathComponent("ProviderScripts/\(lockName)")
+            #expect(try Data(contentsOf: installedLock) == Data(contentsOf: providerScriptsURL.appendingPathComponent(lockName)))
+        }
 
         try #require(fileManager.isExecutableFile(atPath: executableURL.path))
         try #require(fileManager.isExecutableFile(atPath: cliURL.path))
@@ -271,7 +284,7 @@ struct PackagedAppLaunchTests {
         #expect(
             entitlements[
                 "com.apple.security.temporary-exception.files.absolute-path.read-only"
-            ] as? [String] == ["/opt/homebrew/", "/usr/local/"]
+            ] as? [String] == ["/opt/homebrew/", "/usr/local/", "/private/etc/apache2/mime.types"]
         )
         #expect(
             entitlements[
@@ -280,7 +293,7 @@ struct PackagedAppLaunchTests {
         )
     }
 
-    private func signedEntitlements(at appURL: URL) throws -> [String: Any] {
+    private func signedEntitlements(at appURL: URL, allowEmpty: Bool = false) throws -> [String: Any] {
         var staticCode: SecStaticCode?
         let createStatus = SecStaticCodeCreateWithPath(appURL as CFURL, [], &staticCode)
         guard createStatus == errSecSuccess, let staticCode else {
@@ -294,13 +307,14 @@ struct PackagedAppLaunchTests {
             &signingInformation
         )
         guard copyStatus == errSecSuccess,
-              let signingInformation,
-              let entitlements = (signingInformation as NSDictionary)[
-                kSecCodeInfoEntitlementsDict as String
-              ] as? [String: Any] else {
+              let signingInformation else {
             throw PackagedAppTestError.signingInformationUnavailable(copyStatus)
         }
-        return entitlements
+        if let entitlements = (signingInformation as NSDictionary)[
+            kSecCodeInfoEntitlementsDict as String
+        ] as? [String: Any] { return entitlements }
+        if allowEmpty { return [:] }
+        throw PackagedAppTestError.signingInformationUnavailable(copyStatus)
     }
 
     private func verifyDMGPresentation(at mountURL: URL) throws {

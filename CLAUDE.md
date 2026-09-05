@@ -46,6 +46,13 @@ open/drop PDF → read → choose local provider → explicit Parse → readable
 - `OkraPDF/PDFReaderView.swift` — native PDFKit reader bridge
 - `OkraPDF/LocalProcessing/` — provider contracts, setup, coordinator, and output UI
 - `OkraPDF/ProviderScripts/` — bundled managed-parser setup and worker scripts
+- `scripts/provider-installer/` — private XPC service for explicit, hash-locked
+  dependency installation. It accepts only built-in provider IDs from its own
+  signed host, derives its container destination, and cancels subprocess groups
+  on cancellation or disconnect. Dependency writes happen outside App Sandbox
+  to avoid quarantining native Python libraries; the reader and inference
+  workers remain sandboxed. `scripts/build-provider-installer.sh` packages it.
+  See `docs/provider-runtime-installation.md` for the trust boundary and checks.
 - `windows/` — unsigned Windows alpha source, tests, and portable build script
 
 ## Build and test

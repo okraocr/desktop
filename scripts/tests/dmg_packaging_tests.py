@@ -149,7 +149,7 @@ class DMGPackagingTests(unittest.TestCase):
             entitlements[
                 "com.apple.security.temporary-exception.files.absolute-path.read-only"
             ],
-            ["/opt/homebrew/", "/usr/local/"],
+            ["/opt/homebrew/", "/usr/local/", "/private/etc/apache2/mime.types"],
         )
         self.assertEqual(
             entitlements[

@@ -40,6 +40,7 @@ cp .build/release/Okra "$APP_DIR/MacOS/${APP_NAME}"
 cp .build/release/okra-cli "$APP_DIR/Resources/okra"
 chmod 755 "$APP_DIR/Resources/okra"
 cp -R .build/release/okraPDF_Okra.bundle "$APP_DIR/Resources/"
+bash scripts/build-provider-installer.sh "$APP_DIR"
 
 # Embed Sparkle (in-app updater) and point the loader at Contents/Frameworks.
 if [[ ! -d "${SPARKLE_FRAMEWORK_SOURCE}" ]]; then
@@ -161,6 +162,12 @@ if [[ -n "${SIGNING_IDENTITY}" ]]; then
     --options runtime \
     --timestamp \
     --sign "${SIGNING_IDENTITY}" \
+    "$APP_DIR/XPCServices/com.okrapdf.desktop.provider-installer.xpc"
+  codesign \
+    --force \
+    --options runtime \
+    --timestamp \
+    --sign "${SIGNING_IDENTITY}" \
     "$APP_DIR/Resources/okra"
   codesign \
     --force \
@@ -181,6 +188,7 @@ else
     "${SPARKLE_FW}"; do
     sign_sparkle_component "${component}" --sign -
   done
+  codesign --force --sign - "$APP_DIR/XPCServices/com.okrapdf.desktop.provider-installer.xpc"
   codesign --force --sign - "$APP_DIR/Resources/okra"
   codesign --force --sign - --entitlements okraPDF.entitlements "build/${APP_NAME}.app"
 fi

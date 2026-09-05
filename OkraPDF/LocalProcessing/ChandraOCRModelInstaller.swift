@@ -35,9 +35,8 @@ struct ChandraOCRModelInstaller: ChandraOCRModelInstalling {
         guard let pythonURL = TrustedPythonInterpreter.firstAvailable(fileManager: fileManager) else {
             throw LocalProcessingError.trustedPythonUnavailable
         }
-        _ = try await LocalCommandRunner.runAsync(
-            executableURL: URL(fileURLWithPath: "/bin/zsh"),
-            arguments: [scriptURL.path, runtime.rootURL.path, pythonURL.path]
+        try await ProviderRuntimeInstaller.run(
+            scriptURL: scriptURL, rootURL: runtime.rootURL, pythonURL: pythonURL
         )
         try Task.checkCancellation()
 

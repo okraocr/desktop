@@ -31,6 +31,10 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Prepare managed-runtime smoke interpreter
+        shell: bash
+        run: brew list --versions python@3.13 >/dev/null || HOMEBREW_NO_AUTO_UPDATE=1 brew install python@3.13
+
       - name: Run brand, unit, and build checks
         shell: bash
         env:
