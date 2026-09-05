@@ -16,15 +16,15 @@
 > formerly a generated projection of the Okra monorepo; development now
 > happens directly here.
 
-RC.18 keeps the permanent source/facet workspace and reduces the visible task
-vocabulary to **Parse** and **Redact**. Local model downloads, recommendation,
-selection, and Presidio setup now live in one native Settings window. Chandra
-OCR 2 remains the clean-install extraction default on eligible Macs, Presidio
-remains explicit, and the bundled `okra` CLI reconnects to the same sandboxed
-app runtime and parse history.
+RC.19 repairs local model setup in Settings, including Python bootstrap errors
+and macOS blocking installed native libraries. The permanent source/facet
+workspace keeps **Parse** and **Redact** as its task vocabulary. Chandra OCR 2
+remains the clean-install extraction default on eligible Macs, Presidio remains
+explicit, and the bundled `okra` CLI reconnects to the same sandboxed app runtime
+and parse history.
 
 <p align="center">
-  <a href="https://github.com/okraocr/desktop/releases/tag/desktop-v1.0.0-rc.18">
+  <a href="https://github.com/okraocr/desktop/releases/tag/desktop-v1.0.0-rc.19">
     <img alt="Download for macOS" src="https://img.shields.io/badge/download-macOS%2013%2B-2f855a">
   </a>
   <a href="https://github.com/okraocr/desktop/releases/tag/windows-v0.1.0-alpha.2">
@@ -39,7 +39,7 @@ app runtime and parse history.
 </p>
 
 <p align="center">
-  <a href="https://github.com/okraocr/desktop/releases/tag/desktop-v1.0.0-rc.18">Download</a> ·
+  <a href="https://github.com/okraocr/desktop/releases/tag/desktop-v1.0.0-rc.19">Download</a> ·
   <a href="docs/releases/README.md">Release notes</a> ·
   <a href="https://github.com/okraocr/desktop/issues/new">Report an issue</a>
 </p>
@@ -190,13 +190,12 @@ must be parsed with a source-aligned provider before redaction is available.
 
 ## Download
 
-`desktop-v1.0.0-rc.18` is the current signed public release candidate for
-Apple-silicon Macs running macOS 13 or later. It adds the action-first
-Parse/Redact workspace and Settings-owned local model manager to the
-source-linked Facet workspace.
+`desktop-v1.0.0-rc.19` is the current signed public release candidate for
+Apple-silicon Macs running macOS 13 or later. It repairs managed runtime
+installation for Baidu, Dots, Chandra, and Presidio from Settings.
 
 1. Download `Okra-1.0.0-rc.18.dmg` from the
-   [v1.0.0-rc.18 release](https://github.com/okraocr/desktop/releases/tag/desktop-v1.0.0-rc.18).
+   [v1.0.0-rc.19 release](https://github.com/okraocr/desktop/releases/tag/desktop-v1.0.0-rc.19).
 2. Optionally download the adjacent checksum and run
    `shasum -a 256 -c Okra-1.0.0-rc.18.dmg.sha256`.
 3. Open the DMG, drag **Okra** to **Applications**, and eject the DMG.
