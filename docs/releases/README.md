@@ -13,6 +13,7 @@ language that accompanied their original release.
 
 ## v1.0 release candidates
 
+- [v1.0.0-rc.19](RELEASE_NOTES-v1.0.0-rc.19.md)
 - [v1.0.0-rc.18](RELEASE_NOTES-v1.0.0-rc.18.md)
 - [v1.0.0-rc.17](RELEASE_NOTES-v1.0.0-rc.17.md)
 - [v1.0.0-rc.16](RELEASE_NOTES-v1.0.0-rc.16.md)

@@ -121,6 +121,10 @@ jobs:
           echo "RELEASE_KEYCHAIN_PATH=${KEYCHAIN_PATH}" >> "${GITHUB_ENV}"
           echo "RELEASE_ORIGINAL_KEYCHAIN_LIST_PATH=${ORIGINAL_KEYCHAIN_LIST_PATH}" >> "${GITHUB_ENV}"
 
+      - name: Prepare managed-runtime smoke interpreter
+        shell: bash
+        run: brew list --versions python@3.13 >/dev/null || HOMEBREW_NO_AUTO_UPDATE=1 brew install python@3.13
+
       - name: Test and build signed app
         shell: bash
         run: |

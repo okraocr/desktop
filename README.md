@@ -149,6 +149,10 @@ Managed provider setup never discovers Python through `PATH`. It accepts only
 Python 3.10+ at the declared `/opt/homebrew/bin`, `/usr/local/bin`, or
 Apple `/usr/bin` locations, rejects executable symlinks that leave those roots,
 and treats Homebrew installations as user-managed local dependencies.
+The packaged app uses a private installation helper to write the hash-verified
+Python dependencies into its provider directory. This prevents App Sandbox
+from quarantining the native libraries during setup. The helper accepts only
+the built-in provider IDs; the reader and inference workers remain sandboxed.
 
 ## Local PII redaction
 
